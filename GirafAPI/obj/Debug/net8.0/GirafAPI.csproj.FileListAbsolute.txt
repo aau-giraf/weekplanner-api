@@ -128,3 +128,4 @@ C:\Users\Loke\RiderProjects\weekplanner-api\GirafAPI\obj\Debug\net8.0\refint\Gir
 C:\Users\Loke\RiderProjects\weekplanner-api\GirafAPI\obj\Debug\net8.0\GirafAPI.pdb
 C:\Users\Loke\RiderProjects\weekplanner-api\GirafAPI\obj\Debug\net8.0\GirafAPI.genruntimeconfig.cache
 C:\Users\Loke\RiderProjects\weekplanner-api\GirafAPI\obj\Debug\net8.0\ref\GirafAPI.dll
+C:\Users\Loke\RiderProjects\weekplanner-api\GirafAPI\obj\Debug\net8.0\GirafAPI.sourcelink.json
