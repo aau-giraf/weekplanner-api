@@ -1,0 +1,29 @@
+@GirafAPI_HostAddress = http://localhost:5264
+
+GET {{GirafAPI_HostAddress}}/citizens/
+Accept: application/json
+
+###
+GET {{GirafAPI_HostAddress}}/citizens/1
+Accept: application/json
+
+###
+POST {{GirafAPI_HostAddress}}/citizens/
+Content-Type: application/json
+
+{
+  "FirstName": "Jens",
+  "LastName": "Gade"
+}
+
+###
+PUT {{GirafAPI_HostAddress}}/citizens/1
+Content-Type: application/json
+
+{
+  "firstName": "Nedim",
+  "lastName": "Spahic"
+}
+
+###
+DELETE {{GirafAPI_HostAddress}}/citizens/1
