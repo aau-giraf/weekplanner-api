@@ -4,6 +4,7 @@ using GirafAPI.Entities.Weekplans;
 
 namespace GirafAPI.Mapping;
 
+// Static methods for converting between entities and DTOs
 public static class CitizenMapping
 {
     public static Citizen ToEntity(this CreateCitizenDTO citizen)

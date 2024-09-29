@@ -25,8 +25,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Add endpoints
 app.MapCitizensEndpoints();
 
+// Loads a scoped DbContext into memory
 await app.MigrateDbAsync();
 
 app.Run();

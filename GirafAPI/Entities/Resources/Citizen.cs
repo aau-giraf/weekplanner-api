@@ -2,6 +2,7 @@
 
 namespace GirafAPI.Entities.Resources;
 
+// Data model of Citizens in the database
 public class Citizen
 {
     public int Id { get; set; }
