@@ -1,7 +1,10 @@
 ﻿using GirafAPI.Data;
 using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Users;
 using GirafAPI.Mapping;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GirafAPI.Endpoints;
@@ -31,14 +34,24 @@ public static class CitizensEndpoints
             .WithName("GetCitizen");
 
         // POST /citizens
-        group.MapPost("/", async (CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
+        group.MapPost("/", [Authorize(Policy = "AdminPolicy")] async (
+            CreateCitizenDTO newCitizen,
+            GirafDbContext dbContext,
+            UserManager<GirafUser> userManager) =>
         {
-            Citizen citizen = newCitizen.ToEntity();
-    
-            dbContext.Citizens.Add(citizen);
-            await dbContext.SaveChangesAsync();
-    
-            return Results.CreatedAtRoute("GetCitizen", new { id = citizen.Id }, citizen.ToDTO());
+            try
+            {
+                Citizen citizen = await newCitizen.ToEntityAsync(userManager);
+
+                dbContext.Citizens.Add(citizen);
+                await dbContext.SaveChangesAsync();
+
+                return Results.CreatedAtRoute("GetCitizen", new { id = citizen.Id }, citizen.ToDTO());
+            }
+            catch (Exception ex)
+            {
+                return Results.BadRequest(ex.Message);
+            }
         }).WithParameterValidation();
 
         // PUT /citizens

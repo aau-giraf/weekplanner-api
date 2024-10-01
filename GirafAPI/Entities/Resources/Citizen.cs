@@ -1,4 +1,5 @@
 ﻿using GirafAPI.Entities.Weekplans;
+using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Entities.Resources;
 
@@ -14,4 +15,7 @@ public class Citizen
     public int WeekplanId { get; set; }
     
     public Weekplan? Weekplan { get; set; }
+        // Login Information
+    public string UserId { get; set; } = null!;
+    public GirafUser User { get; set; } = null!;
 }

@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Loke\\RiderProjects\\weekplanner-api\\GirafAPI\\GirafAPI.csproj": {}
+    "c:\\Users\\Muffin\\Documents\\GitHub\\weekplanner-api\\GirafAPI\\GirafAPI.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Loke\\RiderProjects\\weekplanner-api\\GirafAPI\\GirafAPI.csproj": {
+    "c:\\Users\\Muffin\\Documents\\GitHub\\weekplanner-api\\GirafAPI\\GirafAPI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Loke\\RiderProjects\\weekplanner-api\\GirafAPI\\GirafAPI.csproj",
+        "projectUniqueName": "c:\\Users\\Muffin\\Documents\\GitHub\\weekplanner-api\\GirafAPI\\GirafAPI.csproj",
         "projectName": "GirafAPI",
-        "projectPath": "C:\\Users\\Loke\\RiderProjects\\weekplanner-api\\GirafAPI\\GirafAPI.csproj",
-        "packagesPath": "C:\\Users\\Loke\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Loke\\RiderProjects\\weekplanner-api\\GirafAPI\\obj\\",
+        "projectPath": "c:\\Users\\Muffin\\Documents\\GitHub\\weekplanner-api\\GirafAPI\\GirafAPI.csproj",
+        "packagesPath": "C:\\Users\\Muffin\\.nuget\\packages\\",
+        "outputPath": "c:\\Users\\Muffin\\Documents\\GitHub\\weekplanner-api\\GirafAPI\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Loke\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Muffin\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -43,6 +43,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.AspNetCore.Identity.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.8, )"
@@ -85,7 +93,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.401/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.402/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
