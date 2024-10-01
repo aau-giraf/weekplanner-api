@@ -24,6 +24,7 @@ app.UseAuthorization();
 
 // Map endpoints
 app.MapCitizensEndpoints();
+app.MapUsersEndpoints();
 app.MapLoginEndpoint();
 
 // Apply migrations, also contains seed data, but not needed

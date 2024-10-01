@@ -1,7 +1,8 @@
-﻿using GirafAPI.Entities.Resources;
-using GirafAPI.Entities.Users;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿﻿using GirafAPI.Entities.Resources;
+using GirafAPI.Entities.Weekplans;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Data
 {
@@ -12,17 +13,6 @@ namespace GirafAPI.Data
         }
 
         public DbSet<Citizen> Citizens => Set<Citizen>();
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-
-            // Configure the one-to-one relationship between Citizen and GirafUser
-            builder.Entity<Citizen>()
-                .HasOne(c => c.User)
-                .WithOne()
-                .HasForeignKey<Citizen>(c => c.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
+        public DbSet<Weekplan> Weekplans => Set<Weekplan>();
     }
 }

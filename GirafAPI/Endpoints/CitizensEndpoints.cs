@@ -34,24 +34,14 @@ public static class CitizensEndpoints
             .WithName("GetCitizen");
 
         // POST /citizens
-        group.MapPost("/", [Authorize(Policy = "AdminPolicy")] async (
-            CreateCitizenDTO newCitizen,
-            GirafDbContext dbContext,
-            UserManager<GirafUser> userManager) =>
+        group.MapPost("/", async (CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
         {
-            try
-            {
-                Citizen citizen = await newCitizen.ToEntityAsync(userManager);
-
-                dbContext.Citizens.Add(citizen);
-                await dbContext.SaveChangesAsync();
-
-                return Results.CreatedAtRoute("GetCitizen", new { id = citizen.Id }, citizen.ToDTO());
-            }
-            catch (Exception ex)
-            {
-                return Results.BadRequest(ex.Message);
-            }
+            Citizen citizen = newCitizen.ToEntity();
+    
+            dbContext.Citizens.Add(citizen);
+            await dbContext.SaveChangesAsync();
+    
+            return Results.CreatedAtRoute("GetCitizen", new { id = citizen.Id }, citizen.ToDTO());
         }).WithParameterValidation();
 
         // PUT /citizens
@@ -63,13 +53,14 @@ public static class CitizensEndpoints
             {
                 return Results.NotFound();
             }
+            
+            var weekplan = await dbContext.Weekplans.FindAsync(citizen.WeekplanId);
     
-            dbContext.Entry(citizen).CurrentValues.SetValues(updatedCitizen.ToEntity(id));
+            dbContext.Entry(citizen).CurrentValues.SetValues(updatedCitizen.ToEntity(id, weekplan));
             await dbContext.SaveChangesAsync();
     
             return Results.Ok();
         });
-
         // DELETE /citizens/{id}
         group.MapDelete("/{id:int}", async (int id, GirafDbContext dbContext) =>
         {
