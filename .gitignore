@@ -1,2 +1,6 @@
 ﻿/GirafAPI/GirafDb.db
 /GirafAPI/bin/
+/GirafAPI/obj/
+/GirafAPI/obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.GirafAPI.props
+/GirafAPI/GirafDb.db-shm
+/GirafAPI/GirafDb.db-wal
