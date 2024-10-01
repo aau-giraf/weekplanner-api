@@ -1,2 +1,5 @@
 ﻿/GirafAPI/GirafDb.db
 /GirafAPI/bin/
+/GirafAPI/obj/
+/GirafAPI/GirafDb.db-shm
+/GirafAPI/GirafDb.db-wal
