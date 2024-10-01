@@ -48,7 +48,7 @@ namespace GirafAPI.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Weekplan");
+                    b.ToTable("Weekplans");
                 });
 
             modelBuilder.Entity("GirafAPI.Entities.Resources.Citizen", b =>

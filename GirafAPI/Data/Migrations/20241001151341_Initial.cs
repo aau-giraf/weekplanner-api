@@ -11,7 +11,7 @@ namespace GirafAPI.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Weekplan",
+                name: "Weekplans",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
@@ -19,7 +19,7 @@ namespace GirafAPI.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Weekplan", x => x.Id);
+                    table.PrimaryKey("PK_Weekplans", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -36,9 +36,9 @@ namespace GirafAPI.Data.Migrations
                 {
                     table.PrimaryKey("PK_Citizens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Citizens_Weekplan_WeekplanId",
+                        name: "FK_Citizens_Weekplans_WeekplanId",
                         column: x => x.WeekplanId,
-                        principalTable: "Weekplan",
+                        principalTable: "Weekplans",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -56,7 +56,7 @@ namespace GirafAPI.Data.Migrations
                 name: "Citizens");
 
             migrationBuilder.DropTable(
-                name: "Weekplan");
+                name: "Weekplans");
         }
     }
 }

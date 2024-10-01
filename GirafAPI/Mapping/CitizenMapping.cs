@@ -17,14 +17,15 @@ public static class CitizenMapping
         };
     }
 
-    public static Citizen ToEntity(this UpdateCitizenDTO citizen, int id)
+    public static Citizen ToEntity(this UpdateCitizenDTO citizen, int id, Weekplan weekplan)
     {
         return new Citizen
         {
             Id = id,
             FirstName = citizen.FirstName,
             LastName = citizen.LastName,
-            Weekplan = new Weekplan()
+            WeekplanId = weekplan.Id,
+            Weekplan = weekplan
         };
     }
 

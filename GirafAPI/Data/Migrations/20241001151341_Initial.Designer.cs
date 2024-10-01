@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GirafAPI.Data.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    [Migration("20240928171951_Initial")]
+    [Migration("20241001151341_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -51,7 +51,7 @@ namespace GirafAPI.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Weekplan");
+                    b.ToTable("Weekplans");
                 });
 
             modelBuilder.Entity("GirafAPI.Entities.Resources.Citizen", b =>

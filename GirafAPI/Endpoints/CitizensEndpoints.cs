@@ -50,8 +50,10 @@ public static class CitizensEndpoints
             {
                 return Results.NotFound();
             }
+            
+            var weekplan = await dbContext.Weekplans.FindAsync(citizen.WeekplanId);
     
-            dbContext.Entry(citizen).CurrentValues.SetValues(updatedCitizen.ToEntity(id));
+            dbContext.Entry(citizen).CurrentValues.SetValues(updatedCitizen.ToEntity(id, weekplan));
             await dbContext.SaveChangesAsync();
     
             return Results.Ok();

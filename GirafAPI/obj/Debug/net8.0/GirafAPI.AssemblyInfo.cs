@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GirafAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3a2fa845706beba8d0c81639ab5b3c346476392c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+14362f1b23543660adaa5122ead929a4d32b0f1c")]
 [assembly: System.Reflection.AssemblyProductAttribute("GirafAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GirafAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
