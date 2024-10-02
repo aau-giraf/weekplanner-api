@@ -1,7 +1,10 @@
 ﻿using GirafAPI.Data;
 using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Users;
 using GirafAPI.Mapping;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GirafAPI.Endpoints;
@@ -58,7 +61,6 @@ public static class CitizensEndpoints
     
             return Results.Ok();
         });
-
         // DELETE /citizens/{id}
         group.MapDelete("/{id:int}", async (int id, GirafDbContext dbContext) =>
         {

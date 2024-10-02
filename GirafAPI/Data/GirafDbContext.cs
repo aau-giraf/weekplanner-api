@@ -1,12 +1,18 @@
-﻿using GirafAPI.Entities.Resources;
+using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Weekplans;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using GirafAPI.Entities.Users;
 
-namespace GirafAPI.Data;
-
-// The in-memory representation of the Giraf database
-public class GirafDbContext(DbContextOptions<GirafDbContext> options) : DbContext(options)
+namespace GirafAPI.Data
 {
-    public DbSet<Citizen> Citizens => Set<Citizen>();
-    public DbSet<Weekplan> Weekplans => Set<Weekplan>();
+    public class GirafDbContext : IdentityDbContext<GirafUser>
+    {
+        public GirafDbContext(DbContextOptions<GirafDbContext> options) : base(options)
+        {
+        }
+
+        public DbSet<Citizen> Citizens => Set<Citizen>();
+        public DbSet<Weekplan> Weekplans => Set<Weekplan>();
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using GirafAPI.Entities.Weekplans;
+using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Entities.Resources;
 

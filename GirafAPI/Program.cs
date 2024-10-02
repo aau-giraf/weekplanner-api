@@ -1,34 +1,33 @@
-using GirafAPI.Data;
 using GirafAPI.Endpoints;
+using GirafAPI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-// Use Sqlite for development environment
-if (builder.Environment.IsDevelopment())
-{
-    var connString = builder.Configuration.GetConnectionString("GirafDb");
-    builder.Services.AddSqlite<GirafDbContext>(connString);
-}
-
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Configure services
+builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment)
+    .ConfigureIdentity()
+    .ConfigureJwt(builder.Configuration)
+    .ConfigureAuthorizationPolicies()
+    .ConfigureSwagger();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Add endpoints
-app.MapCitizensEndpoints();
+app.UseAuthentication();
+app.UseAuthorization();
 
-// Loads a scoped DbContext into memory
-await app.MigrateDbAsync();
+// Map endpoints
+app.MapCitizensEndpoints();
+app.MapUsersEndpoints();
+app.MapLoginEndpoint();
+
+// Apply migrations, also contains seed data, but not needed
+await app.ApplyMigrationsAsync();
 
 app.Run();
