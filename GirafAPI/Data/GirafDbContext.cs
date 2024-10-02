@@ -1,4 +1,4 @@
-﻿﻿using GirafAPI.Entities.Resources;
+using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Weekplans;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
