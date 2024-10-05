@@ -13,5 +13,5 @@ public class Citizen
     
     public required string LastName { get; set; }
     
-    public ICollection<Dayplan>? Dayplans { get; set; }
+    public ICollection<Activity>? Activities { get; set; }
 }

@@ -106,14 +106,11 @@ namespace GirafAPI.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("DayplanCitizenId")
+                    b.Property<int>("CitizenId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateOnly>("DayplanDate")
+                    b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("DayplanId")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -131,22 +128,9 @@ namespace GirafAPI.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DayplanCitizenId", "DayplanDate");
+                    b.HasIndex("CitizenId");
 
                     b.ToTable("Activities");
-                });
-
-            modelBuilder.Entity("GirafAPI.Entities.Weekplans.Dayplan", b =>
-                {
-                    b.Property<int>("CitizenId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("CitizenId", "Date");
-
-                    b.ToTable("Dayplans");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -279,19 +263,8 @@ namespace GirafAPI.Data.Migrations
 
             modelBuilder.Entity("GirafAPI.Entities.Weekplans.Activity", b =>
                 {
-                    b.HasOne("GirafAPI.Entities.Weekplans.Dayplan", "Dayplan")
-                        .WithMany("Activities")
-                        .HasForeignKey("DayplanCitizenId", "DayplanDate")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Dayplan");
-                });
-
-            modelBuilder.Entity("GirafAPI.Entities.Weekplans.Dayplan", b =>
-                {
                     b.HasOne("GirafAPI.Entities.Resources.Citizen", null)
-                        .WithMany("Dayplans")
+                        .WithMany("Activities")
                         .HasForeignKey("CitizenId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -349,11 +322,6 @@ namespace GirafAPI.Data.Migrations
                 });
 
             modelBuilder.Entity("GirafAPI.Entities.Resources.Citizen", b =>
-                {
-                    b.Navigation("Dayplans");
-                });
-
-            modelBuilder.Entity("GirafAPI.Entities.Weekplans.Dayplan", b =>
                 {
                     b.Navigation("Activities");
                 });
