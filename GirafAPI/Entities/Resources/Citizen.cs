@@ -1,4 +1,5 @@
-﻿using GirafAPI.Entities.Weekplans;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using GirafAPI.Entities.Weekplans;
 using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Entities.Resources;
@@ -12,7 +13,5 @@ public class Citizen
     
     public required string LastName { get; set; }
     
-    public int WeekplanId { get; set; }
-    
-    public Weekplan? Weekplan { get; set; }
+    public ICollection<Dayplan>? Dayplans { get; set; }
 }
