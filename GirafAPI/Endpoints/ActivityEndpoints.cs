@@ -17,8 +17,8 @@ public static class ActivityEndpoints
             await dbContext.Activities
                 .Where(a => a.CitizenId == citizenId)
                 .Where(a => a.Date == DateOnly.Parse(date))
+                .Select(a => a.ToDTO())
                 .AsNoTracking()
-                .OrderBy(a => a.StartTime)
                 .ToListAsync()
         );
         
