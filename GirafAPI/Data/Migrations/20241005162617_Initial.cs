@@ -6,26 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GirafAPI.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Dayplans : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Citizens_Weekplans_WeekplanId",
-                table: "Citizens");
-
-            migrationBuilder.DropTable(
-                name: "Weekplans");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Citizens_WeekplanId",
-                table: "Citizens");
-
-            migrationBuilder.DropColumn(
-                name: "WeekplanId",
-                table: "Citizens");
-
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -66,21 +51,17 @@ namespace GirafAPI.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Dayplans",
+                name: "Citizens",
                 columns: table => new
                 {
-                    CitizenId = table.Column<int>(type: "INTEGER", nullable: false),
-                    Date = table.Column<DateOnly>(type: "TEXT", nullable: false)
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FirstName = table.Column<string>(type: "TEXT", nullable: false),
+                    LastName = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Dayplans", x => new { x.CitizenId, x.Date });
-                    table.ForeignKey(
-                        name: "FK_Dayplans_Citizens_CitizenId",
-                        column: x => x.CitizenId,
-                        principalTable: "Citizens",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Citizens", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -195,9 +176,8 @@ namespace GirafAPI.Data.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    DayplanId = table.Column<int>(type: "INTEGER", nullable: false),
-                    DayplanCitizenId = table.Column<int>(type: "INTEGER", nullable: false),
-                    DayplanDate = table.Column<DateOnly>(type: "TEXT", nullable: false),
+                    CitizenId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Date = table.Column<DateOnly>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Description = table.Column<string>(type: "TEXT", nullable: false),
                     StartTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
@@ -207,17 +187,17 @@ namespace GirafAPI.Data.Migrations
                 {
                     table.PrimaryKey("PK_Activities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Activities_Dayplans_DayplanCitizenId_DayplanDate",
-                        columns: x => new { x.DayplanCitizenId, x.DayplanDate },
-                        principalTable: "Dayplans",
-                        principalColumns: new[] { "CitizenId", "Date" },
+                        name: "FK_Activities_Citizens_CitizenId",
+                        column: x => x.CitizenId,
+                        principalTable: "Citizens",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Activities_DayplanCitizenId_DayplanDate",
+                name: "IX_Activities_CitizenId",
                 table: "Activities",
-                columns: new[] { "DayplanCitizenId", "DayplanDate" });
+                column: "CitizenId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -279,45 +259,13 @@ namespace GirafAPI.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Dayplans");
+                name: "Citizens");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.AddColumn<int>(
-                name: "WeekplanId",
-                table: "Citizens",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
-
-            migrationBuilder.CreateTable(
-                name: "Weekplans",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Weekplans", x => x.Id);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Citizens_WeekplanId",
-                table: "Citizens",
-                column: "WeekplanId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Citizens_Weekplans_WeekplanId",
-                table: "Citizens",
-                column: "WeekplanId",
-                principalTable: "Weekplans",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
     }
 }

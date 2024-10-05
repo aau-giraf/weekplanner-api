@@ -5,17 +5,15 @@ public class Activity
 {
     public int Id { get; set; }
     
-    public int DayplanId { get; set; }
+    public int CitizenId { get; set; }
     
-    public required Dayplan Dayplan { get; set; }
+    public required DateOnly Date { get; set; }
     
     public required string Name { get; set; }
     
     public required string Description { get; set; }
     
-    public TimeOnly StartTime { get; set; }
+    public required TimeOnly StartTime { get; set; }
     
-    public TimeOnly EndTime { get; set; }
-    
-    public DateOnly Date { get; set; }
+    public required TimeOnly EndTime { get; set; }
 }

@@ -13,18 +13,18 @@ public static class CitizenMapping
         {
             FirstName = citizen.FirstName,
             LastName = citizen.LastName,
-            Dayplans = new List<Dayplan>()
+            Activities = new List<Activity>()
         };
     }
 
-    public static Citizen ToEntity(this UpdateCitizenDTO citizen, int id, ICollection<Dayplan> dayplans)
+    public static Citizen ToEntity(this UpdateCitizenDTO citizen, int id, ICollection<Activity> activities)
     {
         return new Citizen
         {
             Id = id,
             FirstName = citizen.FirstName,
             LastName = citizen.LastName,
-            Dayplans = dayplans
+            Activities = activities
         };
     }
 

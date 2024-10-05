@@ -54,9 +54,9 @@ public static class CitizensEndpoints
                 return Results.NotFound();
             }
 
-            var dayplans = citizen.Dayplans;
+            var activities = citizen.Activities;
     
-            dbContext.Entry(citizen).CurrentValues.SetValues(updatedCitizen.ToEntity(id, dayplans));
+            dbContext.Entry(citizen).CurrentValues.SetValues(updatedCitizen.ToEntity(id, activities));
             await dbContext.SaveChangesAsync();
     
             return Results.Ok();
