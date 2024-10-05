@@ -21,12 +21,13 @@ public static class ActivityEndpoints
                 .OrderBy(a => a.StartTime)
                 .ToListAsync()
         );
-
+        
+        // GET single activity
         group.MapGet("/aktivitet/{id}", async (int id, GirafDbContext dbContext) => 
         {
             Activity? activity = await dbContext.Activities.FindAsync(id);
             
-            return activity is null ? Results.NotFound() : Results.Ok(activity);
+            return activity is null ? Results.NotFound() : Results.Ok(activity.ToDTO());
         });
         
         // POST new activity
