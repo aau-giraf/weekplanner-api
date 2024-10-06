@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using GirafAPI.Utils;
 
 namespace GirafAPI.Entities.Users.DTOs;
 
@@ -11,6 +12,8 @@ public class CreateUserDTO
     [Required]
     [StringLength(100)]
     public string Password { get; set; }
+    
+    public string Role { get; set; }
     
     [StringLength(100)]
     public string FirstName { get; set; }
