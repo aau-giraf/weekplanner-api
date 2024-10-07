@@ -10,7 +10,7 @@ public static class ActivityEndpoints
 {
     public static RouteGroupBuilder MapActivityEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("ugeplan");
+        var group = app.MapGroup("weekplan");
         
         // GET activities for one day for citizen
         group.MapGet("/{citizenId}", async (int citizenId, string date, GirafDbContext dbContext) =>
@@ -24,7 +24,7 @@ public static class ActivityEndpoints
         );
         
         // GET single activity
-        group.MapGet("/aktivitet/{id}", async (int id, GirafDbContext dbContext) => 
+        group.MapGet("/activity/{id}", async (int id, GirafDbContext dbContext) => 
         {
             Activity? activity = await dbContext.Activities.FindAsync(id);
             
@@ -58,7 +58,7 @@ public static class ActivityEndpoints
         });
         
         // DELETE activity
-        group.MapDelete("/aktivitet/{id}", async (int id, GirafDbContext dbContext) =>
+        group.MapDelete("/activity/{id}", async (int id, GirafDbContext dbContext) =>
         {
             await dbContext.Activities.Where(a => a.Id == id).ExecuteDeleteAsync();
             
