@@ -37,10 +37,10 @@ public static class UsersEndpoints
                         break;
                 }
 
-                Results.Created($"/users/{user.Id}", user);
+                return Results.Created($"/users/{user.Id}", user);
             }
 
-            Results.BadRequest(result.Errors);
+            return Results.BadRequest(result.Errors);
         });
 
         // PUT /users/{id}
