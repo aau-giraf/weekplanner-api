@@ -42,7 +42,7 @@ public static class ActivityEndpoints
         });
         
         // PUT updated activity
-        group.MapPut("/{id}", async (int id, UpdateActivityDTO updatedActivity, GirafDbContext dbContext) =>
+        group.MapPut("/activity/{id}", async (int id, UpdateActivityDTO updatedActivity, GirafDbContext dbContext) =>
         {
             var activity = await dbContext.Activities.FindAsync(id);
 
