@@ -1,5 +1,5 @@
 using GirafAPI.Configuration;
-using GirafAPI.Entities.DTOs;
+using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;

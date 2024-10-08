@@ -13,6 +13,6 @@ namespace GirafAPI.Data
         }
 
         public DbSet<Citizen> Citizens => Set<Citizen>();
-        public DbSet<Weekplan> Weekplans => Set<Weekplan>();
+        public DbSet<Activity> Activities => Set<Activity>();
     }
 }
