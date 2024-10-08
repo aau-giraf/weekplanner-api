@@ -13,19 +13,18 @@ public static class CitizenMapping
         {
             FirstName = citizen.FirstName,
             LastName = citizen.LastName,
-            Weekplan = new Weekplan()
+            Activities = new List<Activity>()
         };
     }
 
-    public static Citizen ToEntity(this UpdateCitizenDTO citizen, int id, Weekplan weekplan)
+    public static Citizen ToEntity(this UpdateCitizenDTO citizen, int id, ICollection<Activity> activities)
     {
         return new Citizen
         {
             Id = id,
             FirstName = citizen.FirstName,
             LastName = citizen.LastName,
-            WeekplanId = weekplan.Id,
-            Weekplan = weekplan
+            Activities = activities
         };
     }
 
@@ -34,8 +33,7 @@ public static class CitizenMapping
         return new CitizenDTO(
             citizen.Id,
             citizen.FirstName,
-            citizen.LastName,
-            citizen.WeekplanId
+            citizen.LastName
         );
     }
 }

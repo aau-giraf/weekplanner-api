@@ -10,9 +10,15 @@
     ```bash
     dotnet run
     ```
-If you make changes to entities or DTOs, make sure to update migrations:
-   ```bash
-   dotnet ef migrations remove
-   dotnet ef migrations add Initial --output-dir Data\Migrations
-   ```
 
+## Update the Database
+If you make changes to entities or DTOs, make sure to update the database:
+
+1. Add a new migration
+   ```bash
+   dotnet ef migrations add {NewMigrationName} --output-dir Data\Migrations
+   ```
+2. Update the database
+   ```bash
+   dotnet ef database update
+   ```

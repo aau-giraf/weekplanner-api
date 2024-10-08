@@ -3,3 +3,5 @@
 /GirafAPI/obj/
 /GirafAPI/GirafDb.db-shm
 /GirafAPI/GirafDb.db-wal
+/Giraf.UnitTests/obj/
+/Giraf.UnitTests/bin/
