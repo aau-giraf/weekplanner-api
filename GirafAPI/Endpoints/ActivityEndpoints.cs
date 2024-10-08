@@ -57,6 +57,32 @@ public static class ActivityEndpoints
             return Results.Ok();
         });
         
+        // PUT copy activity
+        group.MapPut("/activity/move", async (int citizenId, string dateStr, string newDateStr, GirafDbContext dbContext) => 
+        {
+            var date = DateOnly.Parse(dateStr);
+            var newDate = DateOnly.Parse(newDateStr);
+
+            var result = await dbContext.Activities
+                            .Where(a => a.CitizenId == citizenId)
+                            .Where(a => a.Date == date)
+                            .ToListAsync();
+            
+            if(result is null)
+            {
+                return Results.NotFound();
+            }
+
+            foreach(Activity activity in result) 
+            {
+                activity.Date = newDate;
+            }
+            
+            await dbContext.SaveChangesAsync();
+
+            return Results.Ok();
+        }); 
+
         // DELETE activity
         group.MapDelete("/activity/{id}", async (int id, GirafDbContext dbContext) =>
         {
