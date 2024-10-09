@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GirafAPI.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    [Migration("20241008141230_SQLServerDatabase")]
-    partial class SQLServerDatabase
+    [Migration("20241009095729_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

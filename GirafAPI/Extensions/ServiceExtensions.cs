@@ -14,18 +14,9 @@ namespace GirafAPI.Extensions
     {
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
         {
-            var connString = configuration.GetConnectionString("dotnet add package Microsoft.EntityFrameworkCore.SqlServerGirafDb");
-
-            if (env.IsDevelopment())
-            {
-                services.AddDbContext<GirafDbContext>(options =>
-                options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-            }
             
-            else
-            {
-                // Configure production database here
-            }
+            services.AddDbContext<GirafDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             return services;
         }
