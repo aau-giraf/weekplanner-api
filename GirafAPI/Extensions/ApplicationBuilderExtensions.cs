@@ -28,7 +28,7 @@ namespace GirafAPI.Extensions
                 var adminUser = await userManager.FindByNameAsync("admin");
                 if (adminUser == null)
                 {
-                    adminUser = new GirafUser { UserName = "admin"};
+                    adminUser = new GirafUser { UserName = "admin", FirstName = "Admin", LastName = "Adminson"};
                     await userManager.CreateAsync(adminUser, "AdminPassword123!");
                     await userManager.AddToRoleAsync(adminUser, "Administrator");
                 }
@@ -37,7 +37,7 @@ namespace GirafAPI.Extensions
                 var trusteeUser = await userManager.FindByNameAsync("trustee");
                 if (trusteeUser == null)
                 {
-                    trusteeUser = new GirafUser { UserName = "trustee"};
+                    trusteeUser = new GirafUser { UserName = "trustee", FirstName = "Trustee", LastName = "Trusteeson"};
                     await userManager.CreateAsync(trusteeUser, "TrusteePassword123!");
                     await userManager.AddToRoleAsync(trusteeUser, "Trustee");
                 }
