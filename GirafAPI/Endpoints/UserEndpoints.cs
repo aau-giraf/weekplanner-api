@@ -27,8 +27,13 @@ public static class UsersEndpoints
             // await userManager.AddToRoleAsync(user, "RoleName");
 
             return Results.Created($"/users/{user.Id}", user);
-        });
-
+        })
+         .WithName("CreateUser")
+        .WithTags("Users")
+        .WithDescription("Creates a new user with the specified details. Requires administrative privileges.")
+        .Accepts<CreateUserDTO>("application/json")
+        .Produces<GirafUser>(StatusCodes.Status201Created)
+        .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
 
         return group;
     }

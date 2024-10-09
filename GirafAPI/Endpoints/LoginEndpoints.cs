@@ -50,7 +50,13 @@ namespace GirafAPI.Endpoints
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
                 return Results.Ok(new { Token = tokenString });
-            });
+            })
+            .WithName("UserLogin")
+            .WithTags("Authentication")
+            .WithDescription("Authenticates a user and returns a JWT token.")
+            .Accepts<LoginDTO>("application/json")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
         }
     }
 }
