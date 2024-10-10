@@ -72,14 +72,17 @@ public static class UsersEndpoints
                 {
                     return Results.NotFound();
                 }
-
-                return Results.Ok(users);
+                
+                var userDtos = users.ConvertAll(user => user.ToDTO());
+                return Results.Ok(userDtos);
             })
             .WithName("GetUsers")
             .WithTags("Users")
             .WithDescription("Returns a list of users")
-            .Produces<GirafUser[]>()
+            .Produces<UserDTO[]>()
             .Produces<NotFound>(StatusCodes.Status404NotFound);
+        
+        // Get /users/{id}
 
         //TODO Add auth so user can only change their own password unless they're an admin
         group.MapPut("/{id}/change-password",
