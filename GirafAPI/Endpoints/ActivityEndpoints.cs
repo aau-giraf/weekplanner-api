@@ -76,7 +76,8 @@ public static class ActivityEndpoints
                     Name = activity.Name,
                     Description = activity.Description,
                     StartTime = activity.StartTime,
-                    EndTime = activity.EndTime
+                    EndTime = activity.EndTime,
+                    IsCompleted = activity.IsCompleted
                 });
             }
             
@@ -96,6 +97,22 @@ public static class ActivityEndpoints
             }
             
             dbContext.Entry(activity).CurrentValues.SetValues(updatedActivity.ToEntity(id));
+            await dbContext.SaveChangesAsync();
+            
+            return Results.Ok();
+        });
+
+        // PUT IsComplete activity
+        group.MapPut("/activity/{id}/iscomplete", async (int id, bool IsComplete, GirafDbContext dbContext) =>
+        {
+            var activity = await dbContext.Activities.FindAsync(id);
+
+            if (activity is null)
+            {
+                return Results.NotFound();
+            }
+
+            activity.IsCompleted = IsComplete;
             await dbContext.SaveChangesAsync();
             
             return Results.Ok();
