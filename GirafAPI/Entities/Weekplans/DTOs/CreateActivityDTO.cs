@@ -8,5 +8,5 @@ public record CreateActivityDTO(
     [StringLength(500)] string Description,
     [Required][StringLength(10)] string StartTime,
     [Required][StringLength(10)] string EndTime,
-    [Required] bool IsCompleted
+    bool IsCompleted = false
     );
