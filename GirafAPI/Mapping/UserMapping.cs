@@ -32,6 +32,8 @@ public static class UserMapping
     public static UserDTO ToDTO(this GirafUser user)
     {
         return new UserDTO(
+            user.Id,
+            user.UserName,
             user.FirstName,
             user.LastName
         );
