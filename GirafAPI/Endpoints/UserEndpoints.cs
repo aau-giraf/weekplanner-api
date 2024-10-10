@@ -83,6 +83,20 @@ public static class UsersEndpoints
             .Produces<NotFound>(StatusCodes.Status404NotFound);
         
         // Get /users/{id}
+        group.MapGet("/{id}", async (string id, UserManager<GirafUser> userManager) =>
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user is null)
+            {
+                return Results.NotFound();
+            }
+            return Results.Ok(user.ToDTO());
+        })
+        .WithName("GetUser")
+        .WithTags("Users")
+        .WithDescription("Returns a user by id")
+        .Produces<UserDTO>()
+        .Produces<NotFound>(StatusCodes.Status404NotFound);
 
         //TODO Add auth so user can only change their own password unless they're an admin
         group.MapPut("/{id}/change-password",
