@@ -17,6 +17,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.SeedDataAsync();
 }
 
 app.UseAuthentication();
@@ -31,4 +32,11 @@ app.MapActivityEndpoints();
 // Apply migrations, also contains seed data, but not needed
 await app.ApplyMigrationsAsync();
 
-app.Run();
+if (app.Environment.IsDevelopment())
+{
+    app.Run("http://0.0.0.0:5171");
+}
+else
+{
+    app.Run();
+}
