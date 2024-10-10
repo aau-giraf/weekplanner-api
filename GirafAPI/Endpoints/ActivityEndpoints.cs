@@ -75,7 +75,8 @@ public static class ActivityEndpoints
                     Name = activity.Name,
                     Description = activity.Description,
                     StartTime = activity.StartTime,
-                    EndTime = activity.EndTime
+                    EndTime = activity.EndTime,
+                    IsCompleted = activity.IsCompleted
                 });
             }
             

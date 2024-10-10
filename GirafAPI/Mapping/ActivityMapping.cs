@@ -14,7 +14,8 @@ public static class ActivityMapping
             Name = activityDto.Name,
             Description = activityDto.Description,
             StartTime = TimeOnly.Parse(activityDto.StartTime),
-            EndTime = TimeOnly.Parse(activityDto.EndTime)
+            EndTime = TimeOnly.Parse(activityDto.EndTime),
+            IsCompleted = activityDto.IsCompleted
         };
     }
     
@@ -28,7 +29,8 @@ public static class ActivityMapping
             Name = activityDto.Name,
             Description = activityDto.Description,
             StartTime = TimeOnly.Parse(activityDto.StartTime),
-            EndTime = TimeOnly.Parse(activityDto.EndTime)
+            EndTime = TimeOnly.Parse(activityDto.EndTime),
+            IsCompleted = activityDto.IsCompleted
         };
     }
 
@@ -41,7 +43,8 @@ public static class ActivityMapping
             activity.Name,
             activity.Description,
             activity.StartTime.ToString("HH:mm"),
-            activity.EndTime.ToString("HH:mm")
+            activity.EndTime.ToString("HH:mm"),
+            activity.IsCompleted
         );
     }
 }
