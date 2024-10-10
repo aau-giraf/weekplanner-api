@@ -101,6 +101,22 @@ public static class ActivityEndpoints
             return Results.Ok();
         });
 
+        // PUT IsComplete activity
+        group.MapPut("/activity/{id}/iscomplete", async (int id, bool IsComplete, GirafDbContext dbContext) =>
+        {
+            var activity = await dbContext.Activities.FindAsync(id);
+
+            if (activity is null)
+            {
+                return Results.NotFound();
+            }
+
+            activity.IsCompleted = IsComplete;
+            await dbContext.SaveChangesAsync();
+            
+            return Results.Ok();
+        });
+
         // DELETE activity
         group.MapDelete("/activity/{id}", async (int id, GirafDbContext dbContext) =>
         {

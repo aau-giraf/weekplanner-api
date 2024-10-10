@@ -15,7 +15,7 @@ public static class ActivityMapping
             Description = activityDto.Description,
             StartTime = TimeOnly.Parse(activityDto.StartTime),
             EndTime = TimeOnly.Parse(activityDto.EndTime),
-            IsCompleted = activityDto.IsCompleted
+            IsCompleted = false
         };
     }
     
