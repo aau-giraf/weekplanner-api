@@ -62,6 +62,15 @@ public static class UsersEndpoints
                 return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
             });
 
+            return Results.Created($"/users/{user.Id}", user);
+        })
+        .WithName("CreateUser")
+        .WithTags("Users")
+        .WithDescription("Creates a new user with the specified details. Requires administrative privileges.")
+        .Accepts<CreateUserDTO>("application/json")
+        .Produces<GirafUser>(StatusCodes.Status201Created)
+        .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
+
         //TODO Add auth so user can only change their own password unless they're an admin
         group.MapPut("/{id}/change-password",
             async (string id, UpdateUserPasswordDTO updatePasswordDTO, UserManager<GirafUser> userManager) =>
@@ -89,7 +98,6 @@ public static class UsersEndpoints
             var result = await userManager.DeleteAsync(user);
             return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
         });
-
 
         return group;
     }

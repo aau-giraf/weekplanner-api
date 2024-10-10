@@ -1,10 +1,7 @@
 ﻿using GirafAPI.Data;
 using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Resources.DTOs;
-using GirafAPI.Entities.Users;
 using GirafAPI.Mapping;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace GirafAPI.Endpoints;
@@ -22,7 +19,11 @@ public static class CitizensEndpoints
                 .Select(citizen => citizen.ToDTO())
                 .AsNoTracking()
                 .ToListAsync()
-            );
+            )
+            .WithName("GetAllCitizens")
+            .WithTags("Citizens")
+            .WithDescription("Retrieves a list of all citizens.")
+            .Produces<List<CitizenDTO>>(StatusCodes.Status200OK);
 
         // GET /citizens/{id}
         group.MapGet("/{id:int}", async (int id, GirafDbContext dbContext) =>
@@ -31,7 +32,11 @@ public static class CitizensEndpoints
         
                 return citizen is null ? Results.NotFound() : Results.Ok(citizen.ToDTO());
             })
-            .WithName("GetCitizen");
+            .WithName("GetCitizenById")
+            .WithTags("Citizens")
+            .WithDescription("Retrieves a citizen by their ID.")
+            .Produces<CitizenDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound);
 
         // POST /citizens
         group.MapPost("/", async (CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
@@ -42,7 +47,14 @@ public static class CitizensEndpoints
             await dbContext.SaveChangesAsync();
     
             return Results.CreatedAtRoute("GetCitizen", new { id = citizen.Id }, citizen.ToDTO());
-        }).WithParameterValidation();
+        })
+        .WithName("CreateCitizen")
+        .WithTags("Citizens")
+        .WithDescription("Creates a new citizen.")
+        .Accepts<CreateCitizenDTO>("application/json")
+        .Produces<CitizenDTO>(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status400BadRequest)
+        .WithParameterValidation();
 
         // PUT /citizens
         group.MapPut("/{id:int}", async (int id, UpdateCitizenDTO updatedCitizen, GirafDbContext dbContext) =>
@@ -60,14 +72,26 @@ public static class CitizensEndpoints
             await dbContext.SaveChangesAsync();
     
             return Results.Ok();
-        });
+        })
+        .WithName("UpdateCitizen")
+        .WithTags("Citizens")
+        .WithDescription("Updates an existing citizen.")
+        .Accepts<UpdateCitizenDTO>("application/json")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status400BadRequest);
+        
         // DELETE /citizens/{id}
         group.MapDelete("/{id:int}", async (int id, GirafDbContext dbContext) =>
         {
             await dbContext.Citizens.Where(citizen => citizen.Id == id).ExecuteDeleteAsync();
     
             return Results.NoContent();
-        });
+        })
+        .WithName("DeleteCitizen")
+        .WithTags("Citizens")
+        .WithDescription("Deletes a citizen by their ID.")
+        .Produces(StatusCodes.Status204NoContent);
 
         return group;
     }
