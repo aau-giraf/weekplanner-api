@@ -5,6 +5,7 @@ using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
 using GirafAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
@@ -61,6 +62,24 @@ public static class UsersEndpoints
                 var result = await userManager.UpdateAsync(user);
                 return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
             });
+        
+        // Get /users/
+        group.MapGet("/", async (UserManager<GirafUser> userManager) =>
+            {
+                var users = await userManager.Users.ToListAsync();
+
+                if (!users.Any())
+                {
+                    return Results.NotFound();
+                }
+
+                return Results.Ok(users);
+            })
+            .WithName("GetUsers")
+            .WithTags("Users")
+            .WithDescription("Returns a list of users")
+            .Produces<GirafUser[]>()
+            .Produces<NotFound>(StatusCodes.Status404NotFound);
 
         //TODO Add auth so user can only change their own password unless they're an admin
         group.MapPut("/{id}/change-password",
