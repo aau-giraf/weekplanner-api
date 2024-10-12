@@ -5,6 +5,7 @@ using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
 using GirafAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
@@ -61,6 +62,41 @@ public static class UsersEndpoints
                 var result = await userManager.UpdateAsync(user);
                 return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
             });
+        
+        // Get /users/
+        group.MapGet("/", async (UserManager<GirafUser> userManager) =>
+            {
+                var users = await userManager.Users.ToListAsync();
+
+                if (!users.Any())
+                {
+                    return Results.NotFound();
+                }
+                
+                var userDtos = users.ConvertAll(user => user.ToDTO());
+                return Results.Ok(userDtos);
+            })
+            .WithName("GetUsers")
+            .WithTags("Users")
+            .WithDescription("Returns a list of users")
+            .Produces<UserDTO[]>()
+            .Produces<NotFound>(StatusCodes.Status404NotFound);
+        
+        // Get /users/{id}
+        group.MapGet("/{id}", async (string id, UserManager<GirafUser> userManager) =>
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user is null)
+            {
+                return Results.NotFound();
+            }
+            return Results.Ok(user.ToDTO());
+        })
+        .WithName("GetUser")
+        .WithTags("Users")
+        .WithDescription("Returns a user by id")
+        .Produces<UserDTO>()
+        .Produces<NotFound>(StatusCodes.Status404NotFound);
 
         //TODO Add auth so user can only change their own password unless they're an admin
         group.MapPut("/{id}/change-password",
