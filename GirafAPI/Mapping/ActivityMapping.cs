@@ -39,7 +39,7 @@ public static class ActivityMapping
         return new ActivityDTO(
             activity.Id,
             activity.CitizenId,
-            activity.Date.ToString(),
+            activity.Date.ToString("yyyy-MM-dd"),
             activity.Name,
             activity.Description,
             activity.StartTime.ToString("HH:mm"),
