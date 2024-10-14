@@ -23,6 +23,7 @@ public class CitizensEndpointTests
         response.EnsureSuccessStatusCode();
         
         var createdCitizen = await response.Content.ReadFromJsonAsync<CitizenDTO>();
+        createdCitizen?.Id.Should().Be(1);
         createdCitizen?.FirstName.Should().Be("Hans");
         createdCitizen?.LastName.Should().Be("Hansen");
     }
