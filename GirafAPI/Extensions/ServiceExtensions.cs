@@ -14,10 +14,9 @@ namespace GirafAPI.Extensions
     {
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
         {
-            var connString = configuration.GetConnectionString("GirafDb");
-
             if (env.IsDevelopment())
             {
+                var connString = configuration.GetConnectionString("GirafDb");
                 services.AddDbContext<GirafDbContext>(options => options.UseSqlite(connString));
             }
             else
