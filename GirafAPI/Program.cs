@@ -16,7 +16,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(configuration =>
+    {
+        configuration.SwaggerEndpoint("/swagger/v1/swagger.json", "API v1");
+    });
 }
 
 app.UseAuthentication();
@@ -28,7 +31,5 @@ app.MapUsersEndpoints();
 app.MapLoginEndpoint();
 app.MapActivityEndpoints();
 
-// Apply migrations, also contains seed data, but not needed
-await app.ApplyMigrationsAsync();
 
 app.Run();
