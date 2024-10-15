@@ -14,9 +14,16 @@ namespace GirafAPI.Extensions
     {
         public static IServiceCollection ConfigureDatabase(this IServiceCollection services, IConfiguration configuration, IWebHostEnvironment env)
         {
-            
-            services.AddDbContext<GirafDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+
+            if (env.IsDevelopment())
+            {
+                services.AddDbContext<GirafDbContext>(options => options.UseSqlite(configuration.GetConnectionString("DevelopmentConnection")));
+            }
+            else
+            {
+                services.AddDbContext<GirafDbContext>(options =>
+                    options.UseSqlServer(configuration.GetConnectionString("ProductionConnection")));
+            }
 
             return services;
         }
