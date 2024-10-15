@@ -1,13 +1,11 @@
-version: '3.8'
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
+  aspnet_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=Test123!
+      - ASPNETCORE_ENVIRONMENT=Development  # Change to Production as needed
     ports:
-      - "1433:1433"
+      - "5171:80"  # Change to your preferred port
     volumes:
-      - sql_data:/var/opt/mssql
-volumes:
-  sql_data:
+      - .:/app/src
