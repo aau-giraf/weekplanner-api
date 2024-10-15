@@ -64,7 +64,7 @@ public static class ActivityEndpoints
         .Produces<ActivityDTO>(StatusCodes.Status201Created);
         
         // POST copy activity
-        group.MapPost("/activity/copy", async (int citizenId, string dateStr, string newDateStr, GirafDbContext dbContext) => 
+        group.MapPost("/activity/copy", async (int citizenId, List<int> ids, string dateStr, string newDateStr, GirafDbContext dbContext) => 
         {
             var date = DateOnly.Parse(dateStr);
             var newDate = DateOnly.Parse(newDateStr);
@@ -72,6 +72,7 @@ public static class ActivityEndpoints
             var result = await dbContext.Activities
                 .Where(a => a.CitizenId == citizenId)
                 .Where(a => a.Date == date)
+                .Where(a => ids.Contains(a.Id))
                 .AsNoTracking()
                 .ToListAsync();
             
