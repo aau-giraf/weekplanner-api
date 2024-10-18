@@ -27,16 +27,16 @@ public static class CitizensEndpoints
 
         // GET /citizens/{id}
         group.MapGet("/{id:int}", async (int id, GirafDbContext dbContext) =>
-            {
+        {
                 Citizen? citizen = await dbContext.Citizens.FindAsync(id);
         
                 return citizen is null ? Results.NotFound() : Results.Ok(citizen.ToDTO());
-            })
-            .WithName("GetCitizenById")
-            .WithTags("Citizens")
-            .WithDescription("Retrieves a citizen by their ID.")
-            .Produces<CitizenDTO>(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status404NotFound);
+        })
+        .WithName("GetCitizenById")
+        .WithTags("Citizens")
+        .WithDescription("Retrieves a citizen by their ID.")
+        .Produces<CitizenDTO>(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound);
 
         // POST /citizens
         group.MapPost("/", async (CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>

@@ -18,7 +18,11 @@ public static class ActivityEndpoints
                 .Select(a => a.ToDTO())
                 .AsNoTracking()
                 .ToListAsync()
-        );
+        )
+        .WithName("GetAllActivities")
+        .WithDescription("Gets all activities")
+        .WithTags("Activities")
+        .Produces<List<ActivityDTO>>(StatusCodes.Status200OK);
         
         // GET activities for one day for citizen
         group.MapGet("/{citizenId}", async (int citizenId, string date, GirafDbContext dbContext) =>
