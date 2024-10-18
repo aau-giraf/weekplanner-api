@@ -37,31 +37,41 @@ public static class UsersEndpoints
                         userManager.AddToRoleAsync(user, Role.Trustee.ToString()).Wait();
                         break;
                 }
-
                 return Results.Created($"/users/{user.Id}", user);
             }
 
             return Results.BadRequest(result.Errors);
-        });
+        })
+        .WithName("CreateUser")
+        .WithTags("Users")
+        .WithDescription("Creates a new user with the specified details. Requires administrative privileges.")
+        .Accepts<CreateUserDTO>("application/json")
+        .Produces<GirafUser>(StatusCodes.Status201Created)
+        .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
 
         // PUT /users/{id}
-        group.MapPut("/{id}",
-            async (string id, UpdateUserDTO updatedUser, UserManager<GirafUser> userManager) =>
+        group.MapPut("/{id}", async (string id, UpdateUserDTO updatedUser, UserManager<GirafUser> userManager) =>
+        {
+            var user = await userManager.FindByIdAsync(id);
+
+            if (user is null)
             {
-                var user = await userManager.FindByIdAsync(id);
+                return Results.NotFound();
+            }
 
-                if (user is null)
-                {
-                    return Results.NotFound();
-                }
-
-                user.FirstName = updatedUser.FirstName;
-                user.LastName = updatedUser.LastName;
-
-
-                var result = await userManager.UpdateAsync(user);
-                return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
-            });
+            user.FirstName = updatedUser.FirstName;
+            user.LastName = updatedUser.LastName;
+          
+            var result = await userManager.UpdateAsync(user);
+            return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+          })
+          .WithName("UpdateUser")
+          .WithTags("Users")
+          .WithDescription("Updates an existing user's details by their ID. Requires administrative privileges.")
+          .Accepts<UpdateUserDTO>("application/json")
+          .Produces(StatusCodes.Status200OK)
+          .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest)
+          .Produces(StatusCodes.Status404NotFound);
         
         // Get /users/
         group.MapGet("/", async (UserManager<GirafUser> userManager) =>
@@ -99,34 +109,45 @@ public static class UsersEndpoints
         .Produces<NotFound>(StatusCodes.Status404NotFound);
 
         //TODO Add auth so user can only change their own password unless they're an admin
-        group.MapPut("/{id}/change-password",
-            async (string id, UpdateUserPasswordDTO updatePasswordDTO, UserManager<GirafUser> userManager) =>
-            {
-                var user = await userManager.FindByIdAsync(id);
-                var result = await userManager.ChangePasswordAsync(user, updatePasswordDTO.oldPassword,
-                    updatePasswordDTO.newPassword);
-
-                return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
-            });
+        group.MapPut("/{id}/change-password", async (string id, UpdateUserPasswordDTO updatePasswordDTO, UserManager<GirafUser> userManager) =>
+        {
+            var user = await userManager.FindByIdAsync(id);
+            var result = await userManager.ChangePasswordAsync(user, updatePasswordDTO.oldPassword, updatePasswordDTO.newPassword);
+            return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        })
+        .WithName("ChangeUserPassword")
+        .WithTags("Users")
+        .WithDescription("Allows a user to change their password. An admin can change any user's password.")
+        .Accepts<UpdateUserPasswordDTO>("application/json")
+        .Produces(StatusCodes.Status200OK)
+        .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
 
         //TODO Add auth so a user can only change their own username unless they're an admin
-        group.MapPut("/{id}/change-username",
-            async (string id, UpdateUsernameDTO updateUsernameDTO, UserManager<GirafUser> userManager) =>
-            {
-                var user = await userManager.FindByIdAsync(id);
-                var result = await userManager.SetUserNameAsync(user, updateUsernameDTO.Username);
-
-                return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
-            });
+        group.MapPut("/{id}/change-username", async (string id, UpdateUsernameDTO updateUsernameDTO, UserManager<GirafUser> userManager) =>
+        {
+            var user = await userManager.FindByIdAsync(id);
+            var result = await userManager.SetUserNameAsync(user, updateUsernameDTO.Username);
+            return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+        })
+        .WithName("ChangeUsername")
+        .WithTags("Users")
+        .WithDescription("Allows a user to change their username. An admin can change any user's username.")
+        .Accepts<UpdateUsernameDTO>("application/json")
+        .Produces(StatusCodes.Status200OK)
+        .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
 
         group.MapDelete("/{id}", async (string id, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
             var result = await userManager.DeleteAsync(user);
             return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
-        });
+        })
+        .WithName("DeleteUser")
+        .WithTags("Users")
+        .WithDescription("Deletes a user by their ID. Requires administrative privileges.")
+        .Produces(StatusCodes.Status204NoContent)
+        .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
 
-
-        return group;
+    return group;
     }
 }
