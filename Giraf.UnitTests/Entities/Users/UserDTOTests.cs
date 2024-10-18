@@ -3,7 +3,7 @@ using Xunit;
 using System.Collections.Generic;
 using GirafAPI.Entities.Users.DTOs;
 
-namespace GirafAPI.UnitTests
+namespace GirafAPI.UnitTests.Entities.Users
 {
     public class CreateUserDTOTests
     {
