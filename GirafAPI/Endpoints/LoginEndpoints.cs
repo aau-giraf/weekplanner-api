@@ -1,5 +1,5 @@
 using GirafAPI.Configuration;
-using GirafAPI.Entities.Users.DTOs;
+using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using GirafAPI.Entities.Users.DTOs;
 
 namespace GirafAPI.Endpoints
 {

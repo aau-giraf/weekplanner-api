@@ -16,4 +16,6 @@ public class Activity
     public required TimeOnly StartTime { get; set; }
     
     public required TimeOnly EndTime { get; set; }
+
+    public bool IsCompleted { get; set; }
 }
