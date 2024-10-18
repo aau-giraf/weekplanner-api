@@ -116,8 +116,8 @@ public static class ActivityEndpoints
             
             dbContext.Entry(activity).CurrentValues.SetValues(updatedActivity.ToEntity(id));
             await dbContext.SaveChangesAsync();
-            
-            return Results.Ok()
+
+            return Results.Ok();
         })
         .WithName("UpdateActivity")
         .WithDescription("Updates an existing activity using ID.")
@@ -125,7 +125,6 @@ public static class ActivityEndpoints
         .Accepts<UpdateActivityDTO>("application/json")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
-        });
 
         // PUT IsComplete activity
         group.MapPut("/activity/{id}/iscomplete", async (int id, bool IsComplete, GirafDbContext dbContext) =>
