@@ -9,48 +9,44 @@ namespace GirafAPI.Extensions
     {
         public static async Task SeedDataAsync(this IApplicationBuilder app)
         {
-            using (var scope = app.ApplicationServices.CreateScope())
+            using var scope = app.ApplicationServices.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            // Create roles
+            var roles = new[] { "Administrator", "Trustee" };
+            foreach (var role in roles)
             {
-                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-                // Create roles
-                var roles = new[] { "Administrator", "Trustee" };
-                foreach (var role in roles)
+                if (!await roleManager.RoleExistsAsync(role))
                 {
-                    if (!await roleManager.RoleExistsAsync(role))
-                    {
-                        await roleManager.CreateAsync(new IdentityRole(role));
-                    }
+                    await roleManager.CreateAsync(new IdentityRole(role));
                 }
+            }
 
-                // Create an admin user
-                var adminUser = await userManager.FindByNameAsync("admin");
-                if (adminUser == null)
-                {
-                    adminUser = new GirafUser { UserName = "admin", FirstName = "Admin", LastName = "Adminson"};
-                    await userManager.CreateAsync(adminUser, "AdminPassword123!");
-                    await userManager.AddToRoleAsync(adminUser, "Administrator");
-                }
+            // Create an admin user
+            var adminUser = await userManager.FindByNameAsync("admin");
+            if (adminUser == null)
+            {
+                adminUser = new GirafUser { UserName = "admin", FirstName = "Admin", LastName = "Adminson" };
+                await userManager.CreateAsync(adminUser, "AdminPassword123!");
+                await userManager.AddToRoleAsync(adminUser, "Administrator");
+            }
 
-                // Create a trustee user
-                var trusteeUser = await userManager.FindByNameAsync("trustee");
-                if (trusteeUser == null)
-                {
-                    trusteeUser = new GirafUser { UserName = "trustee", FirstName = "Trustee", LastName = "Trusteeson"};
-                    await userManager.CreateAsync(trusteeUser, "TrusteePassword123!");
-                    await userManager.AddToRoleAsync(trusteeUser, "Trustee");
-                }
+            // Create a trustee user
+            var trusteeUser = await userManager.FindByNameAsync("trustee");
+            if (trusteeUser == null)
+            {
+                trusteeUser = new GirafUser { UserName = "trustee", FirstName = "Trustee", LastName = "Trusteeson" };
+                await userManager.CreateAsync(trusteeUser, "TrusteePassword123!");
+                await userManager.AddToRoleAsync(trusteeUser, "Trustee");
             }
         }
 
         public static async Task ApplyMigrationsAsync(this IApplicationBuilder app)
         {
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                await dbContext.Database.MigrateAsync();
-            }
+            using var scope = app.ApplicationServices.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            await dbContext.Database.MigrateAsync();
         }
     }
 }
