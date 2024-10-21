@@ -102,7 +102,13 @@ public static class ActivityEndpoints
             await dbContext.SaveChangesAsync();
 
             return Results.Ok();
-        });
+        })
+        .WithName("CopyActivities")
+        .WithTags("Activities")
+        .WithDescription("Copies specified activities of a citizen from one date to another.")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status400BadRequest);
         
         // PUT updated activity
         group.MapPut("/activity/{id}", async (int id, UpdateActivityDTO updatedActivity, GirafDbContext dbContext) =>
@@ -140,7 +146,13 @@ public static class ActivityEndpoints
             await dbContext.SaveChangesAsync();
             
             return Results.Ok();
-        });
+        })
+        .WithName("UpdateActivityCompletion")
+        .WithTags("Activities")
+        .WithDescription("Updates the completion status of an activity.")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status400BadRequest);;
 
         // DELETE activity
         group.MapDelete("/activity/{id}", async (int id, GirafDbContext dbContext) =>

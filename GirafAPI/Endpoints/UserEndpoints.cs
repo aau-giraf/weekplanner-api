@@ -3,7 +3,6 @@ using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
-using GirafAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
@@ -20,7 +19,7 @@ public static class UsersEndpoints
         var group = app.MapGroup("users").RequireAuthorization("AdminPolicy");
 
         // POST /users
-        group.MapPost("/", async (CreateUserDTO newUser, UserManager<GirafUser> userManager) =>
+        group.MapPost("/", async (CreateUserDTO newUser, UserManager<GirafUser> userManager, RoleManager<IdentityRole> roleManager) =>
         {
             await Console.Out.WriteLineAsync(newUser.UserName);
             GirafUser user = newUser.ToEntity();
@@ -28,19 +27,27 @@ public static class UsersEndpoints
 
             if (result.Succeeded)
             {
-                switch (newUser.Role)
+                // Retrieve valid roles from the database, NOT USING ENUMS
+                var validRoles = await roleManager.Roles.Select(r => r.Name).ToListAsync();
+
+                if (!validRoles.Contains(newUser.Role))
                 {
-                    case nameof(Role.Administrator):
-                        userManager.AddToRoleAsync(user, Role.Administrator.ToString()).Wait();
-                        break;
-                    default:
-                        userManager.AddToRoleAsync(user, Role.Trustee.ToString()).Wait();
-                        break;
+                    return Results.BadRequest($"Invalid role specified: {newUser.Role}");
                 }
+
+                // Add user to the specified role
+                var roleResult = await userManager.AddToRoleAsync(user, newUser.Role);
+                if (!roleResult.Succeeded)
+                {
+                    var errors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
+                    return Results.Problem($"Failed to assign role to the user. Errors: {errors}", statusCode: StatusCodes.Status500InternalServerError);
+                }
+
                 return Results.Created($"/users/{user.Id}", user);
             }
 
-            return Results.BadRequest(result.Errors);
+            var creationErrors = string.Join("; ", result.Errors.Select(e => e.Description));
+            return Results.BadRequest($"User creation failed. Errors: {creationErrors}");
         })
         .WithName("CreateUser")
         .WithTags("Users")
