@@ -11,7 +11,7 @@ public static class UserMapping
     {
         return new GirafUser
         {
-            UserName = userDTO.UserName,
+            Email = userDTO.Email,
             
             FirstName = userDTO.FirstName,
             
@@ -33,7 +33,7 @@ public static class UserMapping
     {
         return new UserDTO(
             user.Id,
-            user.UserName,
+            user.Email,
             user.FirstName,
             user.LastName
         );
