@@ -22,25 +22,10 @@ public static class UsersEndpoints
         // POST /users
         group.MapPost("/", async (CreateUserDTO newUser, UserManager<GirafUser> userManager) =>
         {
-            await Console.Out.WriteLineAsync(newUser.UserName);
             GirafUser user = newUser.ToEntity();
             var result = await userManager.CreateAsync(user, newUser.Password);
-
-            if (result.Succeeded)
-            {
-                switch (newUser.Role)
-                {
-                    case nameof(Role.Administrator):
-                        userManager.AddToRoleAsync(user, Role.Administrator.ToString()).Wait();
-                        break;
-                    default:
-                        userManager.AddToRoleAsync(user, Role.Trustee.ToString()).Wait();
-                        break;
-                }
-                return Results.Created($"/users/{user.Id}", user);
-            }
-
-            return Results.BadRequest(result.Errors);
+            
+            return result.Succeeded ? Results.Created($"/users/{user.Id}", user.ToDTO()) : Results.BadRequest();
         })
         .WithName("CreateUser")
         .WithTags("Users")

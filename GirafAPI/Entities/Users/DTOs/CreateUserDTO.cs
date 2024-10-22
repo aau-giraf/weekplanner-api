@@ -3,21 +3,19 @@ using GirafAPI.Utils;
 
 namespace GirafAPI.Entities.Users.DTOs;
 
-public class CreateUserDTO
+public record CreateUserDTO
 {
     [Required]
     [StringLength(50)]
-    public string UserName { get; set; }
+    public required string Email { get; set; }
 
     [Required]
     [StringLength(100)]
-    public string Password { get; set; }
+    public required string Password { get; set; }
     
-    public string Role { get; set; }
+    [StringLength(50)]
+    public required string FirstName { get; set; }
     
-    [StringLength(100)]
-    public string FirstName { get; set; }
-    
-    [StringLength(100)]
-    public string LastName { get; set; }
+    [StringLength(50)]
+    public required string LastName { get; set; }
 }
