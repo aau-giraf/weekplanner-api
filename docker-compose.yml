@@ -6,6 +6,6 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development  # Change to Production as needed
     ports:
-      - "5171:80"  # Change to your preferred port
+      - "5171:8080"  # Change to your preferred port -> host_port:container_port
     volumes:
       - .:/app/src

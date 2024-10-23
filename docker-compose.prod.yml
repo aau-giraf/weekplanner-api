@@ -1,12 +1,13 @@
-version: '3.8'
-
 services:
-  webapp:
+  aspnet_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://+:80 # In production, map to port 80
+      ASPNETCORE_URLS: http://+:8080 # In production, map to port 8080
     ports:
-      - "80:80" # Serve over default HTTP port
+      - "5171:8080" # Serve over default HTTP port
     depends_on:
       - mssql
   mssql:
