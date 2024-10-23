@@ -12,6 +12,14 @@ public static class ActivityEndpoints
     {
         var group = app.MapGroup("weekplan");
         
+        // GET all activities (mainly for debugging)
+        group.MapGet("/", async (GirafDbContext dbContext) =>
+            await dbContext.Activities
+                .Select(a => a.ToDTO())
+                .AsNoTracking()
+                .ToListAsync()
+        );
+        
         // GET activities for one day for citizen
         group.MapGet("/{citizenId}", async (int citizenId, string date, GirafDbContext dbContext) =>
             await dbContext.Activities
@@ -41,6 +49,42 @@ public static class ActivityEndpoints
             return Results.Created($"/activity/{activity.Id}", activity.ToDTO());
         });
         
+        // POST copy activity
+        group.MapPost("/activity/copy", async (int citizenId, List<int> ids, string dateStr, string newDateStr, GirafDbContext dbContext) => 
+        {
+            var date = DateOnly.Parse(dateStr);
+            var newDate = DateOnly.Parse(newDateStr);
+
+            var result = await dbContext.Activities
+                .Where(a => a.CitizenId == citizenId)
+                .Where(a => a.Date == date)
+                .Where(a => ids.Contains(a.Id))
+                .AsNoTracking()
+                .ToListAsync();
+            
+            if(result is null)
+            {
+                return Results.NotFound();
+            }
+
+            foreach(Activity activity in result) 
+            {
+                dbContext.Activities.Add(new Activity
+                {
+                    CitizenId = citizenId,
+                    Date = newDate,
+                    Name = activity.Name,
+                    Description = activity.Description,
+                    StartTime = activity.StartTime,
+                    EndTime = activity.EndTime
+                });
+            }
+            
+            await dbContext.SaveChangesAsync();
+
+            return Results.Ok();
+        });
+        
         // PUT updated activity
         group.MapPut("/activity/{id}", async (int id, UpdateActivityDTO updatedActivity, GirafDbContext dbContext) =>
         {
@@ -56,7 +100,7 @@ public static class ActivityEndpoints
             
             return Results.Ok();
         });
-        
+
         // DELETE activity
         group.MapDelete("/activity/{id}", async (int id, GirafDbContext dbContext) =>
         {
