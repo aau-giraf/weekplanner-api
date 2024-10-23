@@ -16,9 +16,6 @@ public static class UsersEndpoints
 {
     public static RouteGroupBuilder MapUsersEndpoints(this WebApplication app)
     {
-        //TODO Add authorization requirement to this group for users and admins
-        var group = app.MapGroup("users").RequireAuthorization("AdminPolicy");
-
         // POST /users
         group.MapPost("/", async (CreateUserDTO newUser, UserManager<GirafUser> userManager) =>
         {
