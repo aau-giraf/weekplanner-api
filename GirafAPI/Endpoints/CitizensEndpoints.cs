@@ -66,11 +66,6 @@ public static class CitizensEndpoints
         {
             try
             {
-                if (newCitizen == null)
-                {
-                    return Results.BadRequest("Invalid citizen data.");
-                }
-
                 Citizen citizen = newCitizen.ToEntity();
                 dbContext.Citizens.Add(citizen);
                 await dbContext.SaveChangesAsync();
