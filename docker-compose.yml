@@ -9,3 +9,6 @@ services:
       - "5171:8080"  # Change to your preferred port -> host_port:container_port
     volumes:
       - .:/app/src
+      - /app/bin
+      - /app/obj
+    command: dotnet watch run
