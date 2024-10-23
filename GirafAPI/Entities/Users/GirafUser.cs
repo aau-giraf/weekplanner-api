@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using GirafAPI.Entities.Organizations;
 
 namespace GirafAPI.Entities.Users;
 
@@ -9,4 +10,6 @@ public class GirafUser : IdentityUser
     
     public string LastName { get; set; }
 
+    public int? OrganizationId { get; set; }
+    public Organization Organization { get; set; }
 }

@@ -3,9 +3,7 @@ using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Resources.DTOs;
 using GirafAPI.Mapping;
 using Microsoft.EntityFrameworkCore;
-
 namespace GirafAPI.Endpoints;
-
 // Endpoints for Trustees and Administrators to view, edit and delete Citizen data.
 public static class CitizensEndpoints
 {
@@ -24,7 +22,7 @@ public static class CitizensEndpoints
             .WithTags("Citizens")
             .WithDescription("Retrieves a list of all citizens.")
             .Produces<List<CitizenDTO>>(StatusCodes.Status200OK);
-
+        
         // GET /citizens/{id}
         group.MapGet("/{id:int}", async (int id, GirafDbContext dbContext) =>
         {
@@ -37,7 +35,7 @@ public static class CitizensEndpoints
         .WithDescription("Retrieves a citizen by their ID.")
         .Produces<CitizenDTO>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound);
-
+        
         // POST /citizens
         group.MapPost("/", async (CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
         {
@@ -55,17 +53,15 @@ public static class CitizensEndpoints
         .Produces<CitizenDTO>(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status400BadRequest)
         .WithParameterValidation();
-
+        
         // PUT /citizens
         group.MapPut("/{id:int}", async (int id, UpdateCitizenDTO updatedCitizen, GirafDbContext dbContext) =>
         {
             var citizen = await dbContext.Citizens.FindAsync(id);
-
             if (citizen is null)
             {
                 return Results.NotFound();
             }
-
             var activities = citizen.Activities;
     
             dbContext.Entry(citizen).CurrentValues.SetValues(updatedCitizen.ToEntity(id, activities));
@@ -92,7 +88,6 @@ public static class CitizensEndpoints
         .WithTags("Citizens")
         .WithDescription("Deletes a citizen by their ID.")
         .Produces(StatusCodes.Status204NoContent);
-
         return group;
     }
 }

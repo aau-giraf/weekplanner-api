@@ -3,6 +3,7 @@ using GirafAPI.Entities.Weekplans;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using GirafAPI.Entities.Users;
+using GirafAPI.Entities.Organizations;
 
 namespace GirafAPI.Data
 {
@@ -14,5 +15,6 @@ namespace GirafAPI.Data
 
         public DbSet<Citizen> Citizens => Set<Citizen>();
         public DbSet<Activity> Activities => Set<Activity>();
+        public DbSet<Organization> Organizations { get; set; }
     }
 }

@@ -8,7 +8,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using GirafAPI.Entities.Users.DTOs;
-
 namespace GirafAPI.Endpoints
 {
     public static class LoginEndpoint
@@ -22,34 +21,34 @@ namespace GirafAPI.Endpoints
                 {
                     return Results.BadRequest("Invalid username or password");
                 }
+                
                 var passwordValid = await userManager.CheckPasswordAsync(user, loginDTO.Password);
                 if (!passwordValid)
                 {
                     return Results.BadRequest("Invalid username or password");
                 }
-
+                
                 var roles = await userManager.GetRolesAsync(user);
-
+                
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Name, user.UserName)
                 };
-
                 claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
+                
                 var token = new JwtSecurityToken(
                     issuer: jwtSettings.Value.Issuer,
                     audience: jwtSettings.Value.Audience,
                     claims: claims,
                     expires: DateTime.UtcNow.AddHours(1),
                     signingCredentials: creds);
-
+                
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
-
+                
                 return Results.Ok(new { Token = tokenString });
             })
             .WithName("UserLogin")
