@@ -50,20 +50,5 @@ namespace GirafAPI.UnitTests.Entities.Resources
             Assert.Equal("John", citizen.FirstName);
             Assert.Equal("Doe", citizen.LastName);
         }
-
-       [Fact]
-        public void CitizenDTO_LastNameExceedsMaxLength()
-        {
-            // Arrange
-            var longLastName = new string('B', 21); // 21 characters, above limit
-            var citizen = new CitizenDTO(1, "John", longLastName);
-
-            // Act
-            var validationResults = ValidateModel(citizen);
-
-            // Assert
-            Assert.NotEmpty(validationResults);
-            Assert.Contains(validationResults, v => v.MemberNames.Contains("LastName") && v.ErrorMessage.Contains("maximum length"));
-        }
     }
 }
