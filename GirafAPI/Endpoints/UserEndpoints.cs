@@ -17,14 +17,13 @@ public static class UsersEndpoints
     public static RouteGroupBuilder MapUsersEndpoints(this WebApplication app)
     {
         //TODO Add authorization requirement to this group for users and admins
-        var group = app.MapGroup("users").RequireAuthorization("AdminPolicy");
+        var group = app.MapGroup("users");
 
         // POST /users
         group.MapPost("/", async (CreateUserDTO newUser, UserManager<GirafUser> userManager) =>
         {
             GirafUser user = newUser.ToEntity();
             var result = await userManager.CreateAsync(user, newUser.Password);
-            
             return result.Succeeded ? Results.Created($"/users/{user.Id}", user.ToDTO()) : Results.BadRequest();
         })
         .WithName("CreateUser")

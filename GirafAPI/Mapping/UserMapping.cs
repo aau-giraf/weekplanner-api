@@ -16,6 +16,8 @@ public static class UserMapping
             FirstName = userDTO.FirstName,
             
             LastName = userDTO.LastName,
+            
+            UserName = userDTO.Email,  
 
         };
     }
