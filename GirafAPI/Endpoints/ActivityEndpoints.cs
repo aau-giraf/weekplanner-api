@@ -41,7 +41,6 @@ public static class ActivityEndpoints
         {
             try
             {
-                // Fetch activities for the citizen on the specified date
                 var activities = await dbContext.Activities
                     .Where(a => a.CitizenId == citizenId)
                     .Where(a => a.Date == DateOnly.Parse(date))
@@ -186,7 +185,7 @@ public static class ActivityEndpoints
             }
             catch (DbUpdateException)
             {
-                // Hdatabase update issue
+                // database update issue
                 return Results.BadRequest("Failed to update activity. Ensure the provided data is correct.");
             }
             catch (Exception)
