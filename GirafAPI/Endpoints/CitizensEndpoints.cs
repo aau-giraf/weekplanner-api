@@ -70,7 +70,7 @@ public static class CitizensEndpoints
                 dbContext.Citizens.Add(citizen);
                 await dbContext.SaveChangesAsync();
 
-                return Results.CreatedAtRoute("GetCitizen", new { id = citizen.Id }, citizen.ToDTO());
+                return Results.Created($"citizen/{citizen.Id}", citizen.ToDTO());
             }
             catch (DbUpdateException ex)
             {
