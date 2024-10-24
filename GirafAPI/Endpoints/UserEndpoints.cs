@@ -3,29 +3,43 @@ using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
-using GirafAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Extensions;
-
 namespace GirafAPI.Endpoints;
-
 public static class UsersEndpoints
 {
     public static RouteGroupBuilder MapUsersEndpoints(this WebApplication app)
     {
         //TODO Add authorization requirement to this group for users and admins
         var group = app.MapGroup("users").RequireAuthorization("AdminPolicy");
-
         // POST /users
-        group.MapPost("/", async (CreateUserDTO newUser, UserManager<GirafUser> userManager) =>
+        group.MapPost("/", async (CreateUserDTO newUser, UserManager<GirafUser> userManager, RoleManager<IdentityRole> roleManager) =>
         {
+            await Console.Out.WriteLineAsync(newUser.UserName);
             GirafUser user = newUser.ToEntity();
             var result = await userManager.CreateAsync(user, newUser.Password);
-            
-            return result.Succeeded ? Results.Created($"/users/{user.Id}", user.ToDTO()) : Results.BadRequest();
+            if (result.Succeeded)
+            {
+                // Retrieve valid roles from the database, NOT USING ENUMS
+                var validRoles = await roleManager.Roles.Select(r => r.Name).ToListAsync();
+                if (!validRoles.Contains(newUser.Role))
+                {
+                    return Results.BadRequest($"Invalid role specified: {newUser.Role}");
+                }
+                // Add user to the specified role
+                var roleResult = await userManager.AddToRoleAsync(user, newUser.Role);
+                if (!roleResult.Succeeded)
+                {
+                    var errors = string.Join("; ", roleResult.Errors.Select(e => e.Description));
+                    return Results.Problem($"Failed to assign role to the user. Errors: {errors}", statusCode: StatusCodes.Status500InternalServerError);
+                }
+                return Results.Created($"/users/{user.Id}", user);
+            }
+            var creationErrors = string.Join("; ", result.Errors.Select(e => e.Description));
+            return Results.BadRequest($"User creation failed. Errors: {creationErrors}");
         })
         .WithName("CreateUser")
         .WithTags("Users")
@@ -33,17 +47,14 @@ public static class UsersEndpoints
         .Accepts<CreateUserDTO>("application/json")
         .Produces<GirafUser>(StatusCodes.Status201Created)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
-
         // PUT /users/{id}
         group.MapPut("/{id}", async (string id, UpdateUserDTO updatedUser, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
-
             if (user is null)
             {
                 return Results.NotFound();
             }
-
             user.FirstName = updatedUser.FirstName;
             user.LastName = updatedUser.LastName;
           
@@ -62,7 +73,6 @@ public static class UsersEndpoints
         group.MapGet("/", async (UserManager<GirafUser> userManager) =>
             {
                 var users = await userManager.Users.ToListAsync();
-
                 if (!users.Any())
                 {
                     return Results.NotFound();
@@ -92,7 +102,6 @@ public static class UsersEndpoints
         .WithDescription("Returns a user by id")
         .Produces<UserDTO>()
         .Produces<NotFound>(StatusCodes.Status404NotFound);
-
         //TODO Add auth so user can only change their own password unless they're an admin
         group.MapPut("/{id}/change-password", async (string id, UpdateUserPasswordDTO updatePasswordDTO, UserManager<GirafUser> userManager) =>
         {
@@ -106,7 +115,6 @@ public static class UsersEndpoints
         .Accepts<UpdateUserPasswordDTO>("application/json")
         .Produces(StatusCodes.Status200OK)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
-
         //TODO Add auth so a user can only change their own username unless they're an admin
         group.MapPut("/{id}/change-username", async (string id, UpdateUsernameDTO updateUsernameDTO, UserManager<GirafUser> userManager) =>
         {
@@ -120,7 +128,6 @@ public static class UsersEndpoints
         .Accepts<UpdateUsernameDTO>("application/json")
         .Produces(StatusCodes.Status200OK)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
-
         group.MapDelete("/{id}", async (string id, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
@@ -132,7 +139,6 @@ public static class UsersEndpoints
         .WithDescription("Deletes a user by their ID. Requires administrative privileges.")
         .Produces(StatusCodes.Status204NoContent)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
-
     return group;
     }
 }
