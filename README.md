@@ -22,3 +22,15 @@ If you make changes to entities or DTOs, make sure to update the database:
    ```bash
    dotnet ef database update
    ```
+   
+## Running in a Container
+
+### Development Environment
+```
+docker compose up
+```
+
+### Production Environment
+```
+docker compose -f docker-compose.prod.yml up --build
+```

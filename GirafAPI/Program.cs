@@ -29,8 +29,6 @@ app.MapUsersEndpoints();
 app.MapLoginEndpoint();
 app.MapActivityEndpoints();
 
-// Apply migrations, also contains seed data, but not needed
-await app.ApplyMigrationsAsync();
 
 if (app.Environment.IsDevelopment())
 {

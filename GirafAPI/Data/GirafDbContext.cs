@@ -9,8 +9,7 @@ namespace GirafAPI.Data
     public class GirafDbContext : IdentityDbContext<GirafUser>
     {
         public GirafDbContext(DbContextOptions<GirafDbContext> options) : base(options)
-        {
-        }
+        {}
 
         public DbSet<Citizen> Citizens => Set<Citizen>();
         public DbSet<Activity> Activities => Set<Activity>();
