@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GirafAPI", "GirafAPI\GirafA
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Giraf.UnitTests", "Giraf.UnitTests\Giraf.UnitTests.csproj", "{AB334249-7D9F-4A57-970B-506D8C91D3C3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Giraf.IntegrationTests", "Giraf.IntegrationTests\Giraf.IntegrationTests.csproj", "{63C19915-0F63-49F0-A703-C2226A88DDBD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,5 +21,9 @@ Global
 		{AB334249-7D9F-4A57-970B-506D8C91D3C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AB334249-7D9F-4A57-970B-506D8C91D3C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AB334249-7D9F-4A57-970B-506D8C91D3C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63C19915-0F63-49F0-A703-C2226A88DDBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63C19915-0F63-49F0-A703-C2226A88DDBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63C19915-0F63-49F0-A703-C2226A88DDBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63C19915-0F63-49F0-A703-C2226A88DDBD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
