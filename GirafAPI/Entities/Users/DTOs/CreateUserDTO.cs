@@ -18,4 +18,5 @@ public record CreateUserDTO
     
     [StringLength(50)]
     public required string LastName { get; set; }
+    
 }
