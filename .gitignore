@@ -5,3 +5,7 @@
 /GirafAPI/GirafDb.db-wal
 /Giraf.UnitTests/obj/
 /Giraf.UnitTests/bin/
+/Giraf.IntegrationTests/obj/
+/Giraf.IntegrationTests/bin/
+/Giraf.IntegrationTests/obj/
+/Giraf.IntegrationTests/bin/
