@@ -16,12 +16,13 @@ namespace GirafAPI.Extensions
         {
             if (env.IsDevelopment())
             {
-                var connString = configuration.GetConnectionString("GirafDb");
-                services.AddDbContext<GirafDbContext>(options => options.UseSqlite(connString));
+                services.AddDbContext<GirafDbContext>(options => options.UseSqlite(configuration.GetConnectionString("DevelopmentConnection")));
+
             }
             else
             {
-                // Configure production database here
+                services.AddDbContext<GirafDbContext>(options =>
+                    options.UseSqlServer(configuration.GetConnectionString("ProductionConnection")));
             }
 
             return services;
