@@ -29,6 +29,7 @@ If you make changes to entities or DTOs, make sure to update the database:
 ```
 docker compose up
 ```
+(If the api does not seem to be working, try changing the port in docker-compose.yml to 5171:5171 rather than 5171:8080)
 
 ### Production Environment
 ```
