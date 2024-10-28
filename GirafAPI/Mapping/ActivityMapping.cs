@@ -14,7 +14,8 @@ public static class ActivityMapping
             Name = activityDto.Name,
             Description = activityDto.Description,
             StartTime = TimeOnly.Parse(activityDto.StartTime),
-            EndTime = TimeOnly.Parse(activityDto.EndTime)
+            EndTime = TimeOnly.Parse(activityDto.EndTime),
+            IsCompleted = false
         };
     }
     
@@ -28,7 +29,8 @@ public static class ActivityMapping
             Name = activityDto.Name,
             Description = activityDto.Description,
             StartTime = TimeOnly.Parse(activityDto.StartTime),
-            EndTime = TimeOnly.Parse(activityDto.EndTime)
+            EndTime = TimeOnly.Parse(activityDto.EndTime),
+            IsCompleted = activityDto.IsCompleted
         };
     }
 
@@ -37,11 +39,12 @@ public static class ActivityMapping
         return new ActivityDTO(
             activity.Id,
             activity.CitizenId,
-            activity.Date.ToString(),
+            activity.Date.ToString("yyyy-MM-dd"),
             activity.Name,
             activity.Description,
             activity.StartTime.ToString("HH:mm"),
-            activity.EndTime.ToString("HH:mm")
+            activity.EndTime.ToString("HH:mm"),
+            activity.IsCompleted
         );
     }
 }

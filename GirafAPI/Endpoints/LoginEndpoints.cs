@@ -1,5 +1,5 @@
 using GirafAPI.Configuration;
-using GirafAPI.Entities.Users.DTOs;
+using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using GirafAPI.Entities.Users.DTOs;
 
 namespace GirafAPI.Endpoints
 {
@@ -50,7 +51,13 @@ namespace GirafAPI.Endpoints
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
                 return Results.Ok(new { Token = tokenString });
-            });
+            })
+            .WithName("UserLogin")
+            .WithTags("Authentication")
+            .WithDescription("Authenticates a user and returns a JWT token.")
+            .Accepts<LoginDTO>("application/json")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest);
         }
     }
 }
