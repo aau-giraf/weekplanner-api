@@ -16,17 +16,19 @@ namespace GirafAPI.UnitTests.Entities.Users
         }
 
         [Fact]
-        public void UserName_IsRequired()
+        public void Email_IsRequired()
         {
             // Arrange
-            var createUserDTO = new CreateUserDTO
+            var newUser = new CreateUserDTO
             {
-                UserName = null, // Missing the required value
+                FirstName = "User",
+                LastName = "Userson",
+                Email = null, // Missing the required value
                 Password = "validpassword"
             };            
 
             // Act
-            var validationResults = ValidateModel(createUserDTO);
+            var validationResults = ValidateModel(newUser);
 
             // Log
             foreach (var result in validationResults)
@@ -35,22 +37,24 @@ namespace GirafAPI.UnitTests.Entities.Users
             }
 
             // Assert
-            Assert.Contains(validationResults, v => v.MemberNames.Contains(nameof(CreateUserDTO.UserName)));
-            Assert.Equal("The UserName field is required.", validationResults[0].ErrorMessage);
+            Assert.Contains(validationResults, v => v.MemberNames.Contains(nameof(CreateUserDTO.Email)));
+            Assert.Equal("The Email field is required.", validationResults[0].ErrorMessage);
         }
 
         [Fact]
         public void Password_IsRequired()
         {
             // Arrange
-            var createUserDTO = new CreateUserDTO
+            var newUser = new CreateUserDTO
             {
-                UserName = "ValidUsername", 
+                FirstName = "User",
+                LastName = "Userson",
+                Email = "ValidEmail@email.com", 
                 Password = null // Missing the required value
             };            
 
             // Act
-            var validationResults = ValidateModel(createUserDTO);
+            var validationResults = ValidateModel(newUser);
 
             // Log
             foreach (var result in validationResults)
@@ -64,12 +68,14 @@ namespace GirafAPI.UnitTests.Entities.Users
         }
 
         [Fact]
-        public void UserName_CannotExceedMaxLength()
+        public void Email_CannotExceedMaxLength()
         {
             // Arrange
             var createUserDTO = new CreateUserDTO
             {
-                UserName = new string('a', 51), // Exceeds max length
+                FirstName = "User",
+                LastName = "Userson",
+                Email = new string('a', 51), // Exceeds max length
                 Password = "validpassword"
             };
 
@@ -83,8 +89,8 @@ namespace GirafAPI.UnitTests.Entities.Users
             }
 
             // Assert
-            Assert.Contains(validationResults, v => v.MemberNames.Contains(nameof(CreateUserDTO.UserName)));
-            Assert.Equal("The field UserName must be a string with a maximum length of 50.", validationResults[0].ErrorMessage);
+            Assert.Contains(validationResults, v => v.MemberNames.Contains(nameof(CreateUserDTO.Email)));
+            Assert.Equal("The field Email must be a string with a maximum length of 50.", validationResults[0].ErrorMessage);
         }
 
         [Fact]
@@ -93,7 +99,9 @@ namespace GirafAPI.UnitTests.Entities.Users
             // Arrange
             var createUserDTO = new CreateUserDTO
             {
-                UserName = "validusername",
+                FirstName = "User",
+                LastName = "Userson",
+                Email = "validusername",
                 Password = new string('a', 101) // Exceeds max length
             };
 
@@ -117,7 +125,9 @@ namespace GirafAPI.UnitTests.Entities.Users
             // Arrange
             var createUserDTO = new CreateUserDTO
             {
-                UserName = "validusername",
+                FirstName = "User",
+                LastName = "Userson",
+                Email = "validusername",
                 Password = "validpassword"
             };
 
