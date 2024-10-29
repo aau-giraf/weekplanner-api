@@ -12,6 +12,7 @@ COPY GirafAPI/GirafDb.db ./GirafDb.db
 COPY weekplanner-api.sln ./
 COPY GirafAPI/*.csproj ./GirafAPI/
 COPY Giraf.UnitTests/*.csproj ./Giraf.UnitTests/
+COPY Giraf.IntegrationTests/*.csproj ./Giraf.IntegrationTests/
 RUN dotnet restore weekplanner-api.sln
 
 # Copy the rest of the application code
