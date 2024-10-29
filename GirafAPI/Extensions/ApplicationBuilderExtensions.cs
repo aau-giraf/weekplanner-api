@@ -11,34 +11,13 @@ namespace GirafAPI.Extensions
         {
             using var scope = app.ApplicationServices.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
-            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-            // Create roles
-            var roles = new[] { "Administrator", "Trustee" };
-            foreach (var role in roles)
+            // Create a user
+            var user = await userManager.FindByNameAsync("user");
+            if (user == null)
             {
-                if (!await roleManager.RoleExistsAsync(role))
-                {
-                    await roleManager.CreateAsync(new IdentityRole(role));
-                }
-            }
-
-            // Create an admin user
-            var adminUser = await userManager.FindByNameAsync("admin");
-            if (adminUser == null)
-            {
-                adminUser = new GirafUser { UserName = "admin", FirstName = "Admin", LastName = "Adminson" };
-                await userManager.CreateAsync(adminUser, "AdminPassword123!");
-                await userManager.AddToRoleAsync(adminUser, "Administrator");
-            }
-
-            // Create a trustee user
-            var trusteeUser = await userManager.FindByNameAsync("trustee");
-            if (trusteeUser == null)
-            {
-                trusteeUser = new GirafUser { UserName = "trustee", FirstName = "Trustee", LastName = "Trusteeson" };
-                await userManager.CreateAsync(trusteeUser, "TrusteePassword123!");
-                await userManager.AddToRoleAsync(trusteeUser, "Trustee");
+                user = new GirafUser { UserName = "user", Email = "user@user.com", FirstName = "User", LastName = "Userson" };
+                await userManager.CreateAsync(user, "TrusteePassword123!");
             }
         }
 

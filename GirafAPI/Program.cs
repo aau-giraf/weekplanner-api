@@ -1,3 +1,4 @@
+using GirafAPI.Data;
 using GirafAPI.Endpoints;
 using GirafAPI.Extensions;
 
@@ -17,7 +18,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.SeedDataAsync();
 }
 
 app.UseAuthentication();
@@ -29,6 +29,8 @@ app.MapUsersEndpoints();
 app.MapLoginEndpoint();
 app.MapActivityEndpoints();
 
+await app.ApplyMigrationsAsync();
+await app.SeedDataAsync();
 
 if (app.Environment.IsDevelopment())
 {

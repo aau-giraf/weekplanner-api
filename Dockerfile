@@ -6,12 +6,12 @@ WORKDIR /src
 ARG ENVIRONMENT=Development
 ENV ASPNETCORE_ENVIRONMENT=${ENVIRONMENT}
 
-# Copy the db file
-COPY GirafAPI/GirafDb.db ./GirafDb.db
 # Copy the .csproj file and restore any dependencies
 COPY weekplanner-api.sln ./
 COPY GirafAPI/*.csproj ./GirafAPI/
+COPY GirafAPI/Data/Migrations/*.cs ./GirafAPI/Data/Migrations/
 COPY Giraf.UnitTests/*.csproj ./Giraf.UnitTests/
+COPY Giraf.IntegrationTests/*.csproj ./Giraf.IntegrationTests/
 RUN dotnet restore weekplanner-api.sln
 
 # Copy the rest of the application code

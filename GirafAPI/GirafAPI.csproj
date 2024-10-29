@@ -19,13 +19,17 @@
         <PackageReference Include="MinimalApis.Extensions" Version="0.11.0" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Data\Migrations\" />
-    </ItemGroup>
     
     <ItemGroup>
         <InternalsVisibleTo Include="Giraf.IntegrationTests" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Compile Remove="Migrations\GirafDbContextModelSnapshot.cs" />
     </ItemGroup>
 
 </Project>
