@@ -11,7 +11,7 @@ public static class PictogramEndpoints
     {
         var group = app.MapGroup("pictograms");
 
-        group.MapPost("/{orgId}:int", async (int orgId, [FromForm] CreatePictogramDTO dto) =>
+        group.MapPost("/{orgId:int}", async (int orgId, [FromForm] CreatePictogramDTO dto) =>
             {
                 if (dto.Image is null || dto.Image.Length == 0)
                 {
