@@ -28,6 +28,7 @@ app.MapCitizensEndpoints();
 app.MapUsersEndpoints();
 app.MapLoginEndpoint();
 app.MapActivityEndpoints();
+app.MapOrganizationEndpoints();
 
 
 if (app.Environment.IsDevelopment())
