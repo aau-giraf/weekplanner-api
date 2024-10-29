@@ -6,6 +6,10 @@ WORKDIR /src
 ARG ENVIRONMENT=Development
 ENV ASPNETCORE_ENVIRONMENT=${ENVIRONMENT}
 
+
+# Create GirafDb.db if running for the first time
+RUN [ -f GirafAPI/GirafDb.db ] || touch GirafAPI/GirafDb.db
+
 # Copy the db file
 COPY GirafAPI/GirafDb.db ./GirafDb.db
 # Copy the .csproj file and restore any dependencies
