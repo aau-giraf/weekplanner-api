@@ -1,3 +1,4 @@
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Weekplans;
 using Microsoft.EntityFrameworkCore;
@@ -13,5 +14,6 @@ namespace GirafAPI.Data
 
         public DbSet<Citizen> Citizens => Set<Citizen>();
         public DbSet<Activity> Activities => Set<Activity>();
+        public DbSet<Organization> Organizations => Set<Organization>();
     }
 }

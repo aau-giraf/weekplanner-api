@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Weekplans;
 using GirafAPI.Entities.Users;
 
@@ -12,6 +13,8 @@ public class Citizen
     public required string FirstName { get; set; }
     
     public required string LastName { get; set; }
+    
+    public ICollection<Organization>? Organizations { get; set; }
     
     public ICollection<Activity>? Activities { get; set; }
 }

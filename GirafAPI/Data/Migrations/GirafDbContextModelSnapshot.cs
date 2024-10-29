@@ -17,6 +17,37 @@ namespace GirafAPI.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
+            modelBuilder.Entity("CitizenOrganization", b =>
+                {
+                    b.Property<int>("CitizensId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrganizationsId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CitizensId", "OrganizationsId");
+
+                    b.HasIndex("OrganizationsId");
+
+                    b.ToTable("CitizenOrganization");
+                });
+
+            modelBuilder.Entity("GirafAPI.Entities.Organizations.Organization", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Organizations");
+                });
+
             modelBuilder.Entity("GirafAPI.Entities.Resources.Citizen", b =>
                 {
                     b.Property<int>("Id")
@@ -54,6 +85,16 @@ namespace GirafAPI.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
@@ -134,6 +175,21 @@ namespace GirafAPI.Data.Migrations
                     b.HasIndex("CitizenId");
 
                     b.ToTable("Activities");
+                });
+
+            modelBuilder.Entity("GirafUserOrganization", b =>
+                {
+                    b.Property<int>("OrganizationsId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UsersId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("OrganizationsId", "UsersId");
+
+                    b.HasIndex("UsersId");
+
+                    b.ToTable("GirafUserOrganization");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -264,11 +320,41 @@ namespace GirafAPI.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("CitizenOrganization", b =>
+                {
+                    b.HasOne("GirafAPI.Entities.Resources.Citizen", null)
+                        .WithMany()
+                        .HasForeignKey("CitizensId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GirafAPI.Entities.Organizations.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("GirafAPI.Entities.Weekplans.Activity", b =>
                 {
                     b.HasOne("GirafAPI.Entities.Resources.Citizen", null)
                         .WithMany("Activities")
                         .HasForeignKey("CitizenId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("GirafUserOrganization", b =>
+                {
+                    b.HasOne("GirafAPI.Entities.Organizations.Organization", null)
+                        .WithMany()
+                        .HasForeignKey("OrganizationsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GirafAPI.Entities.Users.GirafUser", null)
+                        .WithMany()
+                        .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
