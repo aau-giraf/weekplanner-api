@@ -49,7 +49,7 @@ public static class OrganizationMapping
             );
     }
 
-    public static OrganizationThumbnailDTO ToThumbnailDTO(this Organization organization)
+    public static OrganizationThumbnailDTO ToNameOnlyDTO(this Organization organization)
     {
         return new OrganizationThumbnailDTO(
             organization.Id,
