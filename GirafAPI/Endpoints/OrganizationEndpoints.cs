@@ -181,10 +181,7 @@ public static class OrganizationEndpoints
                     }
 
                     organization.Users.Remove(user);
-                    if (organization.Admins.Contains(user))
-                    {
-                        organization.Admins.Remove(user);
-                    }
+
                     await dbContext.SaveChangesAsync();
 
                     return Results.Ok(organization.ToDTO());
@@ -196,56 +193,6 @@ public static class OrganizationEndpoints
             })
             .WithName("RemoveUser")
             .WithDescription("Removes user from organization.")
-            .WithTags("Organizations")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest)
-            .Produces(StatusCodes.Status500InternalServerError);
-        
-        group.MapPut("/{id}/permissions/{userId}",
-            async (int id, string userId, bool makeAdmin,UserManager<GirafUser> userManager, GirafDbContext dbContext) =>
-            {
-                try
-                {
-                    var user = await userManager.FindByIdAsync(userId);
-                    if (user is null)
-                    {
-                        return Results.BadRequest("Invalid user id.");
-                    }
-
-                    var organization = await dbContext.Organizations.FindAsync(id);
-                    if (organization is null)
-                    {
-                        return Results.BadRequest("Invalid organization id.");
-                    }
-
-                    if (makeAdmin)
-                    {
-                        if (organization.Admins.Contains(user))
-                        {
-                            return Results.BadRequest("User is already an admin.");
-                        }
-
-                        organization.Admins.Add(user);
-                    }
-                    else
-                    {
-                        if (!organization.Admins.Contains(user))
-                        {
-                            return Results.BadRequest("User is not an admin.");
-                        }
-
-                        organization.Admins.Remove(user);
-                    }
-
-                    return Results.Ok(organization.ToDTO());
-                }
-                catch (Exception ex)
-                {
-                    return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-                }
-            })
-            .WithName("ManagePermissions")
-            .WithDescription("Manage organization permissions.")
             .WithTags("Organizations")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)

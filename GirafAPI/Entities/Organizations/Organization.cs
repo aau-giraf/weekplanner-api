@@ -11,9 +11,7 @@ public class Organization
     
     [StringLength(100)] public required string Name { get; set; }
     
-    [NotMapped] public required ICollection<GirafUser> Admins { get; set; }
-    
     public required ICollection<GirafUser> Users { get; set; }
     
-    public ICollection<Citizen>? Citizens { get; set; }
+    public ICollection<Citizen>? Citizens { get; }
 }

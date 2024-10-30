@@ -13,11 +13,9 @@ public static class OrganizationMapping
         var organization = new Organization
         {
             Name = newOrganization.Name,
-            Admins = new List<GirafUser>(),
             Users = new List<GirafUser>()
         };
         
-        organization.Admins.Add(user);
         organization.Users.Add(user);
         
         return organization;
