@@ -29,6 +29,8 @@ If you make changes to entities or DTOs, make sure to update the database:
 ```
 docker compose up
 ```
+If a file is created or removed, use `docker compose up --build` to add the new files to the hot-reload tracking the next time the container starts
+
 (If you are running the api on Linux and it does not seem to be working, try changing the port in docker-compose.yml to 5171:8080 instead of 5171:5171)
 
 ### Production Environment
