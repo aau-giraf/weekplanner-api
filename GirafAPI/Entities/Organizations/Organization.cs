@@ -13,5 +13,5 @@ public class Organization
     
     public required ICollection<GirafUser> Users { get; set; }
     
-    public ICollection<Citizen>? Citizens { get; }
+    public required ICollection<Citizen> Citizens { get; set; }
 }

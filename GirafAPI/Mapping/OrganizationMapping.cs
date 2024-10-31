@@ -1,6 +1,7 @@
 using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Organizations.DTOs;
+using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Resources.DTOs;
 using GirafAPI.Entities.Users;
 
@@ -13,7 +14,8 @@ public static class OrganizationMapping
         var organization = new Organization
         {
             Name = newOrganization.Name,
-            Users = new List<GirafUser>()
+            Users = new List<GirafUser>(),
+            Citizens = new List<Citizen>()
         };
         
         organization.Users.Add(user);

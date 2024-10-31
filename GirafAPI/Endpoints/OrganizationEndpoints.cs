@@ -24,6 +24,9 @@ public static class OrganizationEndpoints
                 {
                     return Results.BadRequest("Invalid user id.");
                 }
+                
+                dbContext.Entry(user)
+                    .Collection(u => u.Organizations).Load();
 
                 if (user.Organizations is null)
                 {
@@ -67,6 +70,11 @@ public static class OrganizationEndpoints
                 {
                     return Results.NotFound();
                 }
+                
+                dbContext.Entry(organization)
+                    .Collection(o => o.Users).Load();
+                dbContext.Entry(organization)
+                    .Collection(o => o.Citizens).Load();
 
                 return Results.Ok(organization.ToDTO());
             }
@@ -123,7 +131,7 @@ public static class OrganizationEndpoints
                 organization.Name = newName;
                 await dbContext.SaveChangesAsync();
 
-                return Results.Ok(organization.ToDTO());
+                return Results.Ok(organization.ToNameOnlyDTO());
             }
             catch (Exception ex)
             {
@@ -179,6 +187,11 @@ public static class OrganizationEndpoints
                     {
                         return Results.BadRequest("Invalid organization id.");
                     }
+                    
+                    dbContext.Entry(organization)
+                        .Collection(o => o.Users).Load();
+                    dbContext.Entry(organization)
+                        .Collection(o => o.Citizens).Load();
 
                     organization.Users.Remove(user);
 
@@ -196,6 +209,86 @@ public static class OrganizationEndpoints
             .WithTags("Organizations")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError);
+        
+        group.MapPut("/{id}/add-citizen/{citizenId}",
+                async (int id, int citizenId, GirafDbContext dbContext) =>
+                {
+                    try
+                    {
+                        var citizen = await dbContext.Citizens.FindAsync(citizenId);
+                        if (citizen is null)
+                        {
+                            return Results.NotFound();
+                        }
+
+                        var organization = await dbContext.Organizations.FindAsync(id);
+                        if (organization is null)
+                        {
+                            return Results.NotFound();
+                        }
+                    
+                        dbContext.Entry(organization)
+                            .Collection(o => o.Users).Load();
+                        dbContext.Entry(organization)
+                            .Collection(o => o.Citizens).Load();
+
+                        organization.Citizens.Add(citizen);
+
+                        await dbContext.SaveChangesAsync();
+
+                        return Results.Ok(organization.ToDTO());
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                    }
+                })
+            .WithName("AddCitizen")
+            .WithDescription("Add citizen to organization.")
+            .WithTags("Organizations")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
+        
+        group.MapPut("/{id}/remove-citizen/{citizenId}",
+                async (int id, int citizenId, GirafDbContext dbContext) =>
+                {
+                    try
+                    {
+                        var citizen = await dbContext.Citizens.FindAsync(citizenId);
+                        if (citizen is null)
+                        {
+                            return Results.NotFound();
+                        }
+
+                        var organization = await dbContext.Organizations.FindAsync(id);
+                        if (organization is null)
+                        {
+                            return Results.NotFound();
+                        }
+                    
+                        dbContext.Entry(organization)
+                            .Collection(o => o.Users).Load();
+                        dbContext.Entry(organization)
+                            .Collection(o => o.Citizens).Load();
+
+                        organization.Citizens.Remove(citizen);
+
+                        await dbContext.SaveChangesAsync();
+
+                        return Results.Ok(organization.ToDTO());
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                    }
+                })
+            .WithName("RemoveCitizen")
+            .WithDescription("Remove citizen to organization.")
+            .WithTags("Organizations")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
         return group;
