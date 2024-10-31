@@ -1,0 +1,185 @@
+Index: GirafAPI/Data/GirafDbContext.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using GirafAPI.Entities.Resources;\nusing GirafAPI.Entities.Weekplans;\nusing Microsoft.EntityFrameworkCore;\nusing Microsoft.AspNetCore.Identity.EntityFrameworkCore;\nusing GirafAPI.Entities.Users;\n\nnamespace GirafAPI.Data\n{\n    public class GirafDbContext : IdentityDbContext<GirafUser>\n    {\n        public GirafDbContext(DbContextOptions<GirafDbContext> options) : base(options)\n        {}\n\n        public DbSet<Citizen> Citizens => Set<Citizen>();\n        public DbSet<Activity> Activities => Set<Activity>();\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/GirafAPI/Data/GirafDbContext.cs b/GirafAPI/Data/GirafDbContext.cs
+--- a/GirafAPI/Data/GirafDbContext.cs	(revision 1168a95eaf16d1e1ff92747507f94755ebedda3a)
++++ b/GirafAPI/Data/GirafDbContext.cs	(date 1730331680771)
+@@ -13,5 +13,7 @@
+ 
+         public DbSet<Citizen> Citizens => Set<Citizen>();
+         public DbSet<Activity> Activities => Set<Activity>();
++
++        public DbSet<Pictogram> Pictograms => Set<Pictogram>();
+     }
+ }
+\ No newline at end of file
+Index: GirafAPI/Program.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using GirafAPI.Data;\nusing GirafAPI.Endpoints;\nusing GirafAPI.Extensions;\n\nvar builder = WebApplication.CreateBuilder(args);\n\n// Configure services\nbuilder.Services.ConfigureDatabase(builder.Configuration, builder.Environment)\n    .ConfigureIdentity()\n    .ConfigureJwt(builder.Configuration)\n    .ConfigureAuthorizationPolicies()\n    .ConfigureSwagger();\n\nvar app = builder.Build();\n\n// Configure middleware\nif (app.Environment.IsDevelopment())\n{\n    app.UseSwagger();\n    app.UseSwaggerUI();\n}\n\napp.UseAuthentication();\napp.UseAuthorization();\n\n// Map endpoints\napp.MapCitizensEndpoints();\napp.MapUsersEndpoints();\napp.MapLoginEndpoint();\napp.MapActivityEndpoints();\n\nawait app.ApplyMigrationsAsync();\nawait app.SeedDataAsync();\n\nif (app.Environment.IsDevelopment())\n{\n    app.Run(\"http://0.0.0.0:5171\");\n}\nelse\n{\n    app.Run();\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/GirafAPI/Program.cs b/GirafAPI/Program.cs
+--- a/GirafAPI/Program.cs	(revision 1168a95eaf16d1e1ff92747507f94755ebedda3a)
++++ b/GirafAPI/Program.cs	(date 1730329120826)
+@@ -28,6 +28,7 @@
+ app.MapUsersEndpoints();
+ app.MapLoginEndpoint();
+ app.MapActivityEndpoints();
++app.MapPictogramEndpoints();
+ 
+ await app.ApplyMigrationsAsync();
+ await app.SeedDataAsync();
+@@ -39,4 +40,4 @@
+ else
+ {
+     app.Run();
+-}
+\ No newline at end of file
++}
+Index: GirafAPI/Endpoints/PictogramEndpoints.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>using GirafAPI.Entities.Resources;\nusing GirafAPI.Entities.Resources.DTOs;\nusing GirafAPI.Mapping;\nusing Microsoft.AspNetCore.Mvc;\n\nnamespace GirafAPI.Endpoints;\n\npublic static class PictogramEndpoints\n{\n    public static RouteGroupBuilder MapPictogramEndpoints(this WebApplication app)\n    {\n        var group = app.MapGroup(\"pictograms\");\n\n        group.MapPost(\"/{orgId:int}\", async (int orgId, [FromForm] CreatePictogramDTO dto) =>\n            {\n                if (dto.Image is null || dto.Image.Length == 0)\n                {\n                    return Results.BadRequest(\"Image file is required\");\n                }\n\n                if (string.IsNullOrEmpty(dto.PictogramName))\n                {\n                    return Results.BadRequest(\"Pictogram name is required\");\n                }\n\n                Pictogram pictogram = dto.ToEntity();\n                //Create a filepath where the name of the image is a unique id generated when the pictogram becomes an entity\n                var filePath = Path.Combine($\"pictograms/{orgId}\", $\"{pictogram.ImageId}.jpg\");\n                //Ensure the directory exists\n                Directory.CreateDirectory(Path.GetDirectoryName(filePath));\n\n                await using var stream = new FileStream(filePath, FileMode.Create);\n                await dto.Image.CopyToAsync(stream);\n\n                return Results.Ok();\n\n            })\n            .WithName(\"CreatePictogram\")\n            .WithDescription(\"Creates a pictogram\")\n            .WithTags(\"Pictograms\")\n            .Accepts<CreatePictogramDTO>(\"multipart/form-data\")\n            .Produces(StatusCodes.Status200OK)\n            .Produces(StatusCodes.Status400BadRequest);\n        \n        \n        return group;\n    }\n    \n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/GirafAPI/Endpoints/PictogramEndpoints.cs b/GirafAPI/Endpoints/PictogramEndpoints.cs
+--- a/GirafAPI/Endpoints/PictogramEndpoints.cs	(revision 1168a95eaf16d1e1ff92747507f94755ebedda3a)
++++ b/GirafAPI/Endpoints/PictogramEndpoints.cs	(date 1730330281439)
+@@ -11,26 +11,26 @@
+     {
+         var group = app.MapGroup("pictograms");
+ 
+-        group.MapPost("/{orgId:int}", async (int orgId, [FromForm] CreatePictogramDTO dto) =>
++        group.MapPost("/{orgId:int}", async (int orgId, [FromForm] CreatePictogramDTO pictogramDTOtest) =>
+             {
+-                if (dto.Image is null || dto.Image.Length == 0)
++                if (pictogramDTOtest.Image is null || pictogramDTOtest.Image.Length == 0)
+                 {
+                     return Results.BadRequest("Image file is required");
+                 }
+ 
+-                if (string.IsNullOrEmpty(dto.PictogramName))
++                if (string.IsNullOrEmpty(pictogramDTOtest.PictogramName))
+                 {
+                     return Results.BadRequest("Pictogram name is required");
+                 }
+ 
+-                Pictogram pictogram = dto.ToEntity();
++                Pictogram pictogram = pictogramDTOtest.ToEntity();
+                 //Create a filepath where the name of the image is a unique id generated when the pictogram becomes an entity
+                 var filePath = Path.Combine($"pictograms/{orgId}", $"{pictogram.ImageId}.jpg");
+                 //Ensure the directory exists
+                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+ 
+                 await using var stream = new FileStream(filePath, FileMode.Create);
+-                await dto.Image.CopyToAsync(stream);
++                await pictogramDTOtest.Image.CopyToAsync(stream);
+ 
+                 return Results.Ok();
+ 
+@@ -46,4 +46,4 @@
+         return group;
+     }
+     
+-}
+\ No newline at end of file
++}
+Index: Dockerfile
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Stage 1: Build the application\nFROM mcr.microsoft.com/dotnet/sdk:8.0 AS build\nWORKDIR /src\n\n# Set default environment as Development\nARG ENVIRONMENT=Development\nENV ASPNETCORE_ENVIRONMENT=${ENVIRONMENT}\n\n# Copy the .csproj file and restore any dependencies\nCOPY weekplanner-api.sln ./\nCOPY GirafAPI/*.csproj ./GirafAPI/\nCOPY GirafAPI/Data/Migrations/*.cs ./GirafAPI/Data/Migrations/\nCOPY Giraf.UnitTests/*.csproj ./Giraf.UnitTests/\nCOPY Giraf.IntegrationTests/*.csproj ./Giraf.IntegrationTests/\nRUN dotnet restore weekplanner-api.sln\n\n# Copy the rest of the application code\nCOPY . ./\nWORKDIR /src/GirafAPI\n\n# Build the application\nRUN dotnet build -c Release -o /app/build\n\n# Publish the application\nRUN dotnet publish -c Release -o /app/publish --no-restore\n\n# Stage 2: Set up the runtime environment\nFROM mcr.microsoft.com/dotnet/sdk:8.0 AS runtime\nWORKDIR /app\nCOPY --from=build /app/publish .\n\nRUN ls -la /app\n\n# Specify the entrypoint command to run the app\nENTRYPOINT [\"dotnet\", \"GirafAPI.dll\"]
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Dockerfile b/Dockerfile
+--- a/Dockerfile	(revision 1168a95eaf16d1e1ff92747507f94755ebedda3a)
++++ b/Dockerfile	(date 1730331415949)
+@@ -1,6 +1,6 @@
+ # Stage 1: Build the application
+ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+-WORKDIR /src
++WORKDIR /app
+ 
+ # Set default environment as Development
+ ARG ENVIRONMENT=Development
+@@ -14,22 +14,15 @@
+ COPY Giraf.IntegrationTests/*.csproj ./Giraf.IntegrationTests/
+ RUN dotnet restore weekplanner-api.sln
+ 
+-# Copy the rest of the application code
+-COPY . ./
+-WORKDIR /src/GirafAPI
+-
+-# Build the application
+-RUN dotnet build -c Release -o /app/build
+ 
+ # Publish the application
+-RUN dotnet publish -c Release -o /app/publish --no-restore
++RUN dotnet publish GirafAPI/GirafAPI.csproj -c Release -o /app/publish
+ 
+ # Stage 2: Set up the runtime environment
+-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS runtime
++FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+ WORKDIR /app
+ COPY --from=build /app/publish .
+ 
+-RUN ls -la /app
+ 
+-# Specify the entrypoint command to run the app
+-ENTRYPOINT ["dotnet", "GirafAPI.dll"]
+\ No newline at end of file
++# Specify the entrypoint command to run the app - overridden in development by docker-compose
++ENTRYPOINT ["dotnet", "GirafAPI.dll"]
+Index: docker-compose.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>services:\n  aspnet_app:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    environment:\n      - ASPNETCORE_ENVIRONMENT=Development  # Change to Production as needed\n    ports:\n      - \"5171:5171\"  # Change to your preferred port -> host_port:container_port\n    volumes:\n      - .:/app/src\n      - /app/bin\n      - /app/obj\n    command: dotnet watch run\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/docker-compose.yml b/docker-compose.yml
+--- a/docker-compose.yml	(revision 1168a95eaf16d1e1ff92747507f94755ebedda3a)
++++ b/docker-compose.yml	(date 1730330408978)
+@@ -5,10 +5,11 @@
+       dockerfile: Dockerfile
+     environment:
+       - ASPNETCORE_ENVIRONMENT=Development  # Change to Production as needed
++      - ASPNETCORE_URLS=http://+:5171
+     ports:
+       - "5171:5171"  # Change to your preferred port -> host_port:container_port
+     volumes:
+-      - .:/app/src
++      - .:/app
+       - /app/bin
+       - /app/obj
+-    command: dotnet watch run
++    command: ["dotnet", "watch", "run"]
+Index: docker-compose.prod.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>services:\n  aspnet_app:\n    build:\n      context: .\n      dockerfile: Dockerfile\n    environment:\n      ASPNETCORE_ENVIRONMENT: Production\n      ASPNETCORE_URLS: http://+:8080 # In production, map to port 8080\n    ports:\n      - \"5171:8080\" # Serve over default HTTP port\n    depends_on:\n      - mssql\n  mssql:\n    image: mcr.microsoft.com/mssql/server:2022-latest\n    container_name: mssql_db\n    environment:\n      - SA_PASSWORD=YourStrong!Passw0rd\n      - ACCEPT_EULA=Y\n    ports:\n      - \"1433:1433\"\n    volumes:\n      - mssql_data:/var/opt/mssql\nvolumes:\n  mssql_data:\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/docker-compose.prod.yml b/docker-compose.prod.yml
+--- a/docker-compose.prod.yml	(revision 1168a95eaf16d1e1ff92747507f94755ebedda3a)
++++ b/docker-compose.prod.yml	(date 1730329058866)
+@@ -5,9 +5,9 @@
+       dockerfile: Dockerfile
+     environment:
+       ASPNETCORE_ENVIRONMENT: Production
+-      ASPNETCORE_URLS: http://+:8080 # In production, map to port 8080
++      ASPNETCORE_URLS: http://+:5171 # In production, map to port 8080
+     ports:
+-      - "5171:8080" # Serve over default HTTP port
++      - "5171:5171" # Serve over default HTTP port
+     depends_on:
+       - mssql
+   mssql:
