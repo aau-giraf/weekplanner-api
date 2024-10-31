@@ -29,6 +29,7 @@ app.MapUsersEndpoints();
 app.MapLoginEndpoint();
 app.MapActivityEndpoints();
 app.MapOrganizationEndpoints();
+app.MapInvitationEndpoints();
 
 await app.ApplyMigrationsAsync();
 await app.SeedDataAsync();

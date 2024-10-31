@@ -1,3 +1,4 @@
+using GirafAPI.Entities.Invitations;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Weekplans;
@@ -15,5 +16,6 @@ namespace GirafAPI.Data
         public DbSet<Citizen> Citizens => Set<Citizen>();
         public DbSet<Activity> Activities => Set<Activity>();
         public DbSet<Organization> Organizations => Set<Organization>();
+        public DbSet<Invitation> Invitations => Set<Invitation>();
     }
 }

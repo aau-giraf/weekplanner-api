@@ -32,6 +32,28 @@ namespace GirafAPI.Data.Migrations
                     b.ToTable("CitizenOrganization");
                 });
 
+            modelBuilder.Entity("GirafAPI.Entities.Invitations.Invitation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ReceiverId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invitations");
+                });
+
             modelBuilder.Entity("GirafAPI.Entities.Organizations.Organization", b =>
                 {
                     b.Property<int>("Id")
