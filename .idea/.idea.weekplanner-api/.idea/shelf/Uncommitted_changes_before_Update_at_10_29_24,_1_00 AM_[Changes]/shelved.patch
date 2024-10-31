@@ -1,0 +1,31 @@
+Index: GirafAPI/GirafAPI.csproj
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><Project Sdk=\"Microsoft.NET.Sdk.Web\">\n\n    <PropertyGroup>\n        <TargetFramework>net8.0</TargetFramework>\n        <Nullable>enable</Nullable>\n        <ImplicitUsings>enable</ImplicitUsings>\n    </PropertyGroup>\n\n    <ItemGroup>\n        <PackageReference Include=\"Microsoft.AspNetCore.Authentication.JwtBearer\" Version=\"8.0.8\" />\n        <PackageReference Include=\"Microsoft.AspNetCore.Identity.EntityFrameworkCore\" Version=\"8.0.8\" />\n        <PackageReference Include=\"Microsoft.AspNetCore.OpenApi\" Version=\"8.0.8\" />\n        <PackageReference Include=\"Microsoft.EntityFrameworkCore.Design\" Version=\"8.0.8\">\n          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>\n          <PrivateAssets>all</PrivateAssets>\n        </PackageReference>\n        <PackageReference Include=\"Microsoft.EntityFrameworkCore.Sqlite\" Version=\"8.0.8\" />\n        <PackageReference Include=\"MinimalApis.Extensions\" Version=\"0.11.0\" />\n        <PackageReference Include=\"Swashbuckle.AspNetCore\" Version=\"6.4.0\" />\n    </ItemGroup>\n\n    <ItemGroup>\n      <Folder Include=\"Data\\Migrations\\\" />\n    </ItemGroup>\n\n</Project>\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/GirafAPI/GirafAPI.csproj b/GirafAPI/GirafAPI.csproj
+--- a/GirafAPI/GirafAPI.csproj	(revision 17c423159df87514e43c82e20dfc5d9330664a76)
++++ b/GirafAPI/GirafAPI.csproj	(date 1730159868545)
+@@ -23,4 +23,20 @@
+       <Folder Include="Data\Migrations\" />
+     </ItemGroup>
+ 
++    <ItemGroup>
++      <Compile Remove="obj\**" />
++    </ItemGroup>
++
++    <ItemGroup>
++      <EmbeddedResource Remove="obj\**" />
++    </ItemGroup>
++
++    <ItemGroup>
++      <Content Remove="obj\**" />
++    </ItemGroup>
++
++    <ItemGroup>
++      <None Remove="obj\**" />
++    </ItemGroup>
++
+ </Project>

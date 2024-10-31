@@ -1,35 +1,24 @@
 # Stage 1: Build the application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-# Set default environment as Development
+# Set the default environment to Development
 ARG ENVIRONMENT=Development
 ENV ASPNETCORE_ENVIRONMENT=${ENVIRONMENT}
 
-# Copy the .csproj file and restore any dependencies
+# Copy the solution and project files
 COPY weekplanner-api.sln ./
-COPY GirafAPI/*.csproj ./GirafAPI/
-COPY GirafAPI/Data/Migrations/*.cs ./GirafAPI/Data/Migrations/
-COPY Giraf.UnitTests/*.csproj ./Giraf.UnitTests/
-COPY Giraf.IntegrationTests/*.csproj ./Giraf.IntegrationTests/
+COPY GirafAPI/GirafAPI.csproj ./GirafAPI/
+COPY Giraf.UnitTests/Giraf.UnitTests.csproj ./Giraf.UnitTests/
+COPY Giraf.IntegrationTests/Giraf.IntegrationTests.csproj ./Giraf.IntegrationTests/
 RUN dotnet restore weekplanner-api.sln
 
-# Copy the rest of the application code
-COPY . ./
-WORKDIR /src/GirafAPI
+# Copy the entire source code for the projects
+COPY . .
 
-# Build the application
-RUN dotnet build -c Release -o /app/build
+# Expose the port for the app
+EXPOSE 5171
 
-# Publish the application
-RUN dotnet publish -c Release -o /app/publish --no-restore
+# Set the entry point for development
+ENTRYPOINT ["sh", "-c", "if [ \"$ASPNETCORE_ENVIRONMENT\" = 'Development' ]; then dotnet watch run --project GirafAPI/GirafAPI.csproj --urls http://+:5171; else dotnet GirafAPI.dll; fi"]
 
-# Stage 2: Set up the runtime environment
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS runtime
-WORKDIR /app
-COPY --from=build /app/publish .
-
-RUN ls -la /app
-
-# Specify the entrypoint command to run the app
-ENTRYPOINT ["dotnet", "GirafAPI.dll"]
