@@ -19,5 +19,6 @@ namespace GirafAPI.Data
         public DbSet<Organization> Organizations => Set<Organization>();
         public DbSet<Invitation> Invitations => Set<Invitation>();
         public DbSet<Grade> Grades { get; set; }
+        public DbSet<Pictogram> Pictograms => Set<Pictogram>();
     }
 }
