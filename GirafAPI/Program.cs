@@ -11,6 +11,11 @@ builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment)
     .ConfigureAuthorizationPolicies()
     .ConfigureSwagger();
 
+builder.Services.AddAntiforgery(options =>
+    {
+      options.Cookie.Expiration = TimeSpan.Zero;
+    });
+
 var app = builder.Build();
 
 // Configure middleware
@@ -23,6 +28,8 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseAntiforgery();
+
 // Map endpoints
 app.MapCitizensEndpoints();
 app.MapUsersEndpoints();
@@ -31,6 +38,7 @@ app.MapActivityEndpoints();
 app.MapOrganizationEndpoints();
 app.MapInvitationEndpoints();
 app.MapGradeEndpoints();
+app.MapPictogramEndpoints();
 
 await app.ApplyMigrationsAsync();
 await app.SeedDataAsync();
@@ -43,3 +51,4 @@ else
 {
     app.Run();
 }
+
