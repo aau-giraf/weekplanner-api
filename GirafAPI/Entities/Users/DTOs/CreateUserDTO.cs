@@ -13,7 +13,7 @@ public record CreateUserDTO
     [StringLength(100)]
     public required string Password { get; set; }
     
-    [StringLength(50)]
+    [StringLength(20)]
     public required string FirstName { get; set; }
     
     [StringLength(50)]

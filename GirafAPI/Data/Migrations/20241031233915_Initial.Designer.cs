@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GirafAPI.Data.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    [Migration("20241029155051_Initial")]
+    [Migration("20241031233915_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -33,6 +33,28 @@ namespace GirafAPI.Data.Migrations
                     b.HasIndex("OrganizationsId");
 
                     b.ToTable("CitizenOrganization");
+                });
+
+            modelBuilder.Entity("GirafAPI.Entities.Invitations.Invitation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ReceiverId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invitations");
                 });
 
             modelBuilder.Entity("GirafAPI.Entities.Organizations.Organization", b =>

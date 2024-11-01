@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -64,6 +64,21 @@ namespace GirafAPI.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Citizens", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Invitations",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OrganizationId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ReceiverId = table.Column<string>(type: "TEXT", nullable: false),
+                    SenderId = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Invitations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -337,6 +352,9 @@ namespace GirafAPI.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "GirafUserOrganization");
+
+            migrationBuilder.DropTable(
+                name: "Invitations");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
