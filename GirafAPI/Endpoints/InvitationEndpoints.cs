@@ -33,6 +33,29 @@ public static class InvitationEndpoints
             .WithTags("Invitation")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
+
+        group.MapGet("/user/{userId}", async (string userId, GirafDbContext dbContext) =>
+        {
+            try
+            {
+                var invitations = await dbContext.Invitations
+                    .Where(i => i.ReceiverId == userId)
+                    .ToListAsync();
+
+                return invitations.Count == 0 ? Results.NotFound() : Results.Ok(invitations);
+            }
+            catch (Exception e)
+            {
+                return Results.Problem(e.Message, statusCode: StatusCodes.Status500InternalServerError);
+            }
+        })
+        .WithName("GetInvitationsByUserId")
+        .WithDescription("Get all invitations for user.")
+        .WithTags("Invitation")
+        .Produces(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status403Forbidden)
+        .Produces(StatusCodes.Status500InternalServerError);
+        
         
         group.MapGet("/org/{id}", async (int id, GirafDbContext dbContext) =>
             {
