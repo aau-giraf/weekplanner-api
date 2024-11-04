@@ -1,8 +1,10 @@
 using GirafAPI.Data;
-using GirafAPI.Entities.Resources;
-using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Pictograms;
+using GirafAPI.Entities.Pictograms.DTOs;
 using GirafAPI.Mapping;
+using GirafAPI.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GirafAPI.Endpoints;
 
@@ -12,7 +14,7 @@ public static class PictogramEndpoints
     {
         var group = app.MapGroup("pictograms").AllowAnonymous();
 
-        group.MapPost("/{orgId:int}", async (int orgId, [FromForm] CreatePictogramDTO pictogramDTO) =>
+        group.MapPost("/", async ([FromForm] CreatePictogramDTO pictogramDTO) =>
             {
                 if (pictogramDTO.Image is null || pictogramDTO.Image.Length == 0)
                 {
@@ -26,7 +28,7 @@ public static class PictogramEndpoints
 
                 Pictogram pictogram = pictogramDTO.ToEntity();
                 //Create a filepath where the name of the image is a unique id generated when the pictogram becomes an entity
-                var filePath = Path.Combine($"pictograms/{orgId}", $"{pictogram.ImageId}.jpg");
+                var filePath = Path.Combine("pictograms", pictogram.OrganizationId.ToString(), $"{pictogram.ImageId}.jpg");
                 //Ensure the directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
@@ -62,6 +64,37 @@ public static class PictogramEndpoints
             .WithTags("Pictograms")
             .Produces<PictogramDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
+
+        group.MapGet("/organizationId:int", async (int organizationId, GirafDbContext dbContext) =>
+            {
+              try
+              {
+                var pictogramsData = await dbContext.Pictograms
+                    .Where(p => p.OrganizationId == organizationId)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                //Converts the pictogram entities to DTOs and adds the image to the DTO
+                var pictograms = pictogramsData.Select(p =>
+                {
+                  var filepath = Path.Combine("pictograms", p.OrganizationId.ToString(), $"{p.ImageId}.jpg");
+                  IFormFile image = FileUtils.CreateFormFile(filepath);
+                  return p.ToDTO(image);
+                }).ToList();
+
+                return Results.Ok(pictograms);
+              }
+              catch (Exception)
+              {
+                return Results.Problem("An error occurred while retrieving pictograms.", statusCode: StatusCodes.Status500InternalServerError);
+              }
+            })
+            .WithName("GetPictogramsByOrgId")
+            .WithDescription("Gets all the pictograms belonging to the specified organization.")
+            .WithTags("Pictograms")
+            .Produces<List<PictogramDTO>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
 

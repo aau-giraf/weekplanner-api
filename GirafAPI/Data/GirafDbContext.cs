@@ -1,5 +1,6 @@
 using GirafAPI.Entities.Invitations;
 using GirafAPI.Entities.Organizations;
+using GirafAPI.Entities.Pictograms;
 using GirafAPI.Entities.Resources;
 using GirafAPI.Entities.Weekplans;
 using Microsoft.EntityFrameworkCore;
