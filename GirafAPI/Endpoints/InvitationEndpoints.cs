@@ -52,8 +52,8 @@ public static class InvitationEndpoints
         .WithName("GetInvitationsByUserId")
         .WithDescription("Get all invitations for user.")
         .WithTags("Invitation")
-        .Produces(StatusCodes.Status201Created)
-        .Produces(StatusCodes.Status403Forbidden)
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
         
