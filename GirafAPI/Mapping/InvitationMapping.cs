@@ -14,4 +14,14 @@ public static class InvitationMapping
             SenderId = newInvitation.SenderId
         };
     }
+
+    public static InvitationDTO ToDTO(this Invitation invitation, string organizationName, string senderName)
+    {
+        return new InvitationDTO(
+            invitation.Id,
+            invitation.OrganizationId,
+            organizationName,
+            senderName
+            );
+    }
 }
