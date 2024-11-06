@@ -1,4 +1,6 @@
 using GirafAPI.Entities.DTOs;
+using GirafAPI.Entities.Grades;
+using GirafAPI.Entities.Grades.DTOs;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Organizations.DTOs;
 using GirafAPI.Entities.Resources;
@@ -15,7 +17,8 @@ public static class OrganizationMapping
         {
             Name = newOrganization.Name,
             Users = new List<GirafUser>(),
-            Citizens = new List<Citizen>()
+            Citizens = new List<Citizen>(),
+            Grades = new List<Grade>()
         };
         
         organization.Users.Add(user);
@@ -41,11 +44,21 @@ public static class OrganizationMapping
             }
         }
         
+        var grades = new List<GradeDTO>();
+        if (organization.Grades is not null)
+        {
+            foreach (var grade in organization.Grades)
+            {
+                grades.Add(grade.ToDTO());
+            }
+        }
+        
         return new OrganizationDTO(
             organization.Id,
             organization.Name,
             users,
-            citizens
+            citizens,
+            grades
             );
     }
 
