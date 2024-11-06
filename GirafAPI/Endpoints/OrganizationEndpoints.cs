@@ -208,7 +208,7 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        group.MapPost("/{id}/add-citizen/{name}",
+        group.MapPost("/{id}/add-citizen",
                 async (int id, CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
                 {
                     try
