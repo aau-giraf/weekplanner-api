@@ -5,12 +5,12 @@ namespace GirafAPI.Mapping;
 
 public static class InvitationMapping
 {
-    public static Invitation ToEntity(this CreateInvitationDTO newInvitation)
+    public static Invitation ToEntity(this CreateInvitationDTO newInvitation, string receiverId)
     {
         return new Invitation
         {
             OrganizationId = newInvitation.OrganizationId,
-            ReceiverId = newInvitation.ReceiverId,
+            ReceiverId = receiverId,
             SenderId = newInvitation.SenderId
         };
     }

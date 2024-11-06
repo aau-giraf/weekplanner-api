@@ -88,15 +88,10 @@ public static class InvitationEndpoints
                     return Results.BadRequest("Receiver email not found.");
                 }
 
-                Invitation invitation = new Invitation
-                {
-                    OrganizationId = newInvitation.OrganizationId,
-                    ReceiverId = receiver.Id, 
-                    SenderId = newInvitation.SenderId
-                };
-
+                var invitation = newInvitation.ToEntity(receiver.Id);
                 dbContext.Invitations.Add(invitation);
                 await dbContext.SaveChangesAsync();
+                
                 return Results.Created($"/invitations/{invitation.Id}", invitation);
             }
             catch (Exception ex)
