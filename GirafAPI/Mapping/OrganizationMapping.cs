@@ -49,9 +49,9 @@ public static class OrganizationMapping
             );
     }
 
-    public static OrganizationThumbnailDTO ToNameOnlyDTO(this Organization organization)
+    public static OrganizationNameOnlyDTO ToNameOnlyDTO(this Organization organization)
     {
-        return new OrganizationThumbnailDTO(
+        return new OrganizationNameOnlyDTO(
             organization.Id,
             organization.Name
             );

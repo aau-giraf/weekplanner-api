@@ -35,17 +35,11 @@ public static class OrganizationEndpoints
                         return Results.NotFound();
                     }
 
-                    var organizationIds = new List<int>();
+                    var organizations = new List<OrganizationNameOnlyDTO>();
                     foreach (var organization in user.Organizations)
                     {
-                        organizationIds.Add(organization.Id);
+                        organizations.Add(organization.ToNameOnlyDTO());
                     }
-
-                    var organizations = await dbContext.Organizations
-                        .Where(organization => organizationIds.Contains(organization.Id))
-                        .Select(org => org.ToNameOnlyDTO())
-                        .AsNoTracking()
-                        .ToListAsync();
 
                     return Results.Ok(organizations);
                 }
@@ -57,7 +51,7 @@ public static class OrganizationEndpoints
             .WithName("GetOrganizations")
             .WithDescription("Gets organizations for user.")
             .WithTags("Organizations")
-            .Produces<List<OrganizationThumbnailDTO>>()
+            .Produces<List<OrganizationNameOnlyDTO>>()
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
