@@ -78,14 +78,20 @@ public static class InvitationEndpoints
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPost("/", async (CreateInvitationDTO newInvitation, GirafDbContext dbContext) =>
+        group.MapPost("/", async (CreateInvitationDTO newInvitation, GirafDbContext dbContext, UserManager<GirafUser> userManager) =>
         {
             try
             {
-                Invitation invitation = newInvitation.ToEntity();
+                var receiver = await userManager.FindByEmailAsync(newInvitation.ReceiverEmail);
+                if (receiver == null)
+                {
+                    return Results.BadRequest("Receiver email not found.");
+                }
 
+                var invitation = newInvitation.ToEntity(receiver.Id);
                 dbContext.Invitations.Add(invitation);
                 await dbContext.SaveChangesAsync();
+                
                 return Results.Created($"/invitations/{invitation.Id}", invitation);
             }
             catch (Exception ex)
