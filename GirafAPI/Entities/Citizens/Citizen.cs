@@ -12,7 +12,7 @@ public class Citizen
     
     public required string LastName { get; set; }
     
-    public ICollection<Organization>? Organizations { get; set; }
+    public required Organization Organization { get; set; }
     
     public ICollection<Activity>? Activities { get; set; }
 }

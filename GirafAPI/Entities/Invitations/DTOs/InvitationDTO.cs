@@ -6,6 +6,6 @@ namespace GirafAPI.Entities.Invitations.DTOs;
 public record InvitationDTO(
     int Id,
     int OrganizationId,
-    string ReceiverId,
-    string SenderId
+    string OrganizationName,
+    string SenderName
     );

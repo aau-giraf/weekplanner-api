@@ -1,7 +1,7 @@
-using Azure;
 using GirafAPI.Data;
 using GirafAPI.Entities.Invitations;
 using GirafAPI.Entities.Invitations.DTOs;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using GirafAPI.Mapping;
 using Microsoft.AspNetCore.Identity;
@@ -20,8 +20,29 @@ public static class InvitationEndpoints
                 try
                 {
                     Invitation? invitation = await dbContext.Invitations.FindAsync(id);
+
+                    if (invitation is null)
+                    {
+                        return Results.NotFound("Invitation not found.");
+                    }
                     
-                    return invitation is null ? Results.NotFound() : Results.Ok(invitation);
+                    GirafUser? sender = await dbContext.Users.FindAsync(invitation.SenderId);
+
+                    if (sender is null)
+                    {
+                        return Results.NotFound("Invitation sender not found.");
+                    }
+                    
+                    Organization? organization = await dbContext.Organizations.FindAsync(invitation.OrganizationId);
+
+                    if (organization is null)
+                    {
+                        return Results.NotFound("Organization not found.");
+                    }
+                    
+                    var invitationDTO = invitation.ToDTO(organization.Name, $"{sender.FirstName} {sender.LastName}");
+                    
+                    return Results.Ok(invitationDTO);
                 }
                 catch (Exception ex)
                 {
@@ -33,6 +54,51 @@ public static class InvitationEndpoints
             .WithTags("Invitation")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
+
+        group.MapGet("/user/{userId}", async (string userId, GirafDbContext dbContext) =>
+        {
+            try
+            {
+                var invitations = await dbContext.Invitations
+                    .Where(i => i.ReceiverId == userId)
+                    .ToListAsync();
+
+                if (invitations.Count == 0)
+                {
+                    return Results.NotFound("No invitations found.");
+                }
+
+                var invitationDtos = new List<InvitationDTO>();
+                foreach (var invitation in invitations)
+                {
+                    GirafUser? sender = await dbContext.Users.FindAsync(invitation.SenderId);
+                    if (sender is null)
+                    {
+                        return Results.NotFound("Invitation sender not found.");
+                    }
+                    Organization? organization = await dbContext.Organizations.FindAsync(invitation.OrganizationId);
+                    if (organization is null)
+                    {
+                        return Results.NotFound("Organization not found.");
+                    }
+                    var invitationDto = invitation.ToDTO(organization.Name, $"{sender.FirstName} {sender.LastName}");
+                    invitationDtos.Add(invitationDto);
+                }
+
+                return Results.Ok(invitationDtos);
+            }
+            catch (Exception e)
+            {
+                return Results.Problem(e.Message, statusCode: StatusCodes.Status500InternalServerError);
+            }
+        })
+        .WithName("GetInvitationsByUserId")
+        .WithDescription("Get all invitations for user.")
+        .WithTags("Invitation")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status500InternalServerError);
+        
         
         group.MapGet("/org/{id}", async (int id, GirafDbContext dbContext) =>
             {
@@ -41,8 +107,30 @@ public static class InvitationEndpoints
                     var invitations = await dbContext.Invitations
                         .Where(i => i.OrganizationId == id)
                         .ToListAsync();
+
+                    if (invitations.Count == 0)
+                    {
+                        return Results.NotFound("No invitations found.");
+                    }
                     
-                    return Results.Ok(invitations);
+                    var invitationDtos = new List<InvitationDTO>();
+                    foreach (var invitation in invitations)
+                    {
+                        GirafUser? sender = await dbContext.Users.FindAsync(invitation.SenderId);
+                        if (sender is null)
+                        {
+                            return Results.NotFound("Invitation sender not found.");
+                        }
+                        Organization? organization = await dbContext.Organizations.FindAsync(invitation.OrganizationId);
+                        if (organization is null)
+                        {
+                            return Results.NotFound("Organization not found.");
+                        }
+                        var invitationDto = invitation.ToDTO(organization.Name, $"{sender.FirstName} {sender.LastName}");
+                        invitationDtos.Add(invitationDto);
+                    }
+
+                    return Results.Ok(invitationDtos);
                 }
                 catch (Exception ex)
                 {
@@ -55,14 +143,20 @@ public static class InvitationEndpoints
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPost("/", async (CreateInvitationDTO newInvitation, GirafDbContext dbContext) =>
+        group.MapPost("/", async (CreateInvitationDTO newInvitation, GirafDbContext dbContext, UserManager<GirafUser> userManager) =>
         {
             try
             {
-                Invitation invitation = newInvitation.ToEntity();
+                var receiver = await userManager.FindByEmailAsync(newInvitation.ReceiverEmail);
+                if (receiver == null)
+                {
+                    return Results.BadRequest("Receiver email not found.");
+                }
 
+                var invitation = newInvitation.ToEntity(receiver.Id);
                 dbContext.Invitations.Add(invitation);
                 await dbContext.SaveChangesAsync();
+                
                 return Results.Created($"/invitations/{invitation.Id}", invitation);
             }
             catch (Exception ex)
