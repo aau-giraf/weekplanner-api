@@ -2,7 +2,7 @@ using GirafAPI.Entities.Grades;
 using GirafAPI.Entities.Invitations;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Citizens;
-using GirafAPI.Entities.Weekplans;
+using GirafAPI.Entities.Activities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using GirafAPI.Entities.Users;

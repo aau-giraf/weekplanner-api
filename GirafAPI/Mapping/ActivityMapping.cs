@@ -1,15 +1,14 @@
-using GirafAPI.Entities.Weekplans;
-using GirafAPI.Entities.Weekplans.DTOs;
+using GirafAPI.Entities.Activities;
+using GirafAPI.Entities.Activities.DTOs;
 
 namespace GirafAPI.Mapping;
 
 public static class ActivityMapping
 {
-    public static Activity ToEntity(this CreateActivityDTO activityDto, int citizenId)
+    public static Activity ToEntity(this CreateActivityDTO activityDto)
     {
         return new Activity
         {
-            CitizenId = citizenId,
             Date = DateOnly.Parse(activityDto.Date),
             Name = activityDto.Name,
             Description = activityDto.Description,
@@ -24,7 +23,6 @@ public static class ActivityMapping
         return new Activity
         {
             Id = id,
-            CitizenId = activityDto.CitizenId,
             Date = DateOnly.Parse(activityDto.Date),
             Name = activityDto.Name,
             Description = activityDto.Description,
@@ -38,7 +36,6 @@ public static class ActivityMapping
     {
         return new ActivityDTO(
             activity.Id,
-            activity.CitizenId,
             activity.Date.ToString("yyyy-MM-dd"),
             activity.Name,
             activity.Description,

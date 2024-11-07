@@ -2,6 +2,7 @@ using GirafAPI.Entities.Grades;
 using GirafAPI.Entities.Grades.DTOs;
 using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Citizens.DTOs;
+using GirafAPI.Entities.Activities;
 
 namespace GirafAPI.Mapping;
 
@@ -31,7 +32,8 @@ public static class GradeMapping
         {
             Name = newGrade.Name,
             OrganizationId = organizationId,
-            Citizens = new List<Citizen>()
+            Citizens = new List<Citizen>(),
+            Activities = new List<Activity>()
         };
     }
 }

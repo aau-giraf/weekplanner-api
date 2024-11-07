@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GirafAPI.Data.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    [Migration("20241107154238_Initial")]
+    [Migration("20241107231204_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -19,6 +19,47 @@ namespace GirafAPI.Data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
+
+            modelBuilder.Entity("GirafAPI.Entities.Activities.Activity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("CitizenId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeOnly>("EndTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("GradeId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CitizenId");
+
+                    b.HasIndex("GradeId");
+
+                    b.ToTable("Activities");
+                });
 
             modelBuilder.Entity("GirafAPI.Entities.Citizens.Citizen", b =>
                 {
@@ -181,42 +222,6 @@ namespace GirafAPI.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("GirafAPI.Entities.Weekplans.Activity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("CitizenId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly>("EndTime")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsCompleted")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<TimeOnly>("StartTime")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CitizenId");
-
-                    b.ToTable("Activities");
-                });
-
             modelBuilder.Entity("GirafUserOrganization", b =>
                 {
                     b.Property<int>("OrganizationsId")
@@ -360,6 +365,17 @@ namespace GirafAPI.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("GirafAPI.Entities.Activities.Activity", b =>
+                {
+                    b.HasOne("GirafAPI.Entities.Citizens.Citizen", null)
+                        .WithMany("Activities")
+                        .HasForeignKey("CitizenId");
+
+                    b.HasOne("GirafAPI.Entities.Grades.Grade", null)
+                        .WithMany("Activities")
+                        .HasForeignKey("GradeId");
+                });
+
             modelBuilder.Entity("GirafAPI.Entities.Citizens.Citizen", b =>
                 {
                     b.HasOne("GirafAPI.Entities.Grades.Grade", null)
@@ -380,15 +396,6 @@ namespace GirafAPI.Data.Migrations
                     b.HasOne("GirafAPI.Entities.Organizations.Organization", null)
                         .WithMany("Grades")
                         .HasForeignKey("OrganizationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("GirafAPI.Entities.Weekplans.Activity", b =>
-                {
-                    b.HasOne("GirafAPI.Entities.Citizens.Citizen", null)
-                        .WithMany("Activities")
-                        .HasForeignKey("CitizenId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -466,6 +473,8 @@ namespace GirafAPI.Data.Migrations
 
             modelBuilder.Entity("GirafAPI.Entities.Grades.Grade", b =>
                 {
+                    b.Navigation("Activities");
+
                     b.Navigation("Citizens");
                 });
 

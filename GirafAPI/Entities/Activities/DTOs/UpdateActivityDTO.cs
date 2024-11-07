@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace GirafAPI.Entities.Weekplans.DTOs;
+namespace GirafAPI.Entities.Activities.DTOs;
 
 public record UpdateActivityDTO(
     [Required] int CitizenId,

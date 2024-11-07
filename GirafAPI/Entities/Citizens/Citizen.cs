@@ -1,5 +1,5 @@
 ﻿using GirafAPI.Entities.Organizations;
-using GirafAPI.Entities.Weekplans;
+using GirafAPI.Entities.Activities;
 
 namespace GirafAPI.Entities.Citizens;
 
@@ -14,5 +14,5 @@ public class Citizen
     
     public required Organization Organization { get; set; }
     
-    public ICollection<Activity>? Activities { get; set; }
+    public required ICollection<Activity> Activities { get; set; }
 }
