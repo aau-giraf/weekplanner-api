@@ -79,9 +79,12 @@ public static class GradeEndpoints
                 {
                     return Results.NotFound("Organization not found.");
                 }
+                
+                await dbContext.Entry(organization)
+                    .Collection(o => o.Grades).LoadAsync();
 
                 var grade = newGrade.ToEntity(orgId);
-                dbContext.Grades.Add(grade);
+                organization.Grades.Add(grade);
                 await dbContext.SaveChangesAsync();
                 return Results.Created($"grades/{grade.Id}", grade.ToDTO());
             }
