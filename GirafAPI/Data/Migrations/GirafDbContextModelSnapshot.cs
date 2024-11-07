@@ -17,21 +17,6 @@ namespace GirafAPI.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
-            modelBuilder.Entity("CitizenOrganization", b =>
-                {
-                    b.Property<int>("CitizensId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("OrganizationsId")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("CitizensId", "OrganizationsId");
-
-                    b.HasIndex("OrganizationsId");
-
-                    b.ToTable("CitizenOrganization");
-                });
-
             modelBuilder.Entity("GirafAPI.Entities.Citizens.Citizen", b =>
                 {
                     b.Property<int>("Id")
@@ -49,9 +34,14 @@ namespace GirafAPI.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GradeId");
+
+                    b.HasIndex("OrganizationId");
 
                     b.ToTable("Citizens");
                 });
@@ -367,26 +357,19 @@ namespace GirafAPI.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CitizenOrganization", b =>
-                {
-                    b.HasOne("GirafAPI.Entities.Citizens.Citizen", null)
-                        .WithMany()
-                        .HasForeignKey("CitizensId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GirafAPI.Entities.Organizations.Organization", null)
-                        .WithMany()
-                        .HasForeignKey("OrganizationsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("GirafAPI.Entities.Citizens.Citizen", b =>
                 {
                     b.HasOne("GirafAPI.Entities.Grades.Grade", null)
                         .WithMany("Citizens")
                         .HasForeignKey("GradeId");
+
+                    b.HasOne("GirafAPI.Entities.Organizations.Organization", "Organization")
+                        .WithMany("Citizens")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
                 });
 
             modelBuilder.Entity("GirafAPI.Entities.Grades.Grade", b =>
@@ -485,6 +468,8 @@ namespace GirafAPI.Data.Migrations
 
             modelBuilder.Entity("GirafAPI.Entities.Organizations.Organization", b =>
                 {
+                    b.Navigation("Citizens");
+
                     b.Navigation("Grades");
                 });
 #pragma warning restore 612, 618

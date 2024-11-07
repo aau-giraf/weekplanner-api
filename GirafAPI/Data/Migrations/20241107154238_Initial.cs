@@ -238,6 +238,7 @@ namespace GirafAPI.Data.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     FirstName = table.Column<string>(type: "TEXT", nullable: false),
                     LastName = table.Column<string>(type: "TEXT", nullable: false),
+                    OrganizationId = table.Column<int>(type: "INTEGER", nullable: false),
                     GradeId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
@@ -248,6 +249,12 @@ namespace GirafAPI.Data.Migrations
                         column: x => x.GradeId,
                         principalTable: "Grades",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Citizens_Organizations_OrganizationId",
+                        column: x => x.OrganizationId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -271,30 +278,6 @@ namespace GirafAPI.Data.Migrations
                         name: "FK_Activities_Citizens_CitizenId",
                         column: x => x.CitizenId,
                         principalTable: "Citizens",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "CitizenOrganization",
-                columns: table => new
-                {
-                    CitizensId = table.Column<int>(type: "INTEGER", nullable: false),
-                    OrganizationsId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CitizenOrganization", x => new { x.CitizensId, x.OrganizationsId });
-                    table.ForeignKey(
-                        name: "FK_CitizenOrganization_Citizens_CitizensId",
-                        column: x => x.CitizensId,
-                        principalTable: "Citizens",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CitizenOrganization_Organizations_OrganizationsId",
-                        column: x => x.OrganizationsId,
-                        principalTable: "Organizations",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -342,14 +325,14 @@ namespace GirafAPI.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_CitizenOrganization_OrganizationsId",
-                table: "CitizenOrganization",
-                column: "OrganizationsId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Citizens_GradeId",
                 table: "Citizens",
                 column: "GradeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Citizens_OrganizationId",
+                table: "Citizens",
+                column: "OrganizationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_GirafUserOrganization_UsersId",
@@ -384,19 +367,16 @@ namespace GirafAPI.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CitizenOrganization");
-
-            migrationBuilder.DropTable(
                 name: "GirafUserOrganization");
 
             migrationBuilder.DropTable(
                 name: "Invitations");
 
             migrationBuilder.DropTable(
-                name: "AspNetRoles");
+                name: "Citizens");
 
             migrationBuilder.DropTable(
-                name: "Citizens");
+                name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
