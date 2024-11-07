@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GirafAPI.Entities.Grades;
-using GirafAPI.Entities.Resources;
+using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Entities.Organizations;

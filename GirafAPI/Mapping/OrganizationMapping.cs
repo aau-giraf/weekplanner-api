@@ -3,8 +3,8 @@ using GirafAPI.Entities.Grades;
 using GirafAPI.Entities.Grades.DTOs;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Organizations.DTOs;
-using GirafAPI.Entities.Resources;
-using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Citizens;
+using GirafAPI.Entities.Citizens.DTOs;
 using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Mapping;

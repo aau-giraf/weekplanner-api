@@ -1,4 +1,4 @@
-using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Citizens.DTOs;
 
 namespace GirafAPI.Entities.Grades.DTOs;
 

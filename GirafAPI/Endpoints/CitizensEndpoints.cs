@@ -1,6 +1,6 @@
 ﻿using GirafAPI.Data;
-using GirafAPI.Entities.Resources;
-using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Citizens;
+using GirafAPI.Entities.Citizens.DTOs;
 using GirafAPI.Mapping;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,9 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using GirafAPI.Entities.Organizations;
+﻿using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Weekplans;
-using GirafAPI.Entities.Users;
 
-namespace GirafAPI.Entities.Resources;
+namespace GirafAPI.Entities.Citizens;
 
 // Data model of Citizens in the database
 public class Citizen

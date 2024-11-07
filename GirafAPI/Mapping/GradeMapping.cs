@@ -1,6 +1,7 @@
 using GirafAPI.Entities.Grades;
 using GirafAPI.Entities.Grades.DTOs;
-using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Citizens;
+using GirafAPI.Entities.Citizens.DTOs;
 
 namespace GirafAPI.Mapping;
 
@@ -22,5 +23,14 @@ public static class GradeMapping
             grade.Name,
             citizens
         );
+    }
+
+    public static Grade ToEntity(this CreateGradeDTO newGrade)
+    {
+        return new Grade
+        {
+            Name = newGrade.Name,
+            Citizens = new List<Citizen>()
+        };
     }
 }

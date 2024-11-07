@@ -1,4 +1,4 @@
-using GirafAPI.Entities.Resources;
+using GirafAPI.Entities.Citizens;
 
 namespace GirafAPI.Entities.Grades;
 
