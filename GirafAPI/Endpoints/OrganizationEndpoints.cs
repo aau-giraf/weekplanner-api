@@ -25,8 +25,8 @@ public static class OrganizationEndpoints
                         return Results.BadRequest("Invalid user id.");
                     }
 
-                    dbContext.Entry(user)
-                        .Collection(u => u.Organizations).Load();
+                    await dbContext.Entry(user)
+                        .Collection(u => u.Organizations).LoadAsync();
 
                     if (user.Organizations is null)
                     {

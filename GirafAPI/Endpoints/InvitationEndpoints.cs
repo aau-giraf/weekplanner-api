@@ -190,8 +190,8 @@ public static class InvitationEndpoints
                             return Results.NotFound();
                         }
                         
-                        dbContext.Entry(organization)
-                            .Collection(o => o.Users).Load();
+                        await dbContext.Entry(organization)
+                            .Collection(o => o.Users).LoadAsync();
 
                         var user = await userManager.FindByIdAsync(invitation.ReceiverId);
                         if (user is null)
