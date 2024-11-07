@@ -53,20 +53,6 @@ namespace GirafAPI.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Citizens",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    FirstName = table.Column<string>(type: "TEXT", nullable: false),
-                    LastName = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Citizens", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Invitations",
                 columns: table => new
                 {
@@ -201,6 +187,70 @@ namespace GirafAPI.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "GirafUserOrganization",
+                columns: table => new
+                {
+                    OrganizationsId = table.Column<int>(type: "INTEGER", nullable: false),
+                    UsersId = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GirafUserOrganization", x => new { x.OrganizationsId, x.UsersId });
+                    table.ForeignKey(
+                        name: "FK_GirafUserOrganization_AspNetUsers_UsersId",
+                        column: x => x.UsersId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_GirafUserOrganization_Organizations_OrganizationsId",
+                        column: x => x.OrganizationsId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Grades",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OrganizationId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Grades", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Grades_Organizations_OrganizationId",
+                        column: x => x.OrganizationId,
+                        principalTable: "Organizations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Citizens",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FirstName = table.Column<string>(type: "TEXT", nullable: false),
+                    LastName = table.Column<string>(type: "TEXT", nullable: false),
+                    GradeId = table.Column<int>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Citizens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Citizens_Grades_GradeId",
+                        column: x => x.GradeId,
+                        principalTable: "Grades",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Activities",
                 columns: table => new
                 {
@@ -243,30 +293,6 @@ namespace GirafAPI.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CitizenOrganization_Organizations_OrganizationsId",
-                        column: x => x.OrganizationsId,
-                        principalTable: "Organizations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GirafUserOrganization",
-                columns: table => new
-                {
-                    OrganizationsId = table.Column<int>(type: "INTEGER", nullable: false),
-                    UsersId = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GirafUserOrganization", x => new { x.OrganizationsId, x.UsersId });
-                    table.ForeignKey(
-                        name: "FK_GirafUserOrganization_AspNetUsers_UsersId",
-                        column: x => x.UsersId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_GirafUserOrganization_Organizations_OrganizationsId",
                         column: x => x.OrganizationsId,
                         principalTable: "Organizations",
                         principalColumn: "Id",
@@ -321,9 +347,19 @@ namespace GirafAPI.Data.Migrations
                 column: "OrganizationsId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Citizens_GradeId",
+                table: "Citizens",
+                column: "GradeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GirafUserOrganization_UsersId",
                 table: "GirafUserOrganization",
                 column: "UsersId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Grades_OrganizationId",
+                table: "Grades",
+                column: "OrganizationId");
         }
 
         /// <inheritdoc />
@@ -364,6 +400,9 @@ namespace GirafAPI.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Grades");
 
             migrationBuilder.DropTable(
                 name: "Organizations");

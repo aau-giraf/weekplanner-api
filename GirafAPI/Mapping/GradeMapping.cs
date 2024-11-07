@@ -25,11 +25,12 @@ public static class GradeMapping
         );
     }
 
-    public static Grade ToEntity(this CreateGradeDTO newGrade)
+    public static Grade ToEntity(this CreateGradeDTO newGrade, int organizationId)
     {
         return new Grade
         {
             Name = newGrade.Name,
+            OrganizationId = organizationId,
             Citizens = new List<Citizen>()
         };
     }

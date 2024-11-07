@@ -30,6 +30,7 @@ app.MapLoginEndpoint();
 app.MapActivityEndpoints();
 app.MapOrganizationEndpoints();
 app.MapInvitationEndpoints();
+app.MapGradeEndpoints();
 
 await app.ApplyMigrationsAsync();
 await app.SeedDataAsync();
