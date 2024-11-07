@@ -98,7 +98,77 @@ public static class CitizensEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
+        
+        group.MapPost("/{id}/add-citizen",
+                async (int id, CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
+                {
+                    try
+                    {
+                        var organization = await dbContext.Organizations.FindAsync(id);
+                        if (organization is null)
+                        {
+                            return Results.NotFound();
+                        }
 
+                        var citizen = newCitizen.ToEntity(organization);
+                        dbContext.Citizens.Add(citizen);
+
+                        await dbContext.Entry(organization)
+                            .Collection(o => o.Citizens).LoadAsync();
+
+                        organization.Citizens.Add(citizen);
+
+                        await dbContext.SaveChangesAsync();
+
+                        return Results.Ok(citizen.Id);
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                    }
+                })
+            .WithName("AddCitizen")
+            .WithDescription("Add citizen to organization.")
+            .WithTags("Organizations")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
+        
+        group.MapDelete("/{id}/remove-citizen/{citizenId}",
+                async (int id, int citizenId, GirafDbContext dbContext) =>
+                {
+                    try
+                    {
+                        var citizen = await dbContext.Citizens
+                            .Include(c => c.Organization)
+                            .FirstOrDefaultAsync(c => c.Id == citizenId);
+                        
+                        if (citizen is null)
+                        {
+                            return Results.NotFound();
+                        }
+                        
+                        if (citizen.Organization.Id != id)
+                        {
+                            return Results.BadRequest("Citizen does not belong to the specified organization.");
+                        }
+
+                        dbContext.Citizens.Remove(citizen);
+                        await dbContext.SaveChangesAsync();
+
+                        return Results.NoContent();
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                    }
+                })
+            .WithName("RemoveCitizen")
+            .WithDescription("Remove citizen from organization.")
+            .WithTags("Organizations")
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
 
         return group;
     }
