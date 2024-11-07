@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace GirafAPI.Endpoints;
 
 // Endpoints for Trustees and Administrators to view, edit and delete Citizen data.
-public static class CitizensEndpoints
+public static class CitizenEndpoints
 {
     public static RouteGroupBuilder MapCitizensEndpoints(this WebApplication app)
     {
