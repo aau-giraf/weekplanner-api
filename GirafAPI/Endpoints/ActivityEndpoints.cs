@@ -1,8 +1,10 @@
 using GirafAPI.Data;
-using GirafAPI.Entities.Weekplans;
-using GirafAPI.Entities.Weekplans.DTOs;
+using GirafAPI.Entities.Activities;
+using GirafAPI.Entities.Activities.DTOs;
+using GirafAPI.Entities.Citizens;
 using GirafAPI.Mapping;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace GirafAPI.Endpoints;
 
@@ -41,15 +43,32 @@ public static class ActivityEndpoints
         {
             try
             {
-                var activities = await dbContext.Activities
-                    .Where(a => a.CitizenId == citizenId)
-                    .Where(a => a.Date == DateOnly.Parse(date))
-                    .OrderBy(a => a.StartTime)
-                    .Select(a => a.ToDTO())
-                    .AsNoTracking()
-                    .ToListAsync();
+                var citizen = await dbContext.Citizens.FindAsync(citizenId);
 
-                return Results.Ok(activities);
+                if (citizen is null)
+                {
+                    return Results.NotFound();
+                }
+                
+                await dbContext.Entry(citizen)
+                    .Collection(c => c.Activities).LoadAsync();
+
+                if (citizen.Activities is null)
+                {
+                    return Results.NotFound();
+                }
+                
+                var activities = new List<ActivityDTO>();
+
+                foreach (var activity in citizen.Activities)
+                {
+                    if (activity.Date == DateOnly.Parse(date))
+                    {
+                        activities.Add(activity.ToDTO());
+                    }
+                }
+
+                return activities.IsNullOrEmpty() ? Results.NotFound() : Results.Ok(activities);
             }
             catch (Exception)
             {
@@ -61,8 +80,53 @@ public static class ActivityEndpoints
         .WithDescription("Gets activities for a specific citizen on a given date.")
         .WithTags("Activities")
         .Produces<List<ActivityDTO>>(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status400BadRequest)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
+        
+        // GET activities for one day for a grade
+        group.MapGet("/grade/{gradeId:int}", async (int gradeId, string date, GirafDbContext dbContext) =>
+            {
+                try
+                {
+                    var grade = await dbContext.Grades.FindAsync(gradeId);
+
+                    if (grade is null)
+                    {
+                        return Results.NotFound();
+                    }
+                
+                    await dbContext.Entry(grade)
+                        .Collection(c => c.Activities).LoadAsync();
+
+                    if (grade.Activities.IsNullOrEmpty())
+                    {
+                        return Results.NotFound();
+                    }
+                
+                    var activities = new List<ActivityDTO>();
+
+                    foreach (var activity in grade.Activities)
+                    {
+                        if (activity.Date == DateOnly.Parse(date))
+                        {
+                            activities.Add(activity.ToDTO());
+                        }
+                    }
+
+                    return activities.IsNullOrEmpty() ? Results.NotFound() : Results.Ok(activities);
+                }
+                catch (Exception)
+                {
+                    //unexpected error
+                    return Results.Problem("An error occurred while retrieving activities.", statusCode: StatusCodes.Status500InternalServerError);
+                }
+            })
+            .WithName("GetActivitiesForGradeOnDate")
+            .WithDescription("Gets activities for a specific grade on a given date.")
+            .WithTags("Activities")
+            .Produces<List<ActivityDTO>>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
 
             
         // GET single activity by ID
@@ -90,13 +154,23 @@ public static class ActivityEndpoints
 
         
         // POST new activity
-        group.MapPost("/{citizenId:int}", async (int citizenId, CreateActivityDTO newActivityDto, GirafDbContext dbContext) =>
+        group.MapPost("/to-citizen/{citizenId:int}", async (int citizenId, CreateActivityDTO newActivityDto, GirafDbContext dbContext) =>
         {
             try
             {
-                Activity activity = newActivityDto.ToEntity(citizenId);
+                Activity activity = newActivityDto.ToEntity();
                 
-                dbContext.Activities.Add(activity);
+                var citizen = await dbContext.Citizens.FindAsync(citizenId);
+                
+                if (citizen is null)
+                {
+                    return Results.NotFound("Citizen not found.");
+                }
+                
+                await dbContext.Entry(citizen)
+                    .Collection(c => c.Activities).LoadAsync();
+                citizen.Activities.Add(activity);
+                
                 await dbContext.SaveChangesAsync();
                 return Results.Created($"/activity/{activity.Id}", activity.ToDTO());
             }
@@ -106,12 +180,48 @@ public static class ActivityEndpoints
                 return Results.Problem("An error occurred while creating the activity.", statusCode: StatusCodes.Status500InternalServerError);
             }
         })
-        .WithName("CreateActivity")
+        .WithName("CreateActivityForCitizen")
         .WithDescription("Creates a new activity for a citizen.")
         .WithTags("Activities")
         .Accepts<CreateActivityDTO>("application/json")
         .Produces<ActivityDTO>(StatusCodes.Status201Created)
+        .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
+        
+        // POST new activity
+        group.MapPost("/to-grade/{gradeId:int}", async (int gradeId, CreateActivityDTO newActivityDto, GirafDbContext dbContext) =>
+            {
+                try
+                {
+                    Activity activity = newActivityDto.ToEntity();
+                
+                    var grade = await dbContext.Grades.FindAsync(gradeId);
+                
+                    if (grade is null)
+                    {
+                        return Results.NotFound("Citizen not found.");
+                    }
+                
+                    await dbContext.Entry(grade)
+                        .Collection(c => c.Activities).LoadAsync();
+                    grade.Activities.Add(activity);
+                
+                    await dbContext.SaveChangesAsync();
+                    return Results.Created($"/activity/{activity.Id}", activity.ToDTO());
+                }
+                catch (Exception)
+                {
+                    //unexpected errors
+                    return Results.Problem("An error occurred while creating the activity.", statusCode: StatusCodes.Status500InternalServerError);
+                }
+            })
+            .WithName("CreateActivityForGrade")
+            .WithDescription("Creates a new activity for a grade.")
+            .WithTags("Activities")
+            .Accepts<CreateActivityDTO>("application/json")
+            .Produces<ActivityDTO>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
 
 
         
@@ -122,31 +232,31 @@ public static class ActivityEndpoints
             {
                 var date = DateOnly.Parse(dateStr);
                 var newDate = DateOnly.Parse(newDateStr);
+                
+                var citizen = await dbContext.Citizens.FindAsync(citizenId);
 
-                var result = await dbContext.Activities
-                    .Where(a => a.CitizenId == citizenId)
-                    .Where(a => a.Date == date)
-                    .Where(a => ids.Contains(a.Id))
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                if (result is null || result.Count == 0)
+                if (citizen is null)
                 {
-                    return Results.NotFound("No activities found to copy.");
+                    return Results.NotFound();
                 }
+                
+                await dbContext.Entry(citizen)
+                    .Collection(c => c.Activities).LoadAsync();
 
-                foreach (Activity activity in result)
+                foreach (Activity activity in citizen.Activities)
                 {
-                    dbContext.Activities.Add(new Activity
+                    if (activity.Date == date)
                     {
-                        CitizenId = citizenId,
-                        Date = newDate,
-                        Name = activity.Name,
-                        Description = activity.Description,
-                        StartTime = activity.StartTime,
-                        EndTime = activity.EndTime,
-                        IsCompleted = activity.IsCompleted
-                    });
+                        citizen.Activities.Add(new Activity
+                        {
+                            Date = newDate,
+                            Name = activity.Name,
+                            Description = activity.Description,
+                            StartTime = activity.StartTime,
+                            EndTime = activity.EndTime,
+                            IsCompleted = activity.IsCompleted
+                        });
+                    }
                 }
 
                 await dbContext.SaveChangesAsync();

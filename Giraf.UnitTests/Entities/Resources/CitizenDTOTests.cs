@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
-using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Citizens.DTOs;
 using Xunit;
 
 namespace GirafAPI.UnitTests.Entities.Resources

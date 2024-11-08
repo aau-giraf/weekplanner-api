@@ -1,9 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using GirafAPI.Entities.Organizations;
-using GirafAPI.Entities.Weekplans;
-using GirafAPI.Entities.Users;
+﻿using GirafAPI.Entities.Organizations;
+using GirafAPI.Entities.Activities;
 
-namespace GirafAPI.Entities.Resources;
+namespace GirafAPI.Entities.Citizens;
 
 // Data model of Citizens in the database
 public class Citizen
@@ -16,5 +14,5 @@ public class Citizen
     
     public required Organization Organization { get; set; }
     
-    public ICollection<Activity>? Activities { get; set; }
+    public required ICollection<Activity> Activities { get; set; }
 }

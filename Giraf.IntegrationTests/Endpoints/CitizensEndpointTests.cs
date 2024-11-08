@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using FluentAssertions;
 using Giraf.IntegrationTests.Utils;
-using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Citizens.DTOs;
 
 namespace Giraf.IntegrationTests.Endpoints;
 

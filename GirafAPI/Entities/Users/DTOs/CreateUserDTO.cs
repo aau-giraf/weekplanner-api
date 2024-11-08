@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using GirafAPI.Utils;
 
 namespace GirafAPI.Entities.Users.DTOs;
 

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using GirafAPI.Entities.Resources;
+using GirafAPI.Entities.Grades;
+using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Entities.Organizations;
@@ -12,6 +13,8 @@ public class Organization
     [StringLength(100)] public required string Name { get; set; }
     
     public required ICollection<GirafUser> Users { get; set; }
+    
+    public required ICollection<Grade> Grades { get; set; }
     
     public required ICollection<Citizen> Citizens { get; set; }
 }

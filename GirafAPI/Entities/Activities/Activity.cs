@@ -1,11 +1,9 @@
-﻿namespace GirafAPI.Entities.Weekplans;
+﻿namespace GirafAPI.Entities.Activities;
 
 // Data model of one activity in a day
 public class Activity
 {
     public int Id { get; set; }
-    
-    public int CitizenId { get; set; }
     
     public required DateOnly Date { get; set; }
     

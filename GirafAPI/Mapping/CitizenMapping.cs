@@ -1,7 +1,7 @@
-﻿using GirafAPI.Entities.Organizations;
-using GirafAPI.Entities.Resources;
-using GirafAPI.Entities.Resources.DTOs;
-using GirafAPI.Entities.Weekplans;
+using GirafAPI.Entities.Organizations;
+using GirafAPI.Entities.Citizens;
+using GirafAPI.Entities.Citizens.DTOs;
+using GirafAPI.Entities.Activities;
 
 namespace GirafAPI.Mapping;
 

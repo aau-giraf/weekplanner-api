@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using GirafAPI.Entities.Weekplans;
+using GirafAPI.Entities.Activities;
 
-namespace GirafAPI.Entities.Resources.DTOs;
+namespace GirafAPI.Entities.Citizens.DTOs;
 
 // Data necessary to view a Citizen
 public record CitizenDTO(

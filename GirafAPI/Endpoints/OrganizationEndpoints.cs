@@ -1,8 +1,6 @@
 using GirafAPI.Data;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Organizations.DTOs;
-using GirafAPI.Entities.Resources;
-using GirafAPI.Entities.Resources.DTOs;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -27,8 +25,8 @@ public static class OrganizationEndpoints
                         return Results.BadRequest("Invalid user id.");
                     }
 
-                    dbContext.Entry(user)
-                        .Collection(u => u.Organizations).Load();
+                    await dbContext.Entry(user)
+                        .Collection(u => u.Organizations).LoadAsync();
 
                     if (user.Organizations is null)
                     {
@@ -66,10 +64,12 @@ public static class OrganizationEndpoints
                         return Results.NotFound();
                     }
 
-                    dbContext.Entry(organization)
-                        .Collection(o => o.Users).Load();
-                    dbContext.Entry(organization)
-                        .Collection(o => o.Citizens).Load();
+                    await dbContext.Entry(organization)
+                        .Collection(o => o.Users).LoadAsync();
+                    await dbContext.Entry(organization)
+                        .Collection(o => o.Citizens).LoadAsync();
+                    await dbContext.Entry(organization)
+                        .Collection(o => o.Grades).LoadAsync();
 
                     return Results.Ok(organization.ToDTO());
                 }
@@ -185,10 +185,10 @@ public static class OrganizationEndpoints
                             return Results.BadRequest("Invalid organization id.");
                         }
 
-                        dbContext.Entry(organization)
-                            .Collection(o => o.Users).Load();
-                        dbContext.Entry(organization)
-                            .Collection(o => o.Citizens).Load();
+                        await dbContext.Entry(organization)
+                            .Collection(o => o.Users).LoadAsync();
+                        await dbContext.Entry(organization)
+                            .Collection(o => o.Citizens).LoadAsync();
 
                         organization.Users.Remove(user);
 

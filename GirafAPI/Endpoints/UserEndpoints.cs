@@ -3,7 +3,6 @@ using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
-using GirafAPI.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;

@@ -1,13 +1,13 @@
 ﻿using GirafAPI.Data;
-using GirafAPI.Entities.Resources;
-using GirafAPI.Entities.Resources.DTOs;
+using GirafAPI.Entities.Citizens;
+using GirafAPI.Entities.Citizens.DTOs;
 using GirafAPI.Mapping;
 using Microsoft.EntityFrameworkCore;
 
 namespace GirafAPI.Endpoints;
 
 // Endpoints for Trustees and Administrators to view, edit and delete Citizen data.
-public static class CitizensEndpoints
+public static class CitizenEndpoints
 {
     public static RouteGroupBuilder MapCitizensEndpoints(this WebApplication app)
     {
