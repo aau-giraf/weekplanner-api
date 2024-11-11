@@ -1,4 +1,5 @@
 # This workflow will build a Docker image and push it to GitHub Container Registry
+
 name: Publish Docker image
 
 on:
