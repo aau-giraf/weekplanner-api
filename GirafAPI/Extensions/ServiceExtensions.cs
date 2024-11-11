@@ -50,7 +50,7 @@ namespace GirafAPI.Extensions
             var jwtSettingsSection = configuration.GetSection("JwtSettings");
             services.Configure<JwtSettings>(jwtSettingsSection);
 
-            var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
+            var jwtSettings = jwtSettingsSection.Get<JwtSettings>() ?? throw new ArgumentNullException(nameof(JwtSettings));
             var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
 
             services.AddAuthentication(options =>

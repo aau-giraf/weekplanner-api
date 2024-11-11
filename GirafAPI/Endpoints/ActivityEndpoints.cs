@@ -26,7 +26,7 @@ public static class ActivityEndpoints
 
                 return Results.Ok(activities);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Results.Problem("An error occurred while retrieving activities.", statusCode: StatusCodes.Status500InternalServerError);
             }

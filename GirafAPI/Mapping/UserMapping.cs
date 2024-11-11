@@ -34,10 +34,10 @@ public static class UserMapping
     public static UserDTO ToDTO(this GirafUser user)
     {
         return new UserDTO(
-            user.Id,
-            user.Email,
-            user.FirstName,
-            user.LastName
+            user.Id ?? throw new ArgumentNullException(nameof(user.Id)),
+            user.Email ?? throw new ArgumentNullException(nameof(user.Email)),
+            user.FirstName ?? throw new ArgumentNullException(nameof(user.FirstName)),
+            user.LastName ?? throw new ArgumentNullException(nameof(user.LastName))
         );
     }
 }
