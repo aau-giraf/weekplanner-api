@@ -95,8 +95,13 @@ public static class UsersEndpoints
         group.MapPut("/{id}/change-password", async (string id, UpdateUserPasswordDTO updatePasswordDTO, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
+            
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
+            }
+
             var result = await userManager.ChangePasswordAsync(
-                user ?? throw new ArgumentNullException(nameof(user)), 
+                user, 
                 updatePasswordDTO.oldPassword, 
                 updatePasswordDTO.newPassword);
             return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
@@ -112,9 +117,12 @@ public static class UsersEndpoints
         group.MapPut("/{id}/change-username", async (string id, UpdateUsernameDTO updateUsernameDTO, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
-            var result = await userManager.SetUserNameAsync(
-                user ?? throw new ArgumentNullException(nameof(user)), 
-                updateUsernameDTO.Username);
+
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
+            }
+
+            var result = await userManager.SetUserNameAsync(user, updateUsernameDTO.Username);
             return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
         })
         .WithName("ChangeUsername")
@@ -127,7 +135,12 @@ public static class UsersEndpoints
         group.MapDelete("/{id}", async (string id, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
-            var result = await userManager.DeleteAsync(user ?? throw new ArgumentNullException(nameof(user)));
+
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
+            }
+
+            var result = await userManager.DeleteAsync(user);
             return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
         })
         .WithName("DeleteUser")

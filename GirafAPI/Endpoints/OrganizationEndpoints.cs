@@ -25,15 +25,16 @@ public static class OrganizationEndpoints
                         return Results.BadRequest("Invalid user id.");
                     }
 
-                    if (user.Organizations is null)
-                    {
-                        return Results.NotFound();
-                    }
-
                     await dbContext.Entry(user)
                         .Collection(u => u.Organizations!).LoadAsync();
 
                     var organizations = new List<OrganizationNameOnlyDTO>();
+
+                    if (user.Organizations is null)
+                    {
+                        return Results.NotFound();
+                    }
+                    
                     foreach (var organization in user.Organizations)
                     {
                         organizations.Add(organization.ToNameOnlyDTO());
