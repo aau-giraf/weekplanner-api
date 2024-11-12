@@ -14,33 +14,44 @@ public static class PictogramEndpoints
     {
         var group = app.MapGroup("pictograms").AllowAnonymous();
 
-        group.MapPost("/", async ([FromForm] CreatePictogramDTO pictogramDTO) =>
+        // Can't use a DTO here since for the endpoint to work correctly with images, the image and the dto must both be multipart/form-data
+        // but minimal apis can't map from multipart/form-data to a record DTO, only from application/json
+        // therefore we use manual binding
+        group.MapPost("/", async ([FromForm] IFormFile image, [FromForm] int? organizationId, [FromForm] string pictogramName) =>
             {
-                if (pictogramDTO.Image is null || pictogramDTO.Image.Length == 0)
+                if (image is null || image.Length == 0)
                 {
                     return Results.BadRequest("Image file is required");
                 }
 
-                if (string.IsNullOrEmpty(pictogramDTO.PictogramName))
+                if (organizationId is null)
+                {
+                    return Results.BadRequest("Organization id is required");
+                }
+
+                if (pictogramName.Length == 0)
                 {
                     return Results.BadRequest("Pictogram name is required");
                 }
 
-                Pictogram pictogram = pictogramDTO.ToEntity();
+                CreatePictogramDTO createPictogramDTO = new CreatePictogramDTO(organizationId.GetValueOrDefault(), pictogramName);
+                Pictogram pictogram = createPictogramDTO.ToEntity();
                 //Create a filepath where the name of the image is a unique id generated when the pictogram becomes an entity
-                var filePath = Path.Combine("pictograms", pictogram.OrganizationId.ToString(), $"{pictogram.ImageId}.jpg");
+                var filePath = Path.Combine("/app/pictograms", pictogram.OrganizationId.ToString(), $"{pictogram.ImageId}.jpg");
                 //Ensure the directory exists
                 Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
                 await using var stream = new FileStream(filePath, FileMode.Create);
-                await pictogramDTO.Image.CopyToAsync(stream);
+                await image.CopyToAsync(stream);
 
                 return Results.Ok();
 
             })
+            .DisableAntiforgery()
             .WithName("CreatePictogram")
             .WithDescription("Creates a pictogram")
             .WithTags("Pictograms")
+            .Accepts<IFormFile>("multipart/form-data")
             .Accepts<CreatePictogramDTO>("multipart/form-data")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
@@ -52,17 +63,31 @@ public static class PictogramEndpoints
               {
                 Pictogram? pictogram = await dbContext.Pictograms.FindAsync(pictogramId);
 
-                return pictogram is null ? Results.NotFound("Pictogram not found") : Results.Ok(pictogram.ToDTO);
+                if (pictogram is null)
+                {
+                    return Results.NotFound("Pictogram not found");
+                }
+
+                var filePath = Path.Combine("/app/pictograms", pictogram.OrganizationId.ToString(), $"{pictogram.ImageId}.jpg");
+
+                if (!File.Exists(filePath))
+                {
+                  return Results.NotFound("File not found");
+                }
+
+                byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
+
+                return Results.File(fileBytes, "application/octet-stream", pictogram.PictogramName);
               }
               catch (Exception)
               {
-                return Results.Problem("An error has occured while retrieving the activity.", statusCode: StatusCodes.Status500InternalServerError);
+                return Results.Problem("An error has occured while retrieving the pictogram.", statusCode: StatusCodes.Status500InternalServerError);
               }
             })
             .WithName("GetPictogramById")
             .WithDescription("Gets a specific pictogram by Id.")
             .WithTags("Pictograms")
-            .Produces<PictogramDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
 
@@ -70,18 +95,11 @@ public static class PictogramEndpoints
             {
               try
               {
-                var pictogramsData = await dbContext.Pictograms
+                var pictograms = await dbContext.Pictograms
                     .Where(p => p.OrganizationId == organizationId)
+                    .Select(p => p.ToDTO())
                     .AsNoTracking()
                     .ToListAsync();
-
-                //Converts the pictogram entities to DTOs and adds the image to the DTO
-                var pictograms = pictogramsData.Select(p =>
-                {
-                  var filepath = Path.Combine("pictograms", p.OrganizationId.ToString(), $"{p.ImageId}.jpg");
-                  IFormFile image = FileUtils.CreateFormFile(filepath);
-                  return p.ToDTO(image);
-                }).ToList();
 
                 return Results.Ok(pictograms);
               }
