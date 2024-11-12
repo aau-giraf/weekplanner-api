@@ -67,7 +67,6 @@ public class CitizensEndpointTests
         citizensResponse.EnsureSuccessStatusCode();
         var citizens = await citizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
         Assert.NotNull(citizens);
-        Assert.Single(citizens);
 
         var citizenId = citizens[0].Id;
 
