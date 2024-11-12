@@ -1,5 +1,6 @@
 # Stage 1: Build the application
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+ARG TARGETARCH
 WORKDIR /src
 
 # Set default environment as Development
@@ -12,17 +13,17 @@ COPY GirafAPI/*.csproj ./GirafAPI/
 COPY GirafAPI/Data/Migrations/*.cs ./GirafAPI/Data/Migrations/
 COPY Giraf.UnitTests/*.csproj ./Giraf.UnitTests/
 COPY Giraf.IntegrationTests/*.csproj ./Giraf.IntegrationTests/
-RUN dotnet restore weekplanner-api.sln
+RUN dotnet restore weekplanner-api.sln -a $TARGETARCH
 
 # Copy the rest of the application code
 COPY . ./
 WORKDIR /src/GirafAPI
 
 # Build the application
-RUN dotnet build -c Release -o /app/build
+RUN dotnet build -c Release -o /app/build -a $TARGETARCH
 
 # Publish the application
-RUN dotnet publish -c Release -o /app/publish --no-restore
+RUN dotnet publish -c Release -o /app/publish -a $TARGETARCH --no-restore 
 
 # Stage 2: Set up the runtime environment
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS runtime
