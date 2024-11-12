@@ -14,12 +14,11 @@ public static class PictogramMapping
         };
     }
 
-    public static PictogramDTO ToDTO(this Pictogram pictogram, IFormFile imageFile)
+    public static PictogramDTO ToDTO(this Pictogram pictogram)
     {
         return new PictogramDTO(
             pictogram.Id,
             pictogram.OrganizationId,
-            Image: imageFile,
             pictogram.PictogramName
         );
     }
