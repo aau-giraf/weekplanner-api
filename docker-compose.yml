@@ -12,3 +12,7 @@ services:
       - .:/app
       - /app/bin
       - /app/obj
+      - pictograms:/app/pictograms
+
+volumes:
+  pictograms:
