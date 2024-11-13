@@ -7,9 +7,9 @@ namespace GirafAPI.Entities.Users;
 // Base class for users that stores data common between user types.
 public class GirafUser : IdentityUser
 {
-    [StringLength(20)] public new required string UserName { get; set; }
+    [StringLength(20)] public override required string UserName { get; set; }
     
-    [StringLength(20)] public new required string Email { get; set; }
+    [StringLength(20)] public override required string Email { get; set; }
     
     [StringLength(20)] [Required] public required string FirstName { get; set; }
     
