@@ -1,4 +1,5 @@
 using GirafAPI.Data;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -16,8 +17,12 @@ namespace GirafAPI.Extensions
             var user = await userManager.FindByNameAsync("user");
             if (user == null)
             {
-                user = new GirafUser { UserName = "user", Email = "user@user.com", FirstName = "User", LastName = "Userson" };
-                await userManager.CreateAsync(user, "TrusteePassword123!");
+                user = new GirafUser { UserName = "user", 
+                                       Email = "user@user.com", 
+                                       FirstName = "User", 
+                                       LastName = "Userson", 
+                                       Organizations = new List<Organization>() };
+                await userManager.CreateAsync(user, "Password123");
             }
         }
 

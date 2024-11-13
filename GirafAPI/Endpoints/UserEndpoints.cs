@@ -1,13 +1,10 @@
-using GirafAPI.Data;
 using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
 
 namespace GirafAPI.Endpoints;
 
@@ -95,7 +92,15 @@ public static class UsersEndpoints
         group.MapPut("/{id}/change-password", async (string id, UpdateUserPasswordDTO updatePasswordDTO, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
-            var result = await userManager.ChangePasswordAsync(user, updatePasswordDTO.oldPassword, updatePasswordDTO.newPassword);
+            
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
+            }
+
+            var result = await userManager.ChangePasswordAsync(
+                user, 
+                updatePasswordDTO.oldPassword, 
+                updatePasswordDTO.newPassword);
             return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
         })
         .WithName("ChangeUserPassword")
@@ -109,6 +114,11 @@ public static class UsersEndpoints
         group.MapPut("/{id}/change-username", async (string id, UpdateUsernameDTO updateUsernameDTO, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
+
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
+            }
+
             var result = await userManager.SetUserNameAsync(user, updateUsernameDTO.Username);
             return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
         })
@@ -122,6 +132,11 @@ public static class UsersEndpoints
         group.MapDelete("/{id}", async (string id, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
+
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
+            }
+
             var result = await userManager.DeleteAsync(user);
             return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
         })

@@ -1,5 +1,4 @@
 using GirafAPI.Data;
-using GirafAPI.Entities.Grades;
 using GirafAPI.Entities.Grades.DTOs;
 using GirafAPI.Mapping;
 using Microsoft.EntityFrameworkCore;

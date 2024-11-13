@@ -1,7 +1,6 @@
 using GirafAPI.Data;
 using GirafAPI.Entities.Activities;
 using GirafAPI.Entities.Activities.DTOs;
-using GirafAPI.Entities.Citizens;
 using GirafAPI.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -26,7 +25,7 @@ public static class ActivityEndpoints
 
                 return Results.Ok(activities);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return Results.Problem("An error occurred while retrieving activities.", statusCode: StatusCodes.Status500InternalServerError);
             }
@@ -52,11 +51,6 @@ public static class ActivityEndpoints
                 
                 await dbContext.Entry(citizen)
                     .Collection(c => c.Activities).LoadAsync();
-
-                if (citizen.Activities is null)
-                {
-                    return Results.NotFound();
-                }
                 
                 var activities = new List<ActivityDTO>();
 
@@ -68,7 +62,7 @@ public static class ActivityEndpoints
                     }
                 }
 
-                return activities.IsNullOrEmpty() ? Results.NotFound() : Results.Ok(activities);
+                return Results.Ok(activities);
             }
             catch (Exception)
             {
@@ -226,7 +220,7 @@ public static class ActivityEndpoints
 
         
        // POST copy activity
-        group.MapPost("/activity/copy", async (int citizenId, List<int> ids, string dateStr, string newDateStr, GirafDbContext dbContext) =>
+        group.MapPost("/activity/copy", async (int citizenId, string dateStr, string newDateStr, GirafDbContext dbContext) =>
         {
             try
             {

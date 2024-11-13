@@ -1,7 +1,7 @@
 using GirafAPI.Entities.DTOs;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
-using Microsoft.AspNetCore.Identity;
 
 namespace GirafAPI.Mapping;
 
@@ -17,17 +17,10 @@ public static class UserMapping
             
             LastName = userDTO.LastName,
             
-            UserName = userDTO.Email,  
+            UserName = userDTO.Email,
+            
+            Organizations = new List<Organization>()
 
-        };
-    }
-
-    public static GirafUser ToEntity(this UpdateUserDTO user)
-    {
-        return new GirafUser
-        {
-            FirstName = user.FirstName,
-            LastName = user.LastName,
         };
     }
 

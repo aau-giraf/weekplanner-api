@@ -29,12 +29,8 @@ public static class OrganizationEndpoints
                     await dbContext.Entry(user)
                         .Collection(u => u.Organizations).LoadAsync();
 
-                    if (user.Organizations is null)
-                    {
-                        return Results.NotFound();
-                    }
-
                     var organizations = new List<OrganizationNameOnlyDTO>();
+                    
                     foreach (var organization in user.Organizations)
                     {
                         organizations.Add(organization.ToNameOnlyDTO());
@@ -51,7 +47,6 @@ public static class OrganizationEndpoints
             .WithDescription("Gets organizations for user.")
             .WithTags("Organizations")
             .Produces<List<OrganizationNameOnlyDTO>>()
-            .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
