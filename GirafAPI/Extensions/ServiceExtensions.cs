@@ -8,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using GirafAPI.Authorization;
-using Microsoft.AspNetCore.Authorization;
 
 namespace GirafAPI.Extensions
 {
@@ -81,9 +80,6 @@ namespace GirafAPI.Extensions
 
         public static IServiceCollection ConfigureAuthorizationPolicies(this IServiceCollection services)
         {
-            services.AddSingleton<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
-            services.AddSingleton<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
-            
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("OrganizationMember", policy =>
