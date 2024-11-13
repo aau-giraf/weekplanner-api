@@ -8,7 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using GirafAPI.Authorization;
-using Microsoft.AspNetCore.Authorization;
 
 namespace GirafAPI.Extensions
 {
@@ -53,7 +52,7 @@ namespace GirafAPI.Extensions
             services.Configure<JwtSettings>(jwtSettingsSection);
 
             var jwtSettings = jwtSettingsSection.Get<JwtSettings>();
-            var key = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
+            var key = Encoding.UTF8.GetBytes(jwtSettings.SecretKey);
 
             services.AddAuthentication(options =>
             {
@@ -81,8 +80,6 @@ namespace GirafAPI.Extensions
 
         public static IServiceCollection ConfigureAuthorizationPolicies(this IServiceCollection services)
         {
-            services.AddSingleton<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
-            
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("OrganizationMember", policy =>
