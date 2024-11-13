@@ -1,5 +1,4 @@
 using GirafAPI.Configuration;
-using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
@@ -33,7 +32,7 @@ namespace GirafAPI.Endpoints
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
-                    new Claim(ClaimTypes.Name, user.UserName!)
+                    new Claim(ClaimTypes.Name, user.UserName)
                 };
 
                 claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));

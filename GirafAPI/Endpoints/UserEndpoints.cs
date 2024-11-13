@@ -1,13 +1,10 @@
-using GirafAPI.Data;
 using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
 
 namespace GirafAPI.Endpoints;
 

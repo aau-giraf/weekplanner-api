@@ -26,11 +26,11 @@ public static class OrganizationEndpoints
                     }
 
                     await dbContext.Entry(user)
-                        .Collection(u => u.Organizations!).LoadAsync();
+                        .Collection(u => u.Organizations).LoadAsync();
 
                     var organizations = new List<OrganizationNameOnlyDTO>();
 
-                    if (user.Organizations is null)
+                    if (!user.Organizations.Any())
                     {
                         return Results.NotFound();
                     }
