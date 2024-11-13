@@ -29,11 +29,6 @@ public static class OrganizationEndpoints
                         .Collection(u => u.Organizations).LoadAsync();
 
                     var organizations = new List<OrganizationNameOnlyDTO>();
-
-                    if (!user.Organizations.Any())
-                    {
-                        return Results.NotFound();
-                    }
                     
                     foreach (var organization in user.Organizations)
                     {
@@ -51,7 +46,6 @@ public static class OrganizationEndpoints
             .WithDescription("Gets organizations for user.")
             .WithTags("Organizations")
             .Produces<List<OrganizationNameOnlyDTO>>()
-            .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 

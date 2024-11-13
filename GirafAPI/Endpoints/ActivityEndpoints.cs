@@ -51,11 +51,6 @@ public static class ActivityEndpoints
                 
                 await dbContext.Entry(citizen)
                     .Collection(c => c.Activities).LoadAsync();
-
-                if (!citizen.Activities.Any())
-                {
-                    return Results.NotFound();
-                }
                 
                 var activities = new List<ActivityDTO>();
 
@@ -67,7 +62,7 @@ public static class ActivityEndpoints
                     }
                 }
 
-                return activities.IsNullOrEmpty() ? Results.NotFound() : Results.Ok(activities);
+                return Results.Ok(activities);
             }
             catch (Exception)
             {
