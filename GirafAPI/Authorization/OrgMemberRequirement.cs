@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
 namespace GirafAPI.Authorization;
@@ -17,7 +18,7 @@ public class OrgMemberAuthorizationHandler : AuthorizationHandler<OrgMemberRequi
     {
         var claims = context.User;
         var orgIds = claims.Claims
-                                .Where(c => c.Type == "OrgMember")
+                                .Where(c => c.Type == "OrgId")
                                 .Select(c => c.Value)
                                 .ToList();
         
