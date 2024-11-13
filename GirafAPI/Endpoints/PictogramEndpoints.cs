@@ -17,7 +17,7 @@ public static class PictogramEndpoints
         // Can't use a DTO here since for the endpoint to work correctly with images, the image and the dto must both be multipart/form-data
         // but minimal apis can't map from multipart/form-data to a record DTO, only from application/json
         // therefore we use manual binding
-        group.MapPost("/", async ([FromForm] IFormFile image, [FromForm] int? organizationId, [FromForm] string pictogramName) =>
+        group.MapPost("/", async ([FromForm] IFormFile image, [FromForm] int? organizationId, [FromForm] string pictogramName, GirafDbContext context) =>
             {
                 if (image is null || image.Length == 0)
                 {
@@ -43,7 +43,15 @@ public static class PictogramEndpoints
 
                 await using var stream = new FileStream(filePath, FileMode.Create);
                 await image.CopyToAsync(stream);
-
+                try
+                {
+                    context.Pictograms.Add(pictogram);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    return Results.BadRequest("Failed to upload pictogram");
+                }
                 return Results.Ok();
 
             })
