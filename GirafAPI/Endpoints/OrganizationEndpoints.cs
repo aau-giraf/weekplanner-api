@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using GirafAPI.Data;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Organizations.DTOs;
@@ -55,11 +56,11 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("/{id}", async (int id, GirafDbContext dbContext) =>
+        group.MapGet("/{orgId}", async (int orgId, GirafDbContext dbContext) =>
             {
                 try
                 {
-                    Organization? organization = await dbContext.Organizations.FindAsync(id);
+                    Organization? organization = await dbContext.Organizations.FindAsync(orgId);
                     if (organization is null)
                     {
                         return Results.NotFound();
@@ -82,6 +83,7 @@ public static class OrganizationEndpoints
             .WithName("GetOrganizationById")
             .WithDescription("Gets organization by id.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -102,6 +104,10 @@ public static class OrganizationEndpoints
                         Organization organization = newOrganization.ToEntity(user);
                         dbContext.Organizations.Add(organization);
                         await dbContext.SaveChangesAsync();
+                        
+                        var memberClaim = new Claim("OrgMember", organization.Id.ToString());
+                        await userManager.AddClaimAsync(user, memberClaim);
+                        
                         return Results.Created($"organizations/{organization.Id}", organization.ToDTO());
                     }
                     catch (Exception ex)
