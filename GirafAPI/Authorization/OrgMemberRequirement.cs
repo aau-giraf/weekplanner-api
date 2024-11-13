@@ -18,7 +18,7 @@ public class OrgMemberAuthorizationHandler : AuthorizationHandler<OrgMemberRequi
     {
         var claims = context.User;
         var orgIds = claims.Claims
-                                .Where(c => c.Type == "OrgId")
+                                .Where(c => c.Type == "OrgMember")
                                 .Select(c => c.Value)
                                 .ToList();
         
