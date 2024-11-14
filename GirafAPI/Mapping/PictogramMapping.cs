@@ -4,13 +4,14 @@ namespace GirafAPI.Mapping;
 
 public static class PictogramMapping
 {
-    public static Pictogram ToEntity(this CreatePictogramDTO pictogramDto)
+    public static Pictogram ToEntity(this CreatePictogramDTO pictogramDto, string url)
     {
         return new Pictogram
         {
             ImageId = Guid.NewGuid(),
             OrganizationId = pictogramDto.OrganizationId,
             PictogramName = pictogramDto.PictogramName,
+            PictogramUrl = url
         };
     }
 
@@ -19,7 +20,8 @@ public static class PictogramMapping
         return new PictogramDTO(
             pictogram.Id,
             pictogram.OrganizationId,
-            pictogram.PictogramName
+            pictogram.PictogramName,
+            pictogram.PictogramUrl
         );
     }
 }
