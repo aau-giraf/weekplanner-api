@@ -4,8 +4,6 @@ using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Activities;
 using GirafAPI.Entities.Pictograms;
-using GirafAPI.Entities.Resources;
-using GirafAPI.Entities.Weekplans;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using GirafAPI.Entities.Users;
