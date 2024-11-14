@@ -4,6 +4,7 @@ using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GirafAPI.Endpoints;
@@ -129,14 +130,20 @@ public static class UsersEndpoints
         .Produces(StatusCodes.Status200OK)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
 
-        group.MapDelete("/{id}", async (string id, UserManager<GirafUser> userManager) =>
+        group.MapDelete("/{id}", async ([FromBody] DeleteUserDTO deleteUserDTO, UserManager<GirafUser> userManager) =>
         {
-            var user = await userManager.FindByIdAsync(id);
+            var user = await userManager.FindByIdAsync(deleteUserDTO.Id);
 
             if(user == null) {
                 return Results.BadRequest("Invalid user id.");
             }
+            
+            var passwordValid = await userManager.CheckPasswordAsync(user, deleteUserDTO.Password);
 
+            if(!passwordValid) {
+                return Results.BadRequest("Invalid password");
+            }
+            
             var result = await userManager.DeleteAsync(user);
             return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
         })
