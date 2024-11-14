@@ -19,7 +19,7 @@ public class OrgAdminAuthorizationHandler : AuthorizationHandler<OrgAdminRequire
     {
         var claims = context.User;
         var orgIds = claims.Claims
-            .Where(c => c.Type == "OrgMember")
+            .Where(c => c.Type == "OrgAdmin")
             .Select(c => c.Value)
             .ToList();
         
