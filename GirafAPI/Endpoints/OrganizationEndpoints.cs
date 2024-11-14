@@ -117,11 +117,11 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        group.MapPut("/{id}/change-name", async (int id, string newName, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/change-name", async (int orgId, string newName, GirafDbContext dbContext) =>
             {
                 try
                 {
-                    Organization? organization = await dbContext.Organizations.FindAsync(id);
+                    Organization? organization = await dbContext.Organizations.FindAsync(orgId);
                     if (organization is null)
                     {
                         return Results.NotFound();
@@ -144,18 +144,18 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        group.MapDelete("/{id}", async (int id, GirafDbContext dbContext) =>
+        group.MapDelete("/{orgId}", async (int orgId, GirafDbContext dbContext) =>
             {
                 try
                 {
-                    Organization? organization = await dbContext.Organizations.FindAsync(id);
+                    Organization? organization = await dbContext.Organizations.FindAsync(orgId);
 
                     if (organization is null)
                     {
                         return Results.NotFound();
                     }
 
-                    await dbContext.Organizations.Where(o => o.Id == id).ExecuteDeleteAsync();
+                    await dbContext.Organizations.Where(o => o.Id == orgId).ExecuteDeleteAsync();
                     return Results.NoContent();
                 }
                 catch (Exception ex)
@@ -170,8 +170,8 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        group.MapPut("/{id}/remove-user/{userId}",
-                async (int id, string userId, UserManager<GirafUser> userManager, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/remove-user/{userId}",
+                async (int orgId, string userId, UserManager<GirafUser> userManager, GirafDbContext dbContext) =>
                 {
                     try
                     {
@@ -181,7 +181,7 @@ public static class OrganizationEndpoints
                             return Results.BadRequest("Invalid user id.");
                         }
 
-                        var organization = await dbContext.Organizations.FindAsync(id);
+                        var organization = await dbContext.Organizations.FindAsync(orgId);
                         if (organization is null)
                         {
                             return Results.BadRequest("Invalid organization id.");
@@ -210,10 +210,10 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapGet("/grades/{id}", async (int id, GirafDbContext dbContext) => {
+        group.MapGet("/grades/{orgId}", async (int orgId, GirafDbContext dbContext) => {
             try
             {
-                Grade? grade = await dbContext.Grades.FindAsync(id);
+                Grade? grade = await dbContext.Grades.FindAsync(orgId);
                 if (grade is null)
                 {
                     return Results.NotFound();
