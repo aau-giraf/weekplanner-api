@@ -46,13 +46,14 @@ public static class PictogramEndpoints
                 try
                 {
                     context.Pictograms.Add(pictogram);
+                    await context.SaveChangesAsync();
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                     return Results.BadRequest("Failed to upload pictogram");
                 }
-                return Results.Ok();
+                return Results.Ok(pictogram.ImageId);
 
             })
             .DisableAntiforgery()
