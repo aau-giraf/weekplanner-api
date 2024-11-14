@@ -2,26 +2,26 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace GirafAPI.Authorization;
 
-public class OrgMemberRequirement : IAuthorizationRequirement;
+public class OrgAdminRequirement : IAuthorizationRequirement;
 
-public class OrgMemberAuthorizationHandler : AuthorizationHandler<OrgMemberRequirement>
+public class OrgAdminAuthorizationHandler : AuthorizationHandler<OrgAdminRequirement>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public OrgMemberAuthorizationHandler(IHttpContextAccessor httpContextAccessor)
+    public OrgAdminAuthorizationHandler(IHttpContextAccessor httpContextAccessor)
     {
         _httpContextAccessor = httpContextAccessor;
     }
 
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
-        OrgMemberRequirement requirement)
+        OrgAdminRequirement requirement)
     {
         var claims = context.User;
         var orgIds = claims.Claims
-                                .Where(c => c.Type == "OrgMember")
-                                .Select(c => c.Value)
-                                .ToList();
+            .Where(c => c.Type == "OrgMember")
+            .Select(c => c.Value)
+            .ToList();
         
         var httpContext = _httpContextAccessor.HttpContext;
         var orgIdInUrl = httpContext.Request.RouteValues["orgId"];
