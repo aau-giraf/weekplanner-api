@@ -146,7 +146,7 @@ public static class UsersEndpoints
                     return Results.BadRequest("Invalid password");
                 }
                 
-                var result = await userManager.DeleteAsync(user);
+                await userManager.DeleteAsync(user);
                 return Results.NoContent();
             }
             catch (Exception) 
