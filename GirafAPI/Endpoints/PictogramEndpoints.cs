@@ -35,13 +35,13 @@ public static class PictogramEndpoints
                 }
 
                 CreatePictogramDTO createPictogramDTO = new CreatePictogramDTO(organizationId.GetValueOrDefault(), pictogramName);
-                Pictogram pictogram = createPictogramDTO.ToEntity();
-                //Create a filepath where the name of the image is a unique id generated when the pictogram becomes an entity
-                var filePath = Path.Combine("/app/pictograms", pictogram.OrganizationId.ToString(), $"{pictogram.ImageId}.jpg");
+                var fileExtension = Path.GetExtension(image.FileName);
+                var url = Path.Combine("pictograms", organizationId.ToString(), $"{pictogramName}{fileExtension}");
+                Pictogram pictogram = createPictogramDTO.ToEntity(url);
                 //Ensure the directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine("/app", url)));
 
-                await using var stream = new FileStream(filePath, FileMode.Create);
+                await using var stream = new FileStream(Path.Combine("/app", url), FileMode.Create);
                 await image.CopyToAsync(stream);
                 try
                 {
@@ -53,7 +53,7 @@ public static class PictogramEndpoints
                     Console.WriteLine(e);
                     return Results.BadRequest("Failed to upload pictogram");
                 }
-                return Results.Ok(pictogram.ImageId);
+                return Results.Ok(pictogram.PictogramUrl);
 
             })
             .DisableAntiforgery()
@@ -77,16 +77,7 @@ public static class PictogramEndpoints
                     return Results.NotFound("Pictogram not found");
                 }
 
-                var filePath = Path.Combine("/app/pictograms", pictogram.OrganizationId.ToString(), $"{pictogram.ImageId}.jpg");
-
-                if (!File.Exists(filePath))
-                {
-                  return Results.NotFound("File not found");
-                }
-
-                byte[] fileBytes = await File.ReadAllBytesAsync(filePath);
-
-                return Results.File(fileBytes, "application/octet-stream", pictogram.PictogramName);
+                return Results.Ok(pictogram.ToDTO());
               }
               catch (Exception)
               {
@@ -132,8 +123,13 @@ public static class PictogramEndpoints
                 Pictogram? pictogram = await dbContext.Pictograms.FindAsync(pictogramId);
                 if (pictogram is not null)
                 {
-                  dbContext.Pictograms.Remove(pictogram);
-                  return Results.Ok("Pictogram deleted");
+                    if (File.Exists(Path.Combine("/app", pictogram.PictogramUrl)))
+                    {
+                        File.Delete(Path.Combine("/app", pictogram.PictogramUrl));
+                    }
+                    dbContext.Pictograms.Remove(pictogram);
+                    await dbContext.SaveChangesAsync();
+                    return Results.Ok("Pictogram deleted");
                 }
                 else
                 {

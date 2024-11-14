@@ -8,7 +8,6 @@ public static class PictogramMapping
     {
         return new Pictogram
         {
-            ImageId = Guid.NewGuid(),
             OrganizationId = pictogramDto.OrganizationId,
             PictogramName = pictogramDto.PictogramName,
             PictogramUrl = url
