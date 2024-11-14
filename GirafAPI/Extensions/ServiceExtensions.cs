@@ -82,6 +82,7 @@ namespace GirafAPI.Extensions
         public static IServiceCollection ConfigureAuthorizationPolicies(this IServiceCollection services)
         {
             services.AddSingleton<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
             
             services.AddAuthorization(options =>
             {
