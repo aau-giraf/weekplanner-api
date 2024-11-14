@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using GirafAPI.Entities.Pictograms;
 
 namespace GirafAPI.Entities.Activities.DTOs;
 
@@ -9,5 +10,6 @@ public record ActivityDTO(
     [StringLength(500)] string Description,
     [Required][StringLength(10)] string StartTime,
     [Required][StringLength(10)] string EndTime,
-    bool IsCompleted
+    bool IsCompleted,
+    Pictogram pictogram
     );
