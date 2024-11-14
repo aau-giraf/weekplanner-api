@@ -12,7 +12,7 @@ builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment)
     .ConfigureSwagger();
 
 var app = builder.Build();
-Console.WriteLine($"Current Environment: {app.Environment.EnvironmentName}");
+
 // Configure middleware
 if (app.Environment.IsDevelopment())
 {

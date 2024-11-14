@@ -130,22 +130,31 @@ public static class UsersEndpoints
         .Produces(StatusCodes.Status200OK)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
 
+        //[FromBody] is needed by ASP NETs .MapDelete method
         group.MapDelete("/{id}", async ([FromBody] DeleteUserDTO deleteUserDTO, UserManager<GirafUser> userManager) =>
         {
-            var user = await userManager.FindByIdAsync(deleteUserDTO.Id);
+            try {
+                var user = await userManager.FindByIdAsync(deleteUserDTO.Id);
 
-            if(user == null) {
-                return Results.BadRequest("Invalid user id.");
+                if(user == null) {
+                    return Results.BadRequest("Invalid user id.");
+                }
+                
+                var passwordValid = await userManager.CheckPasswordAsync(user, deleteUserDTO.Password);
+
+                if(!passwordValid) {
+                    return Results.BadRequest("Invalid password");
+                }
+                
+                var result = await userManager.DeleteAsync(user);
+                return Results.NoContent();
+            }
+            catch (Exception) 
+            {
+                //unexpected error
+                return Results.Problem("An error occurred while trying to delete user.", statusCode: StatusCodes.Status500InternalServerError);
             }
             
-            var passwordValid = await userManager.CheckPasswordAsync(user, deleteUserDTO.Password);
-
-            if(!passwordValid) {
-                return Results.BadRequest("Invalid password");
-            }
-            
-            var result = await userManager.DeleteAsync(user);
-            return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
         })
         .WithName("DeleteUser")
         .WithTags("Users")
