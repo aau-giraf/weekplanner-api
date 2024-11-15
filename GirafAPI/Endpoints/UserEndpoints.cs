@@ -161,6 +161,45 @@ public static class UsersEndpoints
         .WithDescription("Deletes a user by their ID. Requires administrative privileges.")
         .Produces(StatusCodes.Status204NoContent)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
+        
+        
+        group.MapPost("/setProfilePicture", async ([FromForm] IFormFile image, string userId, UserManager<GirafUser> userManager) =>
+            {
+                if (image.Length < 0)
+                {
+                    return Results.BadRequest("Image file is required");
+                }
+
+                var user = await userManager.FindByIdAsync(userId);
+
+                if (user is null)
+                {
+                    return Results.NotFound("User not found");
+                }
+    
+                var folderPath = Path.Combine("wwwroot", "images", "users");
+    
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                var fileName = user.Id;
+                var filePath = Path.Combine(folderPath, fileName + ".jpeg");
+                await using var stream = new FileStream(filePath, FileMode.Create);
+                await image.CopyToAsync(stream);
+                return Results.Ok();
+            })
+            .DisableAntiforgery()
+            .WithName("SetProfilePicture")
+            .WithDescription("Set the user's profile picture")
+            .WithTags("Users")
+            .Accepts<IFormFile>("multipart/form-data")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest);
+
+
 
     return group;
     }
