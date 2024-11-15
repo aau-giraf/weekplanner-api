@@ -35,13 +35,17 @@ public static class PictogramEndpoints
                 }
 
                 CreatePictogramDTO createPictogramDTO = new CreatePictogramDTO(organizationId.GetValueOrDefault(), pictogramName);
+
                 var fileExtension = Path.GetExtension(image.FileName);
-                var url = Path.Combine("pictograms", organizationId.ToString(), $"{pictogramName}{fileExtension}");
+                var url = Path.Combine("images", "pictograms", organizationId.ToString(), $"{pictogramName}{fileExtension}");
                 Pictogram pictogram = createPictogramDTO.ToEntity(url);
                 //Ensure the directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine("/app", url)));
-
-                await using var stream = new FileStream(Path.Combine("/app", url), FileMode.Create);
+                var directoryPath = Path.GetDirectoryName(Path.Combine("wwwroot", url));
+                if (directoryPath != null)
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+                await using var stream = new FileStream(Path.Combine("wwwroot", url), FileMode.Create);
                 await image.CopyToAsync(stream);
                 try
                 {
@@ -123,9 +127,9 @@ public static class PictogramEndpoints
                 Pictogram? pictogram = await dbContext.Pictograms.FindAsync(pictogramId);
                 if (pictogram is not null)
                 {
-                    if (File.Exists(Path.Combine("/app", pictogram.PictogramUrl)))
+                    if (File.Exists(Path.Combine("wwwroot", "images", pictogram.PictogramUrl)))
                     {
-                        File.Delete(Path.Combine("/app", pictogram.PictogramUrl));
+                        File.Delete(Path.Combine("wwwroot", "images", pictogram.PictogramUrl));
                     }
                     dbContext.Pictograms.Remove(pictogram);
                     await dbContext.SaveChangesAsync();
