@@ -26,18 +26,24 @@ public class OrganizationEndpointsTests
         var factory = new GirafWebApplicationFactory(seeder);
         var client = factory.CreateClient();
 
-        // Use seeded user for test
-        var user = UserWithOrganizationsSeeder.SeededUserId;
+        // Retrieve the actual user ID from the seeded data
+        using var scope = factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+        var user = await dbContext.Users
+            .Include(u => u.Organizations)
+            .FirstOrDefaultAsync();
+        Assert.NotNull(user);
 
         // Act
-        var response = await client.GetAsync($"/organizations/user/{user}");
+        var response = await client.GetAsync($"/organizations/user/{user.Id}");
 
         // Assert
         response.EnsureSuccessStatusCode();
         var organizations = await response.Content.ReadFromJsonAsync<List<OrganizationNameOnlyDTO>>();
         Assert.NotNull(organizations);
-        Assert.Equal(2, organizations.Count); // Adjust this depending on the seeder's data
+        Assert.Equal(2, organizations.Count);
     }
+
 
     // Test GET /organizations/user/{id} when user does not exist
     [Fact]
@@ -113,12 +119,17 @@ public class OrganizationEndpointsTests
         var factory = new GirafWebApplicationFactory(seeder);
         var client = factory.CreateClient();
 
-        // Use seeded user for the test
-        var userId = BasicUserSeeder.SeededUserId;
-        var newOrgDto = new CreateOrganizationDTO{Name = "New Organization"};
+        // Retrieve the seeded user's ID from the database
+        using var scope = factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+
+        var user = await dbContext.Users.FirstOrDefaultAsync();
+        Assert.NotNull(user);
+
+        var newOrgDto = new CreateOrganizationDTO { Name = "New Organization" };
 
         // Act
-        var response = await client.PostAsJsonAsync($"/organizations?id={userId}", newOrgDto);
+        var response = await client.PostAsJsonAsync($"/organizations?id={user.Id}", newOrgDto);
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -126,6 +137,7 @@ public class OrganizationEndpointsTests
         Assert.NotNull(createdOrganization);
         Assert.Equal("New Organization", createdOrganization.Name);
     }
+
 
     // Test POST /organizations when user does not exist
     [Fact]
@@ -328,8 +340,15 @@ public class OrganizationEndpointsTests
         var seeder = new BasicUserSeeder();
         var factory = new GirafWebApplicationFactory(seeder);
         var client = factory.CreateClient();
-        var nonExistentOrgId = 9999;
-        var userId = BasicUserSeeder.SeededUserId;
+
+        // Retrieve the seeded user from the database
+        using var scope = factory.Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+        var user = await dbContext.Users.FirstOrDefaultAsync();
+        Assert.NotNull(user);
+
+        var nonExistentOrgId = 9999; // Using an ID that doesn't exist in the database
+        var userId = user.Id;
 
         // Act
         var response = await client.PutAsync($"/organizations/{nonExistentOrgId}/remove-user/{userId}", null);
@@ -337,4 +356,5 @@ public class OrganizationEndpointsTests
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
+
 }

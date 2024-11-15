@@ -8,8 +8,6 @@ namespace Giraf.IntegrationTests.Utils.DbSeeders;
 // This seeder creates a user and associates multiple organizations with them for the GET /organizations/user/{id} test.
 public class UserWithOrganizationsSeeder : DbSeeder
 {
-    public static string SeededUserId = "test_user_id";
-
     public override void SeedData(DbContext context)
     {
         var dbContext = (GirafDbContext)context;
