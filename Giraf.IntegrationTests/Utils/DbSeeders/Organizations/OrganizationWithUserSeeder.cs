@@ -10,7 +10,7 @@ namespace Giraf.IntegrationTests.Utils.DbSeeders;
 // This seeder creates an organization and associates a user with it for the RemoveUser tests.
 public class OrganizationWithUserSeeder : DbSeeder
 {
-        public override void SeedData(DbContext context)
+    public override void SeedData(DbContext context)
     {
         var dbContext = (GirafDbContext)context;
         var user = new GirafUser
@@ -19,6 +19,9 @@ public class OrganizationWithUserSeeder : DbSeeder
             LastName = "ForTestingPurposes",
             Organizations = new List<Organization>()
         };
+
+        dbContext.Users.Add(user);
+        
         var organization = new Organization
         {
             Name = "Organization With User",
