@@ -3,6 +3,7 @@ using GirafAPI.Entities.Invitations;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Activities;
+using GirafAPI.Entities.Pictograms;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using GirafAPI.Entities.Users;
@@ -19,5 +20,6 @@ namespace GirafAPI.Data
         public DbSet<Organization> Organizations => Set<Organization>();
         public DbSet<Invitation> Invitations => Set<Invitation>();
         public DbSet<Grade> Grades { get; set; }
+        public DbSet<Pictogram> Pictograms => Set<Pictogram>();
     }
 }

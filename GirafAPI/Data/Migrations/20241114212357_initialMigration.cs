@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace GirafAPI.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initialMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,11 +30,11 @@ namespace GirafAPI.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
+                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: false),
                     FirstName = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     LastName = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
-                    UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedEmail = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "INTEGER", nullable: false),
                     PasswordHash = table.Column<string>(type: "TEXT", nullable: true),
@@ -78,6 +78,21 @@ namespace GirafAPI.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Organizations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Pictograms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OrganizationId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PictogramName = table.Column<string>(type: "TEXT", nullable: false),
+                    PictogramUrl = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Pictograms", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -269,6 +284,7 @@ namespace GirafAPI.Data.Migrations
                     StartTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
                     EndTime = table.Column<TimeOnly>(type: "TEXT", nullable: false),
                     IsCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PictogramId = table.Column<int>(type: "INTEGER", nullable: false),
                     CitizenId = table.Column<int>(type: "INTEGER", nullable: true),
                     GradeId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
@@ -285,6 +301,12 @@ namespace GirafAPI.Data.Migrations
                         column: x => x.GradeId,
                         principalTable: "Grades",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Activities_Pictograms_PictogramId",
+                        column: x => x.PictogramId,
+                        principalTable: "Pictograms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -296,6 +318,11 @@ namespace GirafAPI.Data.Migrations
                 name: "IX_Activities_GradeId",
                 table: "Activities",
                 column: "GradeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Activities_PictogramId",
+                table: "Activities",
+                column: "PictogramId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -384,6 +411,9 @@ namespace GirafAPI.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Citizens");
+
+            migrationBuilder.DropTable(
+                name: "Pictograms");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
