@@ -28,12 +28,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        "/app/pictograms"),
-    RequestPath = "/pictograms"
-});
+app.UseStaticFiles();
 app.UseAntiforgery();
 
 // Map endpoints

@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GirafAPI.Data.Migrations
+namespace GirafAPI.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    [Migration("20241114212357_initialMigration")]
-    partial class initialMigration
+    [Migration("20241115105706_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
