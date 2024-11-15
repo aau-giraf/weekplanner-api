@@ -157,7 +157,7 @@ public class CitizensEndpointTests
     public async Task AddCitizen_ReturnsOk_WhenOrganizationExists()
     {
         // Arrange
-        var seeder = new OrganizationSeeder("Test Organization");
+        var seeder = new BasicOrganizationSeeder();
         var factory = new GirafWebApplicationFactory(seeder);
         var client = factory.CreateClient();
 
@@ -247,7 +247,7 @@ public class CitizensEndpointTests
     public async Task RemoveCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
     {
         // Arrange
-        var seeder = new OrganizationSeeder();
+        var seeder = new BasicOrganizationSeeder();
         var factory = new GirafWebApplicationFactory(seeder);
         var client = factory.CreateClient();
 

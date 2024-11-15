@@ -10,28 +10,44 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Giraf.IntegrationTests.Utils;
 
 // This factory creates a Giraf web api configured for testing.
-internal class GirafWebApplicationFactory(DbSeeder seeder) : WebApplicationFactory<Program>
+internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
 {
+    private readonly DbSeeder _seeder;
+
+    public GirafWebApplicationFactory(DbSeeder seeder)
+    {
+        _seeder = seeder;
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Testing");
+        builder.UseEnvironment("Testing"); // Set the environment to "Testing"
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll(typeof(DbContextOptions<GirafDbContext>));
 
-            // Add a Sqlite database for testing.
+            // Use a unique SQLite database file for each test to avoid concurrency issues
+            var dbFileName = $"GirafTestDb_{Guid.NewGuid()}.db";
+
+            // Configure the DbContext for testing
             services.AddDbContext<GirafDbContext>(options =>
             {
-                options.UseSqlite("Data Source=GirafTestDb.db");
+                options.UseSqlite($"Data Source={dbFileName}");
             });
 
-            // Build scoped database context
+            // Build the service provider and create a scope
             var serviceProvider = services.BuildServiceProvider();
-            var scope = serviceProvider.CreateScope();
+            using var scope = serviceProvider.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            
-            // Seed test database
-            seeder.Seed(dbContext);
+
+            // Clear the database before seeding
+            dbContext.Database.EnsureDeleted();
+
+            // Use migrations to apply schema, especially for identity tables
+            dbContext.Database.Migrate();
+
+            // Seed the database with scenario-specific data
+            _seeder.SeedData(dbContext);
         });
     }
 }

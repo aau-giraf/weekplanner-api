@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Activities;
 using GirafAPI.Data;
+using GirafAPI.Entities.Organizations;
+using GirafAPI.Entities.Users;
+using GirafAPI.Entities.Grades;
 
 namespace Giraf.IntegrationTests.Utils.DbSeeders;
 
@@ -12,12 +15,17 @@ public class CitizenWithOrganizationSeeder : DbSeeder
     {
         var dbContext = (GirafDbContext)context;
 
-        // Seed organization using OrganizationSeeder
-        var organizationSeeder = new OrganizationSeeder("Specific Test Organization");
-        organizationSeeder.Seed(dbContext);
+        var organization = new Organization
+        {
+            Name = "Test Organization for Citizen",
+            Users = new List<GirafUser>(),
+            Citizens = new List<Citizen>(),
+            Grades = new List<Grade>()
+        };
 
-        // Get the seeded organization to associate with the citizen
-        var organization = dbContext.Organizations.FirstOrDefault();
+        // Add an organization to the context
+        dbContext.Organizations.Add(organization);
+        dbContext.SaveChanges();
 
         dbContext.Citizens.Add(new Citizen
         {

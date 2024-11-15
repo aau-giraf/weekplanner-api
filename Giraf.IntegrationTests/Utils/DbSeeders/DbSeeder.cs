@@ -6,8 +6,7 @@ public abstract class DbSeeder
 {
     public void Seed(DbContext context)
     {
-        context.Database.EnsureDeleted();
-        context.Database.EnsureCreated();
+        
 
         SeedData(context);
     }
