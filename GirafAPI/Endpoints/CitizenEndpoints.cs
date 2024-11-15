@@ -1,6 +1,7 @@
 ﻿using GirafAPI.Data;
 using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Citizens.DTOs;
+using GirafAPI.Entities.Activities;
 using GirafAPI.Mapping;
 using Microsoft.EntityFrameworkCore;
 
@@ -73,7 +74,14 @@ public static class CitizenEndpoints
 
                     var activities = citizen.Activities;
                     var organization = citizen.Organization;
-
+                    if (citizen.Organization == null)
+                    {
+                        return Results.BadRequest("The citizen's organization is not set.");
+                    }
+                    if (citizen.Activities == null)
+                    {
+                        citizen.Activities = new List<Activity>();
+                    }
                     dbContext.Entry(citizen).CurrentValues.SetValues(updatedCitizen.ToEntity(id, activities, organization));
                     await dbContext.SaveChangesAsync();
 

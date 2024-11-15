@@ -14,6 +14,7 @@ internal class GirafWebApplicationFactory(DbSeeder seeder) : WebApplicationFacto
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseEnvironment("Testing");
         builder.ConfigureTestServices(services =>
         {
             services.RemoveAll(typeof(DbContextOptions<GirafDbContext>));
@@ -30,7 +31,7 @@ internal class GirafWebApplicationFactory(DbSeeder seeder) : WebApplicationFacto
             var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
             
             // Seed test database
-            seeder.SeedData(dbContext);
+            seeder.Seed(dbContext);
         });
     }
 }

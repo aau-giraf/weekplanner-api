@@ -32,8 +32,12 @@ app.MapOrganizationEndpoints();
 app.MapInvitationEndpoints();
 app.MapGradeEndpoints();
 
-await app.ApplyMigrationsAsync();
-await app.SeedDataAsync();
+// Apply migrations and seed data only if not in the "Testing" environment
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    await app.ApplyMigrationsAsync();
+    await app.SeedDataAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
