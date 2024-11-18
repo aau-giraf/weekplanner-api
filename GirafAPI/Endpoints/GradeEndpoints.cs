@@ -126,28 +126,48 @@ public static class GradeEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{gradeId}/add-citizen/{citizenId}", async (int gradeId, int citizenId, GirafDbContext dbContext) =>
+        group.MapPut("/{gradeId}/add-citizens", async (int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
             {
                 try
                 {
                     var grade = await dbContext.Grades.FindAsync(gradeId);
-
+                    
                     if (grade is null)
                     {
                         return Results.NotFound("Grade not found.");
                     }
-
+                    
                     await dbContext.Entry(grade)
                         .Collection(g => g.Citizens).LoadAsync();
                     
-                    var citizen = await dbContext.Citizens.FindAsync(citizenId);
-
-                    if (citizen is null)
+                    var citizens = await dbContext.Citizens
+                        .Where(c => citizenIds.Contains(c.Id))
+                        .ToListAsync();
+                    
+                    var missingCitizenIds = citizenIds.Except(citizens.Select(c => c.Id)).ToList();
+                    if (missingCitizenIds.Any())
                     {
-                        return Results.NotFound("Citizen not found.");
+                        return Results.NotFound("Some citizens not found. Please refresh the page.");
                     }
-
-                    grade.Citizens.Add(citizen);
+                    
+                    var alreadyAssignedCitizens = new List<string>();
+                    foreach (var citizen in citizens)
+                    {
+                        if (grade.Citizens.Contains(citizen))
+                        {
+                            alreadyAssignedCitizens.Add($"{grade.Name}: {citizen.FirstName} {citizen.LastName}");
+                        }
+                        else
+                        {
+                            grade.Citizens.Add(citizen);
+                        }
+                    }
+                    
+                    if (alreadyAssignedCitizens.Any())
+                    {
+                        return Results.BadRequest($"Citizens already assigned to {string.Join(", ", alreadyAssignedCitizens)}.");
+                    }
+                    
                     await dbContext.SaveChangesAsync();
                     return Results.Ok(grade.ToDTO());
                 }
@@ -156,14 +176,14 @@ public static class GradeEndpoints
                     return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
                 }
             })
-            .WithName("AddCitizenToGrade")
+            .WithName("AddCitizensToGrade")
             .WithTags("Grade")
-            .WithDescription("Add a citizen to a grade.")
+            .WithDescription("Add one or more citizens to a grade.")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{gradeId}/remove-citizen/{citizenId}", async (int gradeId, int citizenId, GirafDbContext dbContext) =>
+        group.MapPut("/{gradeId}/remove-citizens", async (int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
             {
                 try
                 {
@@ -173,18 +193,37 @@ public static class GradeEndpoints
                     {
                         return Results.NotFound("Grade not found.");
                     }
-
+                    
                     await dbContext.Entry(grade)
                         .Collection(g => g.Citizens).LoadAsync();
                     
-                    var citizen = await dbContext.Citizens.FindAsync(citizenId);
-
-                    if (citizen is null)
+                    var citizens = await dbContext.Citizens
+                        .Where(c => citizenIds.Contains(c.Id))
+                        .ToListAsync();
+                    
+                    var missingCitizenIds = citizenIds.Except(citizens.Select(c => c.Id)).ToList();
+                    if (missingCitizenIds.Any())
                     {
-                        return Results.NotFound("Citizen not found.");
+                        return Results.NotFound("Some citizens not found. Please refresh the page.");
                     }
-
-                    grade.Citizens.Remove(citizen);
+                    
+                    var alreadyRemovedCitizens = new List<string>();
+                    foreach (var citizen in citizens)
+                    {
+                        if (!grade.Citizens.Contains(citizen))
+                        {
+                            alreadyRemovedCitizens.Add($"{citizen.FirstName} {citizen.LastName}");
+                        }
+                        else
+                        {
+                            grade.Citizens.Remove(citizen);
+                        }
+                    }
+                    if (alreadyRemovedCitizens.Any())
+                    {
+                        return Results.BadRequest($"The following citizens were already removed from {grade.Name}: {string.Join(", ", alreadyRemovedCitizens)}.");
+                    }
+                    
                     await dbContext.SaveChangesAsync();
                     return Results.Ok(grade.ToDTO());
                 }
@@ -195,7 +234,7 @@ public static class GradeEndpoints
             })
             .WithName("RemoveCitizenFromGrade")
             .WithTags("Grade")
-            .WithDescription("Remove a citizen from a grade.")
+            .WithDescription("Remove one or more citizens from a grade.")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
