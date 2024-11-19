@@ -2,7 +2,6 @@ using GirafAPI.Data;
 using GirafAPI.Entities.Pictograms;
 using GirafAPI.Entities.Pictograms.DTOs;
 using GirafAPI.Mapping;
-using GirafAPI.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +18,7 @@ public static class PictogramEndpoints
         // therefore we use manual binding
         group.MapPost("/", async ([FromForm] IFormFile image, [FromForm] int? organizationId, [FromForm] string pictogramName, GirafDbContext context) =>
             {
-                if (image is null || image.Length == 0)
+                if (image.Length == 0)
                 {
                     return Results.BadRequest("Image file is required");
                 }
@@ -100,10 +99,11 @@ public static class PictogramEndpoints
               try
               {
                 var pictograms = await dbContext.Pictograms
-                    .Where(p => p.OrganizationId == organizationId)
+                    .Where(p => p.OrganizationId == organizationId || p.OrganizationId == null)
                     .Select(p => p.ToDTO())
                     .AsNoTracking()
                     .ToListAsync();
+                
 
                 return Results.Ok(pictograms);
               }
@@ -135,10 +135,7 @@ public static class PictogramEndpoints
                     await dbContext.SaveChangesAsync();
                     return Results.Ok("Pictogram deleted");
                 }
-                else
-                {
-                  return Results.NotFound("Pictogram not found");
-                }
+                return Results.NotFound("Pictogram not found");
               }
               catch (Exception)
               {
