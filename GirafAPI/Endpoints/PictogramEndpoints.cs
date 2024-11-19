@@ -94,15 +94,19 @@ public static class PictogramEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("/organizationId:int", async (int organizationId, GirafDbContext dbContext) =>
+        group.MapGet("/organizationId:int", async (int organizationId, int currentPage, int pageSize, GirafDbContext dbContext) =>
             {
               try
               {
-                var pictograms = await dbContext.Pictograms
-                    .Where(p => p.OrganizationId == organizationId || p.OrganizationId == null)
-                    .Select(p => p.ToDTO())
-                    .AsNoTracking()
-                    .ToListAsync();
+                  var skip = (currentPage - 1) * pageSize;
+
+                  var pictograms = await dbContext.Pictograms
+                      .Where(p => p.OrganizationId == organizationId || p.OrganizationId == null)
+                      .Skip(skip)  
+                      .Take(pageSize)  
+                      .Select(p => p.ToDTO())
+                      .AsNoTracking()
+                      .ToListAsync();
                 
 
                 return Results.Ok(pictograms);
