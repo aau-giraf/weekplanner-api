@@ -108,9 +108,19 @@ public static class UsersEndpoints
         //TODO Add auth so a user can only change their own username unless they're an admin
         group.MapPut("/{id}/change-username", async (string id, UpdateUsernameDTO updateUsernameDTO, UserManager<GirafUser> userManager) =>
         {
-            var user = await userManager.FindByIdAsync(id);
-            var result = await userManager.SetUserNameAsync(user, updateUsernameDTO.Username);
-            return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
+            try{
+                var user = await userManager.FindByIdAsync(id);
+                if(user == null) {
+                    return Results.BadRequest("Invalid user id.");
+                }
+                var result = await userManager.SetUserNameAsync(user, updateUsernameDTO.Username);
+                return Results.Ok();
+            }
+            catch 
+            {
+                return Results.Problem("An error occurred while trying to delete user.", statusCode: StatusCodes.Status500InternalServerError);
+            }
+            
         })
         .WithName("ChangeUsername")
         .WithTags("Users")
@@ -122,6 +132,9 @@ public static class UsersEndpoints
         group.MapDelete("/{id}", async (string id, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
+            }
             var result = await userManager.DeleteAsync(user);
             return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
         })
