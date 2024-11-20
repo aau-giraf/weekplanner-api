@@ -7,6 +7,7 @@ using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.DTOs;
+using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -71,6 +72,7 @@ public class UsersEndpointTests
     }
 
     // 3. Test PUT /users/{id} when updating an existing user successfully
+    // 3. Test PUT /users/{id} when updating an existing user successfully
     [Fact]
     public async Task UpdateUser_ReturnsOk_WhenUserExists()
     {
@@ -79,28 +81,37 @@ public class UsersEndpointTests
         var factory = new GirafWebApplicationFactory(seeder);
         var client = factory.CreateClient();
 
+        GirafUser existingUser;
+        string userId;
+
         // Retrieve the actual user ID from the database after seeding
-        using var scope = factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-        var existingUser = await dbContext.Users.FirstOrDefaultAsync();
-        Assert.NotNull(existingUser);
+        using (var scope = factory.Services.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            existingUser = await dbContext.Users.FirstOrDefaultAsync();
+            Assert.NotNull(existingUser);
+            userId = existingUser.Id;
+        }
 
         var updateUserDto = new UpdateUserDTO("UpdatedFirstName", "UpdatedLastName");
 
         // Act
-        var response = await client.PutAsJsonAsync($"/users/{existingUser.Id}", updateUserDto);
+        var response = await client.PutAsJsonAsync($"/users/{userId}", updateUserDto);
 
         // Assert
         response.EnsureSuccessStatusCode();
 
-        // Verify that the user was updated
-        var updatedUserResponse = await client.GetAsync($"/users/{existingUser.Id}");
-        updatedUserResponse.EnsureSuccessStatusCode();
-        var updatedUser = await updatedUserResponse.Content.ReadFromJsonAsync<UserDTO>();
-        Assert.NotNull(updatedUser);
-        Assert.Equal("UpdatedFirstName", updatedUser.FirstName);
-        Assert.Equal("UpdatedLastName", updatedUser.LastName);
+        // Verify that the user was updated using a new DbContext
+        using (var verificationScope = factory.Services.CreateScope())
+        {
+            var verificationDbContext = verificationScope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var updatedUser = await verificationDbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            Assert.NotNull(updatedUser);
+            Assert.Equal("UpdatedFirstName", updatedUser.FirstName);
+            Assert.Equal("UpdatedLastName", updatedUser.LastName);
+        }
     }
+
 
     // 4. Test PUT /users/{id} when the user does not exist
     [Fact]
