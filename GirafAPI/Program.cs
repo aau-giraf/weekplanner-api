@@ -43,6 +43,7 @@ app.MapPictogramEndpoints();
 
 await app.ApplyMigrationsAsync();
 await app.SeedDataAsync();
+await app.AddDefaultPictograms();
 
 if (app.Environment.IsDevelopment())
 {
