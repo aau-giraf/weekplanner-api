@@ -6,8 +6,6 @@ public abstract class DbSeeder
 {
     public void Seed(DbContext context)
     {
-        
-
         SeedData(context);
     }
 

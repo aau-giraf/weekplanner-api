@@ -265,17 +265,19 @@ public class UsersEndpointTests
         var user = await dbContext.Users.FirstOrDefaultAsync();
         Assert.NotNull(user);
     
-        var updateUsernameDto = new UpdateUsernameDTO("updateduser");
+        var updateUsernameDto = new UpdateUsernameDTO("updatedUser");
 
         // Act
         var response = await client.PutAsJsonAsync($"/users/{user.Id}/change-username", updateUsernameDto);
         
-
         // Assert
-        var updatedUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
         response.EnsureSuccessStatusCode();
-        Assert.NotNull(updatedUser);
-        Assert.Equal("updateduser", updatedUser.UserName);
+
+        // Reload the user entity from the database
+        await dbContext.Entry(user).ReloadAsync();
+
+        Assert.NotNull(user);
+        Assert.Equal("updatedUser", user.UserName);
     }
 
     // 12. Test PUT /users/{id}/change-username when the user does not exist
@@ -305,7 +307,7 @@ public class UsersEndpointTests
     public async Task DeleteUser_ReturnsNoContent_WhenUserExists()
     {
         // Arrange
-        var seeder = new BasicUserSeeder();
+        var seeder = new BasicUserWithPasswordSeeder();
         var factory = new GirafWebApplicationFactory(seeder);
         var client = factory.CreateClient();
 
@@ -315,13 +317,24 @@ public class UsersEndpointTests
         var user = await dbContext.Users.FirstOrDefaultAsync();
         Assert.NotNull(user);
 
+        var deleteUserDto = new DeleteUserDTO
+        {
+            Id = user.Id,
+            Password = BasicUserWithPasswordSeeder.SeededUserPassword // Use the correct password
+        };
+
         // Act
-        var response = await client.DeleteAsync($"/users/{user.Id}");
+        var request = new HttpRequestMessage(HttpMethod.Delete, $"/users/{user.Id}")
+        {
+            Content = JsonContent.Create(deleteUserDto)
+        };
+        var response = await client.SendAsync(request);
 
         // Assert
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
         // Verify that the user was removed
+        await dbContext.Entry(user).ReloadAsync();
         var deletedUser = await dbContext.Users.FindAsync(user.Id);
         Assert.Null(deletedUser);
     }
