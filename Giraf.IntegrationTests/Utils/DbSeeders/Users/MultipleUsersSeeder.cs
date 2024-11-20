@@ -1,5 +1,6 @@
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,14 +16,16 @@ public class MultipleUsersSeeder : DbSeeder
                 UserName = "user1",
                 Email = "user1@example.com",
                 FirstName = "User",
-                LastName = "One"
+                LastName = "One",
+                Organizations = new List<Organization>()
             },
             new GirafUser
             {
                 UserName = "user2",
                 Email = "user2@example.com",
                 FirstName = "User",
-                LastName = "Two"
+                LastName = "Two",
+                Organizations = new List<Organization>()
             }
         });
         dbContext.SaveChanges();

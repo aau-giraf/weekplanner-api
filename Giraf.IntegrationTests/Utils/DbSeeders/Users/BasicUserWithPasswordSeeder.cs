@@ -1,5 +1,6 @@
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ public class BasicUserWithPasswordSeeder : DbSeeder
             Email = "basicuser@example.com",
             FirstName = "Basic",
             LastName = "User",
+            Organizations = new List<Organization>(),
             PasswordHash = new PasswordHasher<GirafUser>().HashPassword(null, SeededUserPassword)
         };
         dbContext.Users.Add(user);

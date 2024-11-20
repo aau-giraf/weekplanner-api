@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users.DTOs;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -260,22 +262,18 @@ public class UsersEndpointTests
         // Retrieve the actual user ID
         using var scope = factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.UserName == "basicuser");
+        var user = await dbContext.Users.FirstOrDefaultAsync();
         Assert.NotNull(user);
-
-        var updateUsernameDto = new UpdateUsernameDTO
-        (
-            Username : "updateduser"
-        );
+    
+        var updateUsernameDto = new UpdateUsernameDTO("updateduser");
 
         // Act
         var response = await client.PutAsJsonAsync($"/users/{user.Id}/change-username", updateUsernameDto);
+        
 
         // Assert
-        response.EnsureSuccessStatusCode();
-
-        // Verify username change by retrieving updated user data
         var updatedUser = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == user.Id);
+        response.EnsureSuccessStatusCode();
         Assert.NotNull(updatedUser);
         Assert.Equal("updateduser", updatedUser.UserName);
     }

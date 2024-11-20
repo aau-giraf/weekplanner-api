@@ -1,4 +1,5 @@
 using GirafAPI.Data;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,9 +13,11 @@ public class BasicUserSeeder : DbSeeder
         var dbContext = (GirafDbContext)context;
         var user = new GirafUser
         {
+            UserName = "BasicUserUsername",
+            Email = "BasicUser@email.com",
             FirstName = "BasicUserSeeder.cs",
             LastName = "ForTestingPurposes",
-            Organizations = new List<GirafAPI.Entities.Organizations.Organization>()
+            Organizations = new List<Organization>()
         };
         dbContext.Users.Add(user);
         dbContext.SaveChanges();

@@ -15,6 +15,8 @@ public class UserWithOrganizationsSeeder : DbSeeder
         {
             FirstName = "UserWithOrganizationSeeder",
             LastName = "TestingPurposes",
+            UserName = "BasicUserUsername",
+            Email = "BasicUser@email.com",
             Organizations = new List<Organization>
             {
                 new Organization
