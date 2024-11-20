@@ -1,4 +1,6 @@
-﻿namespace GirafAPI.Entities.Activities;
+﻿using GirafAPI.Entities.Pictograms;
+
+namespace GirafAPI.Entities.Activities;
 
 // Data model of one activity in a day
 public class Activity
@@ -16,4 +18,6 @@ public class Activity
     public required TimeOnly EndTime { get; set; }
 
     public bool IsCompleted { get; set; }
+    
+    public Pictogram Pictogram { get; set; }
 }

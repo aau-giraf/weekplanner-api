@@ -1,6 +1,7 @@
 using GirafAPI.Data;
 using GirafAPI.Endpoints;
 using GirafAPI.Extensions;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,6 +11,11 @@ builder.Services.ConfigureDatabase(builder.Configuration, builder.Environment)
     .ConfigureJwt(builder.Configuration)
     .ConfigureAuthorizationPolicies()
     .ConfigureSwagger();
+
+builder.Services.AddAntiforgery(options =>
+    {
+      options.Cookie.Expiration = TimeSpan.Zero;
+    });
 
 var app = builder.Build();
 
@@ -22,6 +28,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseStaticFiles();
+app.UseAntiforgery();
 
 // Map endpoints
 app.MapCitizensEndpoints();
@@ -31,6 +39,7 @@ app.MapActivityEndpoints();
 app.MapOrganizationEndpoints();
 app.MapInvitationEndpoints();
 app.MapGradeEndpoints();
+app.MapPictogramEndpoints();
 
 // Apply migrations and seed data only if not in the "Testing" environment
 if (!app.Environment.IsEnvironment("Testing"))
@@ -47,3 +56,4 @@ else
 {
     app.Run();
 }
+

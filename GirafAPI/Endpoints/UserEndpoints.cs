@@ -1,13 +1,11 @@
-using GirafAPI.Data;
 using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
 using GirafAPI.Mapping;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Extensions;
 
 namespace GirafAPI.Endpoints;
 
@@ -95,7 +93,15 @@ public static class UsersEndpoints
         group.MapPut("/{id}/change-password", async (string id, UpdateUserPasswordDTO updatePasswordDTO, UserManager<GirafUser> userManager) =>
         {
             var user = await userManager.FindByIdAsync(id);
-            var result = await userManager.ChangePasswordAsync(user, updatePasswordDTO.oldPassword, updatePasswordDTO.newPassword);
+            
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
+            }
+
+            var result = await userManager.ChangePasswordAsync(
+                user, 
+                updatePasswordDTO.oldPassword, 
+                updatePasswordDTO.newPassword);
             return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
         })
         .WithName("ChangeUserPassword")
@@ -108,19 +114,14 @@ public static class UsersEndpoints
         //TODO Add auth so a user can only change their own username unless they're an admin
         group.MapPut("/{id}/change-username", async (string id, UpdateUsernameDTO updateUsernameDTO, UserManager<GirafUser> userManager) =>
         {
-            try{
-                var user = await userManager.FindByIdAsync(id);
-                if(user == null) {
-                    return Results.BadRequest("Invalid user id.");
-                }
-                var result = await userManager.SetUserNameAsync(user, updateUsernameDTO.Username);
-                return Results.Ok();
+            var user = await userManager.FindByIdAsync(id);
+
+            if(user == null) {
+                return Results.BadRequest("Invalid user id.");
             }
-            catch 
-            {
-                return Results.Problem("An error occurred while trying to delete user.", statusCode: StatusCodes.Status500InternalServerError);
-            }
-            
+
+            var result = await userManager.SetUserNameAsync(user, updateUsernameDTO.Username);
+            return result.Succeeded ? Results.Ok() : Results.BadRequest(result.Errors);
         })
         .WithName("ChangeUsername")
         .WithTags("Users")
@@ -129,20 +130,76 @@ public static class UsersEndpoints
         .Produces(StatusCodes.Status200OK)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
 
-        group.MapDelete("/{id}", async (string id, UserManager<GirafUser> userManager) =>
+        //[FromBody] is needed by ASP NETs .MapDelete method
+        group.MapDelete("/{id}", async ([FromBody] DeleteUserDTO deleteUserDTO, UserManager<GirafUser> userManager) =>
         {
-            var user = await userManager.FindByIdAsync(id);
-            if(user == null) {
-                return Results.BadRequest("Invalid user id.");
+            try {
+                var user = await userManager.FindByIdAsync(deleteUserDTO.Id);
+
+                if(user == null) {
+                    return Results.BadRequest("Invalid user id.");
+                }
+                
+                var passwordValid = await userManager.CheckPasswordAsync(user, deleteUserDTO.Password);
+
+                if(!passwordValid) {
+                    return Results.BadRequest("Invalid password");
+                }
+                
+                await userManager.DeleteAsync(user);
+                return Results.NoContent();
             }
-            var result = await userManager.DeleteAsync(user);
-            return result.Succeeded ? Results.NoContent() : Results.BadRequest(result.Errors);
+            catch (Exception) 
+            {
+                //unexpected error
+                return Results.Problem("An error occurred while trying to delete user.", statusCode: StatusCodes.Status500InternalServerError);
+            }
+            
         })
         .WithName("DeleteUser")
         .WithTags("Users")
         .WithDescription("Deletes a user by their ID. Requires administrative privileges.")
         .Produces(StatusCodes.Status204NoContent)
         .Produces<IEnumerable<IdentityError>>(StatusCodes.Status400BadRequest);
+        
+        
+        group.MapPost("/setProfilePicture", async ([FromForm] IFormFile image, string userId, UserManager<GirafUser> userManager) =>
+            {
+                if (image.Length < 0)
+                {
+                    return Results.BadRequest("Image file is required");
+                }
+
+                var user = await userManager.FindByIdAsync(userId);
+
+                if (user is null)
+                {
+                    return Results.NotFound("User not found");
+                }
+    
+                var folderPath = Path.Combine("wwwroot", "images", "users");
+    
+                if (!Directory.Exists(folderPath))
+                {
+                    Directory.CreateDirectory(folderPath);
+                }
+
+                var fileName = user.Id;
+                var filePath = Path.Combine(folderPath, fileName + ".jpeg");
+                await using var stream = new FileStream(filePath, FileMode.Create);
+                await image.CopyToAsync(stream);
+                return Results.Ok();
+            })
+            .DisableAntiforgery()
+            .WithName("SetProfilePicture")
+            .WithDescription("Set the user's profile picture")
+            .WithTags("Users")
+            .Accepts<IFormFile>("multipart/form-data")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest);
+
+
 
     return group;
     }

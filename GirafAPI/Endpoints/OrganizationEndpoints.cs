@@ -5,6 +5,7 @@ using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using GirafAPI.Mapping;
+using GirafAPI.Entities.Grades;
 
 namespace GirafAPI.Endpoints;
 
@@ -28,12 +29,8 @@ public static class OrganizationEndpoints
                     await dbContext.Entry(user)
                         .Collection(u => u.Organizations).LoadAsync();
 
-                    if (user.Organizations is null)
-                    {
-                        return Results.NotFound();
-                    }
-
                     var organizations = new List<OrganizationNameOnlyDTO>();
+                    
                     foreach (var organization in user.Organizations)
                     {
                         organizations.Add(organization.ToNameOnlyDTO());
@@ -50,7 +47,6 @@ public static class OrganizationEndpoints
             .WithDescription("Gets organizations for user.")
             .WithTags("Organizations")
             .Produces<List<OrganizationNameOnlyDTO>>()
-            .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
@@ -207,6 +203,42 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
+        
+        group.MapGet("/grades/{id}", async (int id, GirafDbContext dbContext) => {
+            try
+            {
+                Grade? grade = await dbContext.Grades.FindAsync(id);
+                if (grade is null)
+                {
+                    return Results.NotFound();
+                }
+                var organizationId = grade.OrganizationId;
+                Organization? organization = await dbContext.Organizations.FindAsync(organizationId);
+                if (organization is null)
+                {
+                    return Results.NotFound();
+                }
+
+                await dbContext.Entry(organization)
+                    .Collection(o => o.Users).LoadAsync();
+                await dbContext.Entry(organization)
+                    .Collection(o => o.Citizens).LoadAsync();
+                await dbContext.Entry(organization)
+                    .Collection(o => o.Grades).LoadAsync();
+
+                return Results.Ok(organization.ToDTO());         
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+            }
+        })
+        .WithName("GetOrganizationByGradeId")
+        .WithDescription("Gets organization by grade id.")
+        .WithTags("Organizations")
+        .Produces(StatusCodes.Status200OK)
+        .Produces(StatusCodes.Status404NotFound)
+        .Produces(StatusCodes.Status500InternalServerError);
 
         return group;
     }

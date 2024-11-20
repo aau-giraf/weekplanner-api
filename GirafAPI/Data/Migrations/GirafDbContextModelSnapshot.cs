@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GirafAPI.Data.Migrations
+namespace GirafAPI.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
     partial class GirafDbContextModelSnapshot : ModelSnapshot
@@ -46,6 +46,9 @@ namespace GirafAPI.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("PictogramId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<TimeOnly>("StartTime")
                         .HasColumnType("TEXT");
 
@@ -54,6 +57,8 @@ namespace GirafAPI.Data.Migrations
                     b.HasIndex("CitizenId");
 
                     b.HasIndex("GradeId");
+
+                    b.HasIndex("PictogramId");
 
                     b.ToTable("Activities");
                 });
@@ -145,6 +150,28 @@ namespace GirafAPI.Data.Migrations
                     b.ToTable("Organizations");
                 });
 
+            modelBuilder.Entity("GirafAPI.Entities.Pictograms.Pictogram", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PictogramName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("PictogramUrl")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Pictograms");
+                });
+
             modelBuilder.Entity("GirafAPI.Entities.Users.GirafUser", b =>
                 {
                     b.Property<string>("Id")
@@ -158,6 +185,7 @@ namespace GirafAPI.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
@@ -204,6 +232,7 @@ namespace GirafAPI.Data.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
@@ -371,6 +400,14 @@ namespace GirafAPI.Data.Migrations
                     b.HasOne("GirafAPI.Entities.Grades.Grade", null)
                         .WithMany("Activities")
                         .HasForeignKey("GradeId");
+
+                    b.HasOne("GirafAPI.Entities.Pictograms.Pictogram", "Pictogram")
+                        .WithMany()
+                        .HasForeignKey("PictogramId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pictogram");
                 });
 
             modelBuilder.Entity("GirafAPI.Entities.Citizens.Citizen", b =>
