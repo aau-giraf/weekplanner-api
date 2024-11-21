@@ -250,6 +250,75 @@ public static class OrganizationEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
 
+        group.MapPost("/{orgId}/add-admin/{userId}",
+            async (int orgId, string userId, UserManager<GirafUser> userManager, GirafDbContext dbContext) =>
+            {
+                try
+                {
+                    var user = await userManager.FindByIdAsync(userId);
+                    if (user is null)
+                    {
+                        return Results.BadRequest("Invalid user id.");
+                    }
+
+                    var organization = await dbContext.Organizations.FindAsync(orgId);
+                    if (organization is null)
+                    {
+                        return Results.BadRequest("Invalid organization id.");
+                    }
+                    
+                    var adminClaim = new Claim("OrgAdmin", organization.Id.ToString());
+                    var result = await userManager.AddClaimAsync(user, adminClaim);
+                    if (!result.Succeeded)
+                    {
+                        return Results.BadRequest("Failed to add organization admin claim.");
+                    }
+                    
+                    return Results.Ok();
+                    
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                }
+
+            });
+        
+        group.MapPost("/{orgId}/remove-admin/{userId}",
+            async (int orgId, string userId, UserManager<GirafUser> userManager, GirafDbContext dbContext) =>
+            {
+                try
+                {
+                    var user = await userManager.FindByIdAsync(userId);
+                    if (user is null)
+                    {
+                        return Results.BadRequest("Invalid user id.");
+                    }
+
+                    var organization = await dbContext.Organizations.FindAsync(orgId);
+                    if (organization is null)
+                    {
+                        return Results.BadRequest("Invalid organization id.");
+                    }
+                    
+                    var claims = await userManager.GetClaimsAsync(user);
+                    var claimToRemove = claims.FirstOrDefault(c => c.Type == "OrgAdmin" && c.Value == organization.Id.ToString());
+                    var result = await userManager.RemoveClaimAsync(user, claimToRemove);
+                    if (!result.Succeeded)
+                    {
+                        return Results.BadRequest("Failed to add organization admin claim.");
+                    }
+                    
+                    return Results.Ok();
+                    
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                }
+
+            });
+
         return group;
     }
 }
