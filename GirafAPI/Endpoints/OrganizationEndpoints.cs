@@ -195,8 +195,12 @@ public static class OrganizationEndpoints
                         organization.Users.Remove(user);
 
                         await dbContext.SaveChangesAsync();
+                        
+                        var claims = await userManager.GetClaimsAsync(user);
+                        var claimToRemove = claims.FirstOrDefault(c => c.Type == "OrgMember" && c.Value == organization.Id.ToString());
+                        var result = await userManager.RemoveClaimAsync(user, claimToRemove);
 
-                        return Results.Ok(organization.ToDTO());
+                        return !result.Succeeded ? Results.BadRequest("Failed to remove organization claim.") : Results.Ok(organization.ToDTO());
                     }
                     catch (Exception ex)
                     {
