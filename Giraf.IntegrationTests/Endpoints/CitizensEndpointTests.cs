@@ -17,7 +17,7 @@ namespace Giraf.IntegrationTests.Endpoints
     {
         #region Get All Citizens Tests
 
-        // Testing GET /citizens, with multiple existing citizens in the DB
+        // 1. Testing GET /citizens, with multiple existing citizens in the DB
         [Fact]
         public async Task GetAllCitizens_ReturnsListOfCitizens()
         {
@@ -36,7 +36,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(3, citizens.Count);
         }
 
-        // Test GET /citizens when there are no citizens.
+        // 2. Test GET /citizens when there are no citizens.
         [Fact]
         public async Task GetAllCitizens_ReturnsEmptyList_WhenNoCitizens()
         {
@@ -59,7 +59,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Get Citizen by ID Tests
 
-        // Test GET /citizens/{id:int} when the citizen exists.
+        // 3. Test GET /citizens/{id:int} when the citizen exists.
         [Fact]
         public async Task GetCitizenById_ReturnsCitizen_WhenCitizenExists()
         {
@@ -88,7 +88,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal("And", citizen.LastName);
         }
 
-        // Test GET /citizens/{id:int} when the citizen does not exist.
+        // 4. Test GET /citizens/{id:int} when the citizen does not exist.
         [Fact]
         public async Task GetCitizenById_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
@@ -108,7 +108,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Update Citizen Tests
 
-        // Test PUT /citizens/{id:int} when updating an existing citizen.
+        // 5. Test PUT /citizens/{id:int} when updating an existing citizen.
         [Fact]
         public async Task UpdateCitizen_ReturnsOk_WhenCitizenExists()
         {
@@ -143,7 +143,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal("UpdatedLastName", updatedCitizen.LastName);
         }
 
-        // Test PUT /citizens/{id:int} when the citizen does not exist.
+        // 6. Test PUT /citizens/{id:int} when the citizen does not exist.
         [Fact]
         public async Task UpdateCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
@@ -165,7 +165,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Add Citizen to Organization Tests
 
-        // Test POST /citizens/{id}/add-citizen when the organization exists.
+        // 7. Test POST /citizens/{id}/add-citizen when the organization exists.
         [Fact]
         public async Task AddCitizen_ReturnsOk_WhenOrganizationExists()
         {
@@ -201,7 +201,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
         }
 
-        // Test POST /citizens/{id}/add-citizen when the organization does not exist.
+        // 8. Test POST /citizens/{id}/add-citizen when the organization does not exist.
         [Fact]
         public async Task AddCitizen_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
@@ -223,7 +223,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Remove Citizen from Organization Tests
 
-        // Test DELETE /citizens/{id}/remove-citizen/{citizenId} when the citizen exists in the organization.
+        // 9. Test DELETE /citizens/{id}/remove-citizen/{citizenId} when the citizen exists in the organization.
         [Fact]
         public async Task RemoveCitizen_ReturnsNoContent_WhenCitizenExistsInOrganization()
         {
@@ -259,7 +259,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
         }
 
-        // Test DELETE /citizens/{id}/remove-citizen/{citizenId} when the citizen does not exist.
+        // 10. Test DELETE /citizens/{id}/remove-citizen/{citizenId} when the citizen does not exist.
         [Fact]
         public async Task RemoveCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
@@ -284,7 +284,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
         }
 
-        // Test DELETE /citizens/{id}/remove-citizen/{citizenId} when the citizen does not belong to the organization.
+        // 11. Test DELETE /citizens/{id}/remove-citizen/{citizenId} when the citizen does not belong to the organization.
         [Fact]
         public async Task RemoveCitizen_ReturnsBadRequest_WhenCitizenNotInOrganization()
         {

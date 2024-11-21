@@ -1,19 +1,13 @@
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.DTOs;
 using GirafAPI.Entities.Users;
 using GirafAPI.Entities.Users.DTOs;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration.UserSecrets;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Giraf.IntegrationTests.Endpoints
 {

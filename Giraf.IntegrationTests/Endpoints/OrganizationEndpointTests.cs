@@ -1,16 +1,11 @@
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
-using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Organizations.DTOs;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
@@ -18,7 +13,7 @@ namespace Giraf.IntegrationTests.Endpoints
     {
         #region Get Organizations for User Tests
 
-        // Test GET /organizations/user/{id} when user has organizations
+        // 1. Test GET /organizations/user/{id} when user has organizations
         [Fact]
         public async Task GetOrganizationsForUser_ReturnsListOfOrganizations()
         {
@@ -45,7 +40,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(2, organizations.Count);
         }
 
-        // Test GET /organizations/user/{id} when user does not exist
+        // 2. Test GET /organizations/user/{id} when user does not exist
         [Fact]
         public async Task GetOrganizationsForUser_ReturnsBadRequest_WhenUserDoesNotExist()
         {
@@ -66,7 +61,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Get Organization by ID Tests
 
-        // Test GET /organizations/{id} when the organization exists
+        // 3. Test GET /organizations/{id} when the organization exists
         [Fact]
         public async Task GetOrganizationById_ReturnsOrganization_WhenOrganizationExists()
         {
@@ -96,7 +91,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(organizationId, organizationDto.Id);
         }
 
-        // Test GET /organizations/{id} when the organization does not exist
+        // 4. Test GET /organizations/{id} when the organization does not exist
         [Fact]
         public async Task GetOrganizationById_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
@@ -117,7 +112,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Create Organization Tests
 
-        // Test POST /organizations to create a new organization
+        // 5. Test POST /organizations to create a new organization
         [Fact]
         public async Task PostOrganization_ReturnsCreated_WhenUserIsValid()
         {
@@ -145,7 +140,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal("New Organization", createdOrganization.Name);
         }
 
-        // Test POST /organizations when user does not exist
+        // 6. Test POST /organizations when user does not exist
         [Fact]
         public async Task PostOrganization_ReturnsBadRequest_WhenUserDoesNotExist()
         {
@@ -167,7 +162,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Change Organization Name Tests
 
-        // Test PUT /organizations/{id}/change-name when the organization exists
+        // 7. Test PUT /organizations/{id}/change-name when the organization exists
         [Fact]
         public async Task ChangeOrganizationName_ReturnsOk_WhenOrganizationExists()
         {
@@ -200,7 +195,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(newName, updatedOrganization.Name);
         }
 
-        // Test PUT /organizations/{id}/change-name when organization does not exist
+        // 8. Test PUT /organizations/{id}/change-name when organization does not exist
         [Fact]
         public async Task ChangeOrganizationName_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
@@ -222,7 +217,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Delete Organization Tests
 
-        // Test DELETE /organizations/{id} when the organization exists
+        // 9. Test DELETE /organizations/{id} when the organization exists
         [Fact]
         public async Task DeleteOrganization_ReturnsNoContent_WhenOrganizationExists()
         {
@@ -256,7 +251,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
         }
 
-        // Test DELETE /organizations/{id} when the organization does not exist
+        // 10. Test DELETE /organizations/{id} when the organization does not exist
         [Fact]
         public async Task DeleteOrganization_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
@@ -277,7 +272,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Remove User from Organization Tests
 
-        // Test PUT /organizations/{id}/remove-user/{userId} when the organization and user exist
+        // 11. Test PUT /organizations/{id}/remove-user/{userId} when the organization and user exist
         [Fact]
         public async Task RemoveUser_ReturnsOk_WhenOrganizationAndUserExist()
         {
@@ -316,7 +311,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.DoesNotContain(userId, updatedOrganization.Users.Select(u => u.Id));
         }
 
-        // Test PUT /organizations/{id}/remove-user/{userId} when the user does not exist
+        // 12 .Test PUT /organizations/{id}/remove-user/{userId} when the user does not exist
         [Fact]
         public async Task RemoveUser_ReturnsBadRequest_WhenUserDoesNotExist()
         {
@@ -346,7 +341,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        // Test PUT /organizations/{id}/remove-user/{userId} when the organization does not exist
+        // 13. Test PUT /organizations/{id}/remove-user/{userId} when the organization does not exist
         [Fact]
         public async Task RemoveUser_ReturnsBadRequest_WhenOrganizationDoesNotExist()
         {
