@@ -6,6 +6,5 @@ public class EmptyDb : DbSeeder
 {
     public override void SeedData(DbContext context)
     {
-
     }
 }

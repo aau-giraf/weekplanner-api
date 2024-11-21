@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
-using GirafAPI.Entities.Grades;
 using GirafAPI.Entities.Grades.DTOs;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
