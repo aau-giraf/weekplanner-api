@@ -14,8 +14,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task Login_ReturnsOk_WithValidCredentials()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => 
-                new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             var loginDto = new LoginDTO
@@ -37,8 +36,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task Login_ReturnsBadRequest_WithInvalidUsername()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => 
-                new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             var loginDto = new LoginDTO
@@ -58,8 +56,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task Login_ReturnsBadRequest_WithInvalidPassword()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => 
-                new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             var loginDto = new LoginDTO
