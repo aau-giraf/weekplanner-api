@@ -1,22 +1,24 @@
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
+using GirafAPI.Configuration;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.VisualBasic;
 
 namespace Giraf.IntegrationTests.Utils;
 
-// This factory creates a Giraf web api configured for testing.
+// This factory creates a Giraf web API configured for testing.
 internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly DbSeeder _seeder;
+    private readonly Func<IServiceProvider, DbSeeder> _seederFactory;
 
-    public GirafWebApplicationFactory(DbSeeder seeder)
+    public GirafWebApplicationFactory(Func<IServiceProvider, DbSeeder> seederFactory)
     {
-        _seeder = seeder;
+        _seederFactory = seederFactory;
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
@@ -35,6 +37,14 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
                 options.UseSqlite($"Data Source={dbFileName}");
             });
 
+            // Configure JwtSettings for testing
+            services.Configure<JwtSettings>( options =>
+            {
+                options.Issuer = "TestIssuer";
+                options.Audience = "TestAudience";
+                options.SecretKey = "ThisIsASecretKeyForTestingPurposes!";
+            });
+
             // Build the service provider and create a scope
             var serviceProvider = services.BuildServiceProvider();
             using var scope = serviceProvider.CreateScope();
@@ -47,7 +57,8 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
             dbContext.Database.Migrate();
 
             // Seed the database with scenario-specific data
-            _seeder.SeedData(dbContext);
+            var seeder = _seederFactory(scope.ServiceProvider);
+            seeder.SeedData(dbContext);
         });
     }
 }

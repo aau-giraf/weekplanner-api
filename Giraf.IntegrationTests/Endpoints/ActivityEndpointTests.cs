@@ -5,6 +5,8 @@ using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.Activities.DTOs;
 using GirafAPI.Entities.Pictograms;
+using GirafAPI.Entities.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,8 +20,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetAllActivities_ReturnsListOfActivities_WhenActivitiesExist()
         {
             // Arrange
-            var seeder = new BasicActivitySeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
             var client = factory.CreateClient();
 
             // Act
@@ -36,8 +37,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetAllActivities_ReturnsEmptyList_WhenNoActivitiesExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(sp => new BasicUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             // Act
@@ -58,8 +58,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivitiesForCitizenOnDate_ReturnsActivities_WhenActivitiesExist()
         {
             // Arrange
-            var seeder = new CitizenWithActivitiesSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new CitizenWithActivitiesSeeder());
             var client = factory.CreateClient();
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
 
@@ -86,8 +85,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivitiesForCitizenOnDate_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
             var nonExistentCitizenId = 999;
@@ -107,8 +105,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivitiesForGradeOnDate_ReturnsActivities_WhenActivitiesExist()
         {
             // Arrange
-            var seeder = new GradeWithActivitiesSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new GradeWithActivitiesSeeder());
             var client = factory.CreateClient();
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
 
@@ -135,8 +132,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivitiesForGradeOnDate_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
             var nonExistentGradeId = 999;
@@ -156,8 +152,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivityById_ReturnsActivity_WhenActivityExists()
         {
             // Arrange
-            var seeder = new BasicActivitySeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
             var client = factory.CreateClient();
 
             int activityId;
@@ -183,8 +178,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivityById_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentActivityId = 999;
 
@@ -203,8 +197,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateActivityForCitizen_ReturnsCreated_WhenCitizenExists()
         {
             // Arrange
-            var seeder = new BasicCitizenSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
 
             int citizenId;
@@ -255,8 +248,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateActivityForCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentCitizenId = 999;
 
@@ -285,8 +277,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateActivityForGrade_ReturnsCreated_WhenGradeExists()
         {
             // Arrange
-            var seeder = new GradeWithActivitiesSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new GradeWithActivitiesSeeder());
             var client = factory.CreateClient();
 
             int gradeId;
@@ -342,8 +333,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateActivityForGrade_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentGradeId = 999;
 
@@ -372,8 +362,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task UpdateActivity_ReturnsOk_WhenActivityExists()
         {
             // Arrange
-            var seeder = new BasicActivitySeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
             var client = factory.CreateClient();
 
             int activityId;
@@ -419,8 +408,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task UpdateActivity_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentActivityId = 999;
 
@@ -449,8 +437,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteActivity_ReturnsNoContent_WhenActivityExists()
         {
             // Arrange
-            var seeder = new BasicActivitySeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
             var client = factory.CreateClient();
 
             int activityId;
@@ -481,8 +468,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteActivity_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentActivityId = 999;
 
@@ -501,8 +487,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task SetActivityCompletionStatus_ReturnsOk_WhenActivityExists()
         {
             // Arrange
-            var seeder = new BasicActivitySeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
             var client = factory.CreateClient();
 
             int activityId;
@@ -536,8 +521,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task SetActivityCompletionStatus_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentActivityId = 999;
             var isComplete = true;
@@ -557,8 +541,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AssignPictogram_ReturnsOk_WhenActivityAndPictogramExist()
         {
             // Arrange
-            var seeder = new ActivityAndPictogramSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new ActivityAndPictogramSeeder());
             var client = factory.CreateClient();
 
             int activityId;
@@ -588,8 +571,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AssignPictogram_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var seeder = new BasicPictogramSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
             var client = factory.CreateClient();
             var nonExistentActivityId = 999;
             int pictogramId;
@@ -612,8 +594,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AssignPictogram_ReturnsNotFound_WhenPictogramDoesNotExist()
         {
             // Arrange
-            var seeder = new BasicActivitySeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
             var client = factory.CreateClient();
             var nonExistentPictogramId = 999;
             int activityId;

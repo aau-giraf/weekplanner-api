@@ -4,6 +4,8 @@ using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.Organizations.DTOs;
+using GirafAPI.Entities.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,8 +20,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationsForUser_ReturnsListOfOrganizations()
         {
             // Arrange
-            var seeder = new UserWithOrganizationsSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(sp => new UserWithOrganizationsSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             // Retrieve the actual user ID from the seeded data
@@ -45,8 +46,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationsForUser_ReturnsBadRequest_WhenUserDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentUserId = "nonexistent_user_id";
 
@@ -66,8 +66,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationById_ReturnsOrganization_WhenOrganizationExists()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -96,8 +95,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationById_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentOrganizationId = 9999;
 
@@ -117,8 +115,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostOrganization_ReturnsCreated_WhenUserIsValid()
         {
             // Arrange
-            var seeder = new BasicUserSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(sp => new BasicUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             // Retrieve the seeded user's ID from the database
@@ -145,8 +142,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostOrganization_ReturnsBadRequest_WhenUserDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentUserId = "nonexistent_user_id";
             var newOrgDto = new CreateOrganizationDTO { Name = "Another Organization" };
@@ -167,8 +163,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task ChangeOrganizationName_ReturnsOk_WhenOrganizationExists()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -200,8 +195,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task ChangeOrganizationName_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentOrgId = 9999;
             var newName = "Nonexistent Organization Name";
@@ -222,8 +216,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteOrganization_ReturnsNoContent_WhenOrganizationExists()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -256,8 +249,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteOrganization_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentOrgId = 9999;
 
@@ -277,8 +269,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveUser_ReturnsOk_WhenOrganizationAndUserExist()
         {
             // Arrange
-            var seeder = new OrganizationWithUserSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(sp => new OrganizationWithUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             int organizationId;
@@ -316,8 +307,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveUser_ReturnsBadRequest_WhenUserDoesNotExist()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -346,9 +336,9 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveUser_ReturnsBadRequest_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var seeder = new BasicUserSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(sp => new BasicUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
+
 
             // Retrieve the seeded user from the database
             using var scope = factory.Services.CreateScope();

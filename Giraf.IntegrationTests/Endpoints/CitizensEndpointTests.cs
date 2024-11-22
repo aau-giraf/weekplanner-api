@@ -22,8 +22,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetAllCitizens_ReturnsListOfCitizens()
         {
             // Arrange
-            var seeder = new MultipleCitizensSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new MultipleCitizensSeeder());
             var client = factory.CreateClient();
 
             // Act
@@ -41,8 +40,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetAllCitizens_ReturnsEmptyList_WhenNoCitizens()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
             // Act
@@ -64,8 +62,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetCitizenById_ReturnsCitizen_WhenCitizenExists()
         {
             // Arrange
-            var seeder = new BasicCitizenSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
 
             // First, get the list of citizens to obtain the ID
@@ -93,8 +90,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetCitizenById_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
             // Act
@@ -113,8 +109,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task UpdateCitizen_ReturnsOk_WhenCitizenExists()
         {
             // Arrange
-            var seeder = new BasicCitizenSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
 
             // Get the citizen's ID
@@ -148,8 +143,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task UpdateCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
             var updateCitizenDto = new UpdateCitizenDTO("FirstName", "LastName");
@@ -170,8 +164,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AddCitizen_ReturnsOk_WhenOrganizationExists()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             // Get the organization ID
@@ -206,8 +199,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AddCitizen_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var seeder = new EmptyDb();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
             var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
@@ -228,8 +220,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizen_ReturnsNoContent_WhenCitizenExistsInOrganization()
         {
             // Arrange
-            var seeder = new CitizenWithOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new CitizenWithOrganizationSeeder());
             var client = factory.CreateClient();
 
             // Get the organization ID and citizen ID
@@ -264,8 +255,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             // Get the organization ID
@@ -289,8 +279,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizen_ReturnsBadRequest_WhenCitizenNotInOrganization()
         {
             // Arrange
-            var seeder = new MultipleOrganizationsAndCitizensSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new MultipleOrganizationsAndCitizensSeeder());
             var client = factory.CreateClient();
 
             // Get the organization ID and a citizen ID from a different organization

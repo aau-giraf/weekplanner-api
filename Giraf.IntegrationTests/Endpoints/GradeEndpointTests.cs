@@ -18,8 +18,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetGradeById_ReturnsGrade_WhenGradeExists()
         {
             // Arrange
-            var seeder = new BasicGradeSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
 
             int gradeId;
@@ -46,7 +45,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetGradeById_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentGradeId = 9999;
 
@@ -66,8 +65,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetGradesInOrganization_ReturnsGrades_WhenOrganizationExists()
         {
             // Arrange
-            var seeder = new BasicGradeSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -94,7 +92,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetGradesInOrganization_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentOrganizationId = 9999;
 
@@ -114,8 +112,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateGrade_ReturnsCreated_WhenOrganizationExists()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -147,7 +144,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateGrade_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentOrganizationId = 9999;
 
@@ -172,8 +169,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task ChangeGradeName_ReturnsOk_WhenGradeExists()
         {
             // Arrange
-            var seeder = new BasicGradeSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
 
             int gradeId;
@@ -202,7 +198,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task ChangeGradeName_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentGradeId = 9999;
             string newName = "Updated Grade Name";
@@ -223,8 +219,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AddCitizensToGrade_ReturnsOk_WhenGradeAndCitizensExist()
         {
             // Arrange
-            var seeder = new GradeSeederWithCitizen();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new GradeSeederWithCitizen());
             var client = factory.CreateClient();
 
             int gradeId;
@@ -261,8 +256,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AddCitizensToGrade_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var seeder = new BasicCitizenSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
 
             int nonExistentGradeId = 9999;
@@ -295,8 +289,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizensFromGrade_ReturnsOk_WhenGradeAndCitizensExist()
         {
             // Arrange
-            var seeder = new GradeSeederWithCitizen();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new GradeSeederWithCitizen());
             var client = factory.CreateClient();
 
             int gradeId;
@@ -330,8 +323,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizensFromGrade_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var seeder = new BasicCitizenSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
 
             int nonExistentGradeId = 9999;
@@ -364,8 +356,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteGrade_ReturnsNoContent_WhenGradeExists()
         {
             // Arrange
-            var seeder = new BasicGradeSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
 
             int gradeId;
@@ -397,7 +388,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteGrade_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentGradeId = 9999;
 

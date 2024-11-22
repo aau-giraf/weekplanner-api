@@ -19,8 +19,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreatePictogram_ReturnsOk_WhenPictogramIsValid()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -67,8 +66,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreatePictogram_ReturnsBadRequest_WhenImageIsMissing()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             // Prepare multipart form data without image
@@ -87,7 +85,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreatePictogram_ReturnsBadRequest_WhenOrganizationIdIsMissing()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
             // Prepare multipart form data without organizationId
@@ -112,8 +110,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreatePictogram_ReturnsBadRequest_WhenPictogramNameIsMissing()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -152,8 +149,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramById_ReturnsPictogram_WhenPictogramExists()
         {
             // Arrange
-            var seeder = new BasicPictogramSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
             var client = factory.CreateClient();
 
             int pictogramId;
@@ -180,7 +176,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramById_ReturnsNotFound_WhenPictogramDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentPictogramId = 9999;
 
@@ -199,8 +195,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramsByOrganizationId_ReturnsPictograms_WhenPictogramsExist()
         {
             // Arrange
-            var seeder = new BasicPictogramSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -227,8 +222,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramsByOrganizationId_ReturnsEmptyList_WhenNoPictogramsExist()
         {
             // Arrange
-            var seeder = new BasicOrganizationSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int organizationId;
@@ -259,8 +253,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeletePictogram_ReturnsOk_WhenPictogramExists()
         {
             // Arrange
-            var seeder = new BasicPictogramSeeder();
-            var factory = new GirafWebApplicationFactory(seeder);
+            var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
             var client = factory.CreateClient();
 
             int pictogramId;
@@ -292,7 +285,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeletePictogram_ReturnsNotFound_WhenPictogramDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
             int nonExistentPictogramId = 9999;
