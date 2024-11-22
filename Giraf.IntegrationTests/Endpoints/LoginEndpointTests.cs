@@ -78,7 +78,7 @@ namespace Giraf.IntegrationTests.Endpoints
         // Helper class for deserializing the response
         private class LoginResponse
         {
-            public string Token { get; set; }
+            public required string Token { get; set; }
         }
     }
 }
