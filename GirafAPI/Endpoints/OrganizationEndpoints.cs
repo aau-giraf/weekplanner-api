@@ -242,13 +242,13 @@ public static class OrganizationEndpoints
             {
                 return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
             }
-        })
-        .WithName("GetOrganizationByGradeId")
-        .WithDescription("Gets organization by grade id.")
-        .WithTags("Organizations")
-        .Produces(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status404NotFound)
-        .Produces(StatusCodes.Status500InternalServerError);
+            })
+            .WithName("GetOrganizationByGradeId")
+            .WithDescription("Gets organization by grade id.")
+            .WithTags("Organizations")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
 
         group.MapPost("/{orgId}/add-admin/{userId}",
             async (int orgId, string userId, UserManager<GirafUser> userManager, GirafDbContext dbContext) =>
@@ -282,7 +282,13 @@ public static class OrganizationEndpoints
                     return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
                 }
 
-            });
+            })
+            .WithName("AddOrganizationAdmin")
+            .WithDescription("Adds an admin to an organization.")
+            .WithTags("Organizations")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
         
         group.MapPost("/{orgId}/remove-admin/{userId}",
             async (int orgId, string userId, UserManager<GirafUser> userManager, GirafDbContext dbContext) =>
@@ -317,7 +323,13 @@ public static class OrganizationEndpoints
                     return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
                 }
 
-            });
+            })
+            .WithName("RemoveOrganizationAdmin")
+            .WithDescription("Removes an admin from an organization.")
+            .WithTags("Organizations")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status500InternalServerError);
 
         return group;
     }
