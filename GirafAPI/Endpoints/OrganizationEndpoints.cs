@@ -89,9 +89,15 @@ public static class OrganizationEndpoints
                 {
                     try
                     {
-                        var userIdFromClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                        var userClaims = httpContext.User.Claims;
+                        foreach (var claim in userClaims)
+                        {
+                            Console.WriteLine($"{claim.Type}: {claim.Value}");
+                        }
                         
-                        var user = await userManager.FindByIdAsync(userIdFromClaim.Value);
+                        var userId = userManager.GetUserId(httpContext.User);
+                        
+                        var user = userManager.FindByIdAsync(userId).GetAwaiter().GetResult();
 
                         if (user is null)
                         {
@@ -112,6 +118,7 @@ public static class OrganizationEndpoints
                         return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
                     }
                 })
+            .RequireAuthorization()
             .WithName("PostOrganization")
             .WithDescription("Creates a new organization.")
             .WithTags("Organizations")
