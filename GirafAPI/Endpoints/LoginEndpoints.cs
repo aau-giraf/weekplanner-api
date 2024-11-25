@@ -30,7 +30,14 @@ namespace GirafAPI.Endpoints
                     return Results.BadRequest("Invalid username or password");
                 }
 
-                var claims = await userManager.GetClaimsAsync(user);
+                var claims = new List<Claim>
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                    new Claim(ClaimTypes.Name, user.UserName)
+                };
+
+                var userClaims = await userManager.GetClaimsAsync(user);
+                claims.AddRange(userClaims);
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
