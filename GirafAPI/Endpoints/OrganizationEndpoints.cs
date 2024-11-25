@@ -84,12 +84,14 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status500InternalServerError);
 
         group.MapPost("/",
-                async (string id, CreateOrganizationDTO newOrganization, GirafDbContext dbContext,
-                    UserManager<GirafUser> userManager) =>
+                async (CreateOrganizationDTO newOrganization, GirafDbContext dbContext,
+                    UserManager<GirafUser> userManager, HttpContext httpContext) =>
                 {
                     try
                     {
-                        var user = await userManager.FindByIdAsync(id);
+                        var userIdFromClaim = httpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+                        
+                        var user = await userManager.FindByIdAsync(userIdFromClaim.Value);
 
                         if (user is null)
                         {
