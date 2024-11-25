@@ -109,7 +109,9 @@ public static class OrganizationEndpoints
                         await dbContext.SaveChangesAsync();
                         
                         var memberClaim = new Claim("OrgMember", organization.Id.ToString());
+                        var adminClaim = new Claim("OrgAdmin", organization.Id.ToString());
                         await userManager.AddClaimAsync(user, memberClaim);
+                        await userManager.AddClaimAsync(user, adminClaim);
                         
                         return Results.Created($"organizations/{organization.Id}", organization.ToDTO());
                     }
