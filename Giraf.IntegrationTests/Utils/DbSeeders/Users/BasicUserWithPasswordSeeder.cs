@@ -1,27 +1,36 @@
-using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
-using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
+namespace Giraf.IntegrationTests.Utils.DbSeeders;
+
 public class BasicUserWithPasswordSeeder : DbSeeder
 {
-    public const string SeededUserPassword = "P@ssw0rd!";
+    private readonly UserManager<GirafUser> _userManager;
+    public static readonly string SeededUserName = "basicuser";
+    public static readonly string SeededUserPassword = "OldP@ssw0rd!";
+
+    public BasicUserWithPasswordSeeder(UserManager<GirafUser> userManager)
+    {
+        _userManager = userManager;
+    }
 
     public override void SeedData(DbContext context)
     {
-        var dbContext = (GirafDbContext)context;
         var user = new GirafUser
         {
-            UserName = "basicuser",
+            UserName = SeededUserName,
             Email = "basicuser@example.com",
             FirstName = "Basic",
-            LastName = "User",
-            Organizations = new List<Organization>(),
-            PasswordHash = new PasswordHasher<GirafUser>().HashPassword(null, SeededUserPassword)
+            LastName = "User"
         };
-        dbContext.Users.Add(user);
-        dbContext.SaveChanges();
+
+        var result = _userManager.CreateAsync(user, SeededUserPassword).GetAwaiter().GetResult();
+
+        if (!result.Succeeded)
+        {
+            throw new Exception($"Failed to create user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
     }
 }

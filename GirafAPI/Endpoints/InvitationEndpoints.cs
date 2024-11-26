@@ -170,7 +170,7 @@ public static class InvitationEndpoints
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/respond/{id}", async (int id, bool response, GirafDbContext dbContext, UserManager<GirafUser> userManager) =>
+        group.MapPut("/respond/{id}", async (int id, InvitationResponseDTO responseDto, GirafDbContext dbContext, UserManager<GirafUser> userManager) =>
             {
                 try
                 {
@@ -181,7 +181,7 @@ public static class InvitationEndpoints
                         return Results.NotFound();
                     }
 
-                    if (response)
+                    if (responseDto.Response)
                     {
                         var organization = await dbContext.Organizations.FindAsync(invitation.OrganizationId);
 

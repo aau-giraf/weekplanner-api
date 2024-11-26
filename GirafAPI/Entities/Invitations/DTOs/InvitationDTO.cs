@@ -3,9 +3,10 @@ using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Entities.Invitations.DTOs;
 
-public record InvitationDTO(
+public record InvitationDTO
+(
     int Id,
     int OrganizationId,
     string OrganizationName,
     string SenderName
-    );
+);

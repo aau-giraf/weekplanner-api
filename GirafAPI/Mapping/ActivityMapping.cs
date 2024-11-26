@@ -10,11 +10,11 @@ public static class ActivityMapping
     {
         return new Activity
         {
-            Date = DateOnly.Parse(activityDto.Date),
+            Date = activityDto.Date,
             Name = activityDto.Name,
             Description = activityDto.Description,
-            StartTime = TimeOnly.Parse(activityDto.StartTime),
-            EndTime = TimeOnly.Parse(activityDto.EndTime),
+            StartTime = activityDto.StartTime,
+            EndTime = activityDto.EndTime,
             IsCompleted = false
         };
     }
@@ -23,11 +23,11 @@ public static class ActivityMapping
     {
         return new Activity
         {
-            Date = DateOnly.Parse(activityDto.Date),
+            Date = activityDto.Date,
             Name = activityDto.Name,
             Description = activityDto.Description,
-            StartTime = TimeOnly.Parse(activityDto.StartTime),
-            EndTime = TimeOnly.Parse(activityDto.EndTime),
+            StartTime = activityDto.StartTime,
+            EndTime = activityDto.EndTime,
             IsCompleted = false,
             Pictogram = pictogram
         };
@@ -38,11 +38,11 @@ public static class ActivityMapping
         return new Activity
         {
             Id = id,
-            Date = DateOnly.Parse(activityDto.Date),
+            Date = activityDto.Date,
             Name = activityDto.Name,
             Description = activityDto.Description,
-            StartTime = TimeOnly.Parse(activityDto.StartTime),
-            EndTime = TimeOnly.Parse(activityDto.EndTime),
+            StartTime = activityDto.StartTime,
+            EndTime = activityDto.EndTime,
             IsCompleted = activityDto.IsCompleted,
         };
     }
@@ -52,11 +52,11 @@ public static class ActivityMapping
         return new Activity
         {
             Id = id,
-            Date = DateOnly.Parse(activityDto.Date),
+            Date = activityDto.Date,
             Name = activityDto.Name,
             Description = activityDto.Description,
-            StartTime = TimeOnly.Parse(activityDto.StartTime),
-            EndTime = TimeOnly.Parse(activityDto.EndTime),
+            StartTime = activityDto.StartTime,
+            EndTime = activityDto.EndTime,
             IsCompleted = activityDto.IsCompleted,
             Pictogram = pictogram
         };

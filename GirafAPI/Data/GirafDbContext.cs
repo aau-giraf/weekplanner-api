@@ -10,11 +10,8 @@ using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Data
 {
-    public class GirafDbContext : IdentityDbContext<GirafUser>
+    public class GirafDbContext(DbContextOptions<GirafDbContext> options) : IdentityDbContext<GirafUser>(options)
     {
-        public GirafDbContext(DbContextOptions<GirafDbContext> options) : base(options)
-        {}
-
         public DbSet<Citizen> Citizens => Set<Citizen>();
         public DbSet<Activity> Activities => Set<Activity>();
         public DbSet<Organization> Organizations => Set<Organization>();

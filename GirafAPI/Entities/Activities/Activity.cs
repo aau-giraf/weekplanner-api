@@ -19,5 +19,5 @@ public class Activity
 
     public bool IsCompleted { get; set; }
     
-    public Pictogram Pictogram { get; set; }
+    public Pictogram? Pictogram { get; set; }
 }

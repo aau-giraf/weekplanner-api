@@ -3,6 +3,7 @@ using System;
 using GirafAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GirafAPI.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    partial class GirafDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241122113957_AddNormalizedEmailAndUserNameToGirafUser")]
+    partial class AddNormalizedEmailAndUserNameToGirafUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
@@ -156,7 +159,7 @@ namespace GirafAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("OrganizationId")
+                    b.Property<int>("OrganizationId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("PictogramName")
