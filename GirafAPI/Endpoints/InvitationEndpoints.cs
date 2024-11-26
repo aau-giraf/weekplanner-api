@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using GirafAPI.Data;
 using GirafAPI.Entities.Invitations;
 using GirafAPI.Entities.Invitations.DTOs;
@@ -201,6 +202,13 @@ public static class InvitationEndpoints
                         
                         organization.Users.Add(user);
                         await dbContext.SaveChangesAsync();
+                        
+                        var claim = new Claim("OrgMember", organization.Id.ToString());
+                        var result = await userManager.AddClaimAsync(user, claim);
+                        if (!result.Succeeded)
+                        {
+                            return Results.BadRequest("Failed to add organisation claim.");
+                        }
                     }
                     
                     await dbContext.Invitations.Where(i => i.Id == id).ExecuteDeleteAsync();

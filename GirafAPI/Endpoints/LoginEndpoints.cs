@@ -14,28 +14,30 @@ namespace GirafAPI.Endpoints
     {
         public static void MapLoginEndpoint(this WebApplication app)
         {
-            app.MapPost("/login", async (LoginDTO loginDTO, UserManager<GirafUser> userManager, IOptions<JwtSettings> jwtSettings) =>
+            app.MapPost("/login", async (LoginDTO loginDTO, UserManager<GirafUser> userManager, SignInManager<GirafUser> signInManager,  IOptions<JwtSettings> jwtSettings) =>
             {
                 var user = await userManager.FindByNameAsync(loginDTO.Username);
                 if (user == null)
                 {
                     return Results.BadRequest("Invalid username or password");
                 }
-                var passwordValid = await userManager.CheckPasswordAsync(user, loginDTO.Password);
-                if (!passwordValid)
+                var signIn = await signInManager.PasswordSignInAsync(user, 
+                                                                               loginDTO.Password, 
+                                                                               isPersistent: false, 
+                                                                               lockoutOnFailure: false);
+                if (!signIn.Succeeded)
                 {
                     return Results.BadRequest("Invalid username or password");
                 }
 
-                var roles = await userManager.GetRolesAsync(user);
-
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                     new Claim(ClaimTypes.Name, user.UserName)
                 };
 
-                claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+                var userClaims = await userManager.GetClaimsAsync(user);
+                claims.AddRange(userClaims);
 
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

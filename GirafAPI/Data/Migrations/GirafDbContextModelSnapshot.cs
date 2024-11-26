@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GirafAPI.Migrations
+namespace GirafAPI.Data.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
     partial class GirafDbContextModelSnapshot : ModelSnapshot
