@@ -301,49 +301,49 @@ public static class ActivityEndpoints
         
         // PUT updated activity
         group.MapPut("/activity/{id:int}", async (int id, UpdateActivityDTO updatedActivity, GirafDbContext dbContext) =>
-        {
-            try
             {
-                var activity = await dbContext.Activities.FindAsync(id);
-
-                if (activity is null)
+                try
                 {
-                    return Results.NotFound("Activity not found.");
-                }
+                    var activity = await dbContext.Activities
+                        .Include(a => a.Pictogram) 
+                        .FirstOrDefaultAsync(a => a.Id == id);
 
-                if (updatedActivity.PictogramId is not null)
-                {
+                    if (activity is null)
+                    {
+                        return Results.NotFound("Activity not found.");
+                    }
+                    
                     var pictogram = await dbContext.Pictograms.FindAsync(updatedActivity.PictogramId);
-                    dbContext.Entry(activity).CurrentValues.SetValues(updatedActivity.ToEntity(id, pictogram));
-                }
-                else
-                {
+                    if (pictogram is null)
+                    {
+                        return Results.BadRequest($"Pictogram with ID {updatedActivity.PictogramId} not found.");
+                    }
+                    
+                    activity.Pictogram = pictogram; 
                     dbContext.Entry(activity).CurrentValues.SetValues(updatedActivity.ToEntity(id));
+                    await dbContext.SaveChangesAsync();
+
+                    return Results.Ok();
                 }
-
-                await dbContext.SaveChangesAsync();
-
-                return Results.Ok();
-            }
-            catch (DbUpdateException)
-            {
-                // database update issue
-                return Results.BadRequest("Failed to update activity. Ensure the provided data is correct.");
-            }
-            catch (Exception)
-            {
-                // Server Error for any unexpected errors
-                return Results.Problem("An error occurred while updating the activity.", statusCode: StatusCodes.Status500InternalServerError);
-            }
-        })
-        .WithName("UpdateActivity")
-        .WithDescription("Updates an existing activity using ID.")
-        .WithTags("Activities")
-        .Accepts<UpdateActivityDTO>("application/json")
-        .Produces(StatusCodes.Status200OK)
-        .Produces(StatusCodes.Status404NotFound)
-        .Produces(StatusCodes.Status400BadRequest)
-        .Produces(StatusCodes.Status500InternalServerError);
+                catch (DbUpdateException)
+                {
+                    // Database update issue
+                    return Results.BadRequest("Failed to update activity. Ensure the provided data is correct.");
+                }
+                catch (Exception)
+                {
+                    // Server error for any unexpected errors
+                    return Results.Problem("An error occurred while updating the activity.", statusCode: StatusCodes.Status500InternalServerError);
+                }
+            })
+            .WithName("UpdateActivity")
+            .WithDescription("Updates an existing activity using ID.")
+            .WithTags("Activities")
+            .Accepts<UpdateActivityDTO>("application/json")
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status404NotFound)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError);
 
 
         // PUT IsComplete activity
