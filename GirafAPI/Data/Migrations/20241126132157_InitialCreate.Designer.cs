@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GirafAPI.Data.Migrations
+namespace GirafAPI.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    [Migration("20241125041729_initial_migration")]
-    partial class initial_migration
+    [Migration("20241126132157_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,7 +49,7 @@ namespace GirafAPI.Data.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("PictogramId")
+                    b.Property<int?>("PictogramId")
                         .HasColumnType("INTEGER");
 
                     b.Property<TimeOnly>("StartTime")
@@ -212,10 +212,12 @@ namespace GirafAPI.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedUserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
@@ -406,9 +408,7 @@ namespace GirafAPI.Data.Migrations
 
                     b.HasOne("GirafAPI.Entities.Pictograms.Pictogram", "Pictogram")
                         .WithMany()
-                        .HasForeignKey("PictogramId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PictogramId");
 
                     b.Navigation("Pictogram");
                 });

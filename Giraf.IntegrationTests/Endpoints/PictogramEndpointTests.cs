@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
@@ -200,16 +201,17 @@ namespace Giraf.IntegrationTests.Endpoints
 
             int organizationId;
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await context.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                organizationId = organization.Id;
-            }
+            using var scope = factory.Services.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var organization = await context.Organizations.FirstOrDefaultAsync();
+            Assert.NotNull(organization);
+            organizationId = organization.Id;
+
+            var currentPage = 1;
+            var pageSize = 10;
 
             // Act
-            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}");
+            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}&currentPage={currentPage}&pageSize={pageSize}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -235,8 +237,15 @@ namespace Giraf.IntegrationTests.Endpoints
                 organizationId = organization.Id;
             }
 
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
+                new Claim("OrgMember", organizationId.ToString())
+            };
+
             // Act
-            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}");
+            var response = await client.GetAsync($"/pictograms/organization/{organizationId}");
 
             // Assert
             response.EnsureSuccessStatusCode();

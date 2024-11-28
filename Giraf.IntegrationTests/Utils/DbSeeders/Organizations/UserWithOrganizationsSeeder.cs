@@ -1,4 +1,7 @@
+using System.Security.Claims;
 using GirafAPI.Data;
+using GirafAPI.Entities.Citizens;
+using GirafAPI.Entities.Grades;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
@@ -7,33 +10,27 @@ using Microsoft.EntityFrameworkCore;
 namespace Giraf.IntegrationTests.Utils.DbSeeders;
 
 // This seeder creates a user and associates multiple organizations with them for the GET /organizations/user/{id} test.
-public class UserWithOrganizationsSeeder : DbSeeder
+public class UserWithOrganizationsSeeder(UserManager<GirafUser> userManager) : DbSeeder
 {
-    private readonly UserManager<GirafUser> _userManager;
-
-    public UserWithOrganizationsSeeder(UserManager<GirafUser> userManager)
-    {
-        _userManager = userManager;
-    }
+    private readonly UserManager<GirafUser> _userManager = userManager;
 
     public override void SeedData(DbContext context)
     {
         var dbContext = (GirafDbContext)context;
 
-       
         var organizations = new List<Organization>
         {
             new() {
                 Name = "Organization A",
                 Users = new List<GirafUser>(),
-                Citizens = new List<GirafAPI.Entities.Citizens.Citizen>(),
-                Grades = new List<GirafAPI.Entities.Grades.Grade>()
+                Citizens = new List<Citizen>(),
+                Grades = new List<Grade>()
             },
             new() {
                 Name = "Organization B",
                 Users = new List<GirafUser>(),
-                Citizens = new List<GirafAPI.Entities.Citizens.Citizen>(),
-                Grades = new List<GirafAPI.Entities.Grades.Grade>()
+                Citizens = new List<Citizen>(),
+                Grades = new List<Grade>()
             }
         };
 
@@ -46,9 +43,7 @@ public class UserWithOrganizationsSeeder : DbSeeder
             LastName = "TestingPurposes",
             UserName = "BasicUserUsername",
             Email = "BasicUser@email.com",
-            
         };
-
 
         var result = _userManager.CreateAsync(user, "Password123!").GetAwaiter().GetResult();
 
@@ -57,10 +52,13 @@ public class UserWithOrganizationsSeeder : DbSeeder
             throw new Exception($"Failed to create user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
 
-        // Associate the user with the organization
+        // Assign claims and associate user with organizations
         foreach (var org in organizations)
         {
             org.Users.Add(user);
+
+            var memberClaim = new Claim("OrgMember", org.Id.ToString());
+            _userManager.AddClaimAsync(user, memberClaim).GetAwaiter().GetResult();
         }
 
         dbContext.SaveChanges();

@@ -276,7 +276,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsCreated_IfSucessfullyCreated()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationAndUser(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new UserWithOrganizationsSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             using var scope = factory.Services.CreateScope();

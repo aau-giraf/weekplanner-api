@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.TestHost;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.VisualBasic;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Giraf.IntegrationTests.Utils;
 
@@ -43,6 +43,28 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
                 options.Issuer = "TestIssuer";
                 options.Audience = "TestAudience";
                 options.SecretKey = "ThisIsASecretKeyForTestingPurposes!";
+            });
+
+            // Add the test authentication scheme
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = TestAuthHandler.TestAuthenticationScheme;
+                options.DefaultChallengeScheme = TestAuthHandler.TestAuthenticationScheme;
+            })
+            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.TestAuthenticationScheme, options => { });
+
+            // Add authorization policies
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("OrganizationMember", policy =>
+                {
+                    policy.RequireClaim("OrgMember");
+                });
+
+                options.AddPolicy("OrganizationAdmin", policy =>
+                {
+                    policy.RequireClaim("OrgAdmin");
+                });
             });
 
             // Build the service provider and create a scope
