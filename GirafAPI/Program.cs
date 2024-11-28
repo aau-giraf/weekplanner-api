@@ -46,9 +46,9 @@ if (!app.Environment.IsEnvironment("Testing"))
 {
     await app.ApplyMigrationsAsync();
     await app.SeedDataAsync();
+    await app.AddDefaultPictograms();
 }
 
-await app.AddDefaultPictograms();
 
 
 if (app.Environment.IsDevelopment())

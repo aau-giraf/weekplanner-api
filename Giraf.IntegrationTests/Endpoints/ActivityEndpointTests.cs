@@ -373,7 +373,7 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(activity);
                 activityId = activity.Id;
             }
-
+            
             var updateActivityDto = new UpdateActivityDTO
             (
                 Name: "Updated Activity",

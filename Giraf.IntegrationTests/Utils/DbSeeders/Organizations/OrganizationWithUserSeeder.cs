@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using GirafAPI.Data;
 using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Grades;
@@ -22,7 +23,6 @@ public class OrganizationWithUserSeeder : DbSeeder
     {
         var dbContext = (GirafDbContext)context;
         
-
         var organization = new Organization
         {
             Name = "Organization With User",
@@ -33,7 +33,6 @@ public class OrganizationWithUserSeeder : DbSeeder
 
         dbContext.Organizations.Add(organization);
         dbContext.SaveChanges();
-
 
         // Reload the organization to ensure it's tracked
         var organizationFromDb = dbContext.Organizations.Include(o => o.Users).First(o => o.Id == organization.Id);
@@ -52,6 +51,13 @@ public class OrganizationWithUserSeeder : DbSeeder
         {
             throw new Exception($"Failed to create user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
+
+        // Assign claims to the user
+        var memberClaim = new Claim("OrgMember", organization.Id.ToString());
+        var adminClaim = new Claim("OrgAdmin", organization.Id.ToString());
+
+        _userManager.AddClaimAsync(user, memberClaim).GetAwaiter().GetResult();
+        _userManager.AddClaimAsync(user, adminClaim).GetAwaiter().GetResult();
 
         // Reload the user to ensure it's tracked
         var userFromDb = dbContext.Users.Include(u => u.Organizations).First(u => u.Id == user.Id);
