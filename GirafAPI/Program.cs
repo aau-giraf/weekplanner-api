@@ -48,6 +48,9 @@ if (!app.Environment.IsEnvironment("Testing"))
     await app.SeedDataAsync();
 }
 
+await app.AddDefaultPictograms();
+
+
 if (app.Environment.IsDevelopment())
 {
     app.Run("http://0.0.0.0:5171");

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace GirafAPI.Migrations
+namespace GirafAPI.Data.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
     partial class GirafDbContextModelSnapshot : ModelSnapshot
@@ -156,7 +156,7 @@ namespace GirafAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("OrganizationId")
+                    b.Property<int?>("OrganizationId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("PictogramName")

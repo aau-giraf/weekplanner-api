@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using GirafAPI.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GirafAPI.Extensions
 {
@@ -79,10 +81,15 @@ namespace GirafAPI.Extensions
 
         public static IServiceCollection ConfigureAuthorizationPolicies(this IServiceCollection services)
         {
+            services.AddSingleton<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
+            
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Administrator"));
-                options.AddPolicy("TrusteePolicy", policy => policy.RequireRole("Trustee"));
+                options.AddPolicy("OrganizationMember", policy =>
+                    policy.Requirements.Add(new OrgMemberRequirement()));
+                options.AddPolicy("OrganizationAdmin", policy =>
+                    policy.Requirements.Add(new OrgAdminRequirement()));
             });
 
             return services;

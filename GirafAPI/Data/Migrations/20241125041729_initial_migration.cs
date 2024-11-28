@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace GirafAPI.Migrations
+namespace GirafAPI.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class initial_migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -86,7 +86,7 @@ namespace GirafAPI.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    OrganizationId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrganizationId = table.Column<int>(type: "INTEGER", nullable: true),
                     PictogramName = table.Column<string>(type: "TEXT", nullable: false),
                     PictogramUrl = table.Column<string>(type: "TEXT", nullable: false)
                 },
