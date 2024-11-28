@@ -66,7 +66,7 @@ public static class InvitationEndpoints
 
                 if (invitations.Count == 0)
                 {
-                    return Results.NotFound("No invitations found.");
+                    return Results.Ok(Array.Empty<InvitationDTO>());
                 }
 
                 var invitationDtos = new List<InvitationDTO>();
@@ -75,12 +75,12 @@ public static class InvitationEndpoints
                     GirafUser? sender = await dbContext.Users.FindAsync(invitation.SenderId);
                     if (sender is null)
                     {
-                        return Results.NotFound("Invitation sender not found.");
+                        continue;
                     }
                     Organization? organization = await dbContext.Organizations.FindAsync(invitation.OrganizationId);
                     if (organization is null)
                     {
-                        return Results.NotFound("Organization not found.");
+                        continue;
                     }
                     var invitationDto = invitation.ToDTO(organization.Name, $"{sender.FirstName} {sender.LastName}");
                     invitationDtos.Add(invitationDto);
