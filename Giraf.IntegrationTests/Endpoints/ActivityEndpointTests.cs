@@ -382,7 +382,7 @@ namespace Giraf.IntegrationTests.Endpoints
                 StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
                 EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
                 IsCompleted: true,
-                PictogramId: null,
+                PictogramId: 1,
                 CitizenId: 1
             );
 
