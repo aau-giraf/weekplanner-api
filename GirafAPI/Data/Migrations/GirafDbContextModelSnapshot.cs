@@ -29,10 +29,6 @@ namespace GirafAPI.Data.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<TimeOnly>("EndTime")
                         .HasColumnType("TEXT");
 
@@ -41,10 +37,6 @@ namespace GirafAPI.Data.Migrations
 
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<int?>("PictogramId")
                         .HasColumnType("INTEGER");

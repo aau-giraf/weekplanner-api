@@ -273,8 +273,6 @@ public static class ActivityEndpoints
                         citizen.Activities.Add(new Activity
                         {
                             Date = newDate,
-                            Name = activity.Name,
-                            Description = activity.Description,
                             StartTime = activity.StartTime,
                             EndTime = activity.EndTime,
                             IsCompleted = activity.IsCompleted
