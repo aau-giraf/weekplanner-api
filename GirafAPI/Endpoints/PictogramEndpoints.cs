@@ -11,7 +11,7 @@ public static class PictogramEndpoints
 {
     public static RouteGroupBuilder MapPictogramEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("pictograms").AllowAnonymous();
+        var group = app.MapGroup("pictograms");
 
         // Can't use a DTO here since for the endpoint to work correctly with images, the image and the dto must both be multipart/form-data
         // but minimal apis can't map from multipart/form-data to a record DTO, only from application/json
