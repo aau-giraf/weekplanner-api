@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
@@ -20,6 +21,12 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
+            
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             int gradeId;
             using (var scope = factory.Services.CreateScope())
@@ -48,6 +55,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentGradeId = 9999;
+            
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync($"/grades/{nonExistentGradeId}");
@@ -76,6 +89,11 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(organization);
                 organizationId = organization.Id;
             }
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", organizationId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync($"/grades/org/{organizationId}");
@@ -95,6 +113,11 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentOrganizationId = 9999;
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", nonExistentOrganizationId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync($"/grades/org/{nonExistentOrganizationId}");
@@ -123,6 +146,11 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(organization);
                 organizationId = organization.Id;
             }
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgAdmin", organizationId.ToString())
+            };
 
             var newGradeDto = new CreateGradeDTO
             (
@@ -141,12 +169,17 @@ namespace Giraf.IntegrationTests.Endpoints
 
         // Test 6: Create a new grade when the organization does not exist.
         [Fact]
-        public async Task CreateGrade_ReturnsNotFound_WhenOrganizationDoesNotExist()
+        public async Task CreateGrade_ReturnsForbidden_WhenOrganizationDoesNotExist()
         {
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentOrganizationId = 9999;
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", nonExistentOrganizationId.ToString())
+            };
 
             var newGradeDto = new CreateGradeDTO
             (
@@ -157,7 +190,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var response = await client.PostAsJsonAsync($"/grades/?orgId={nonExistentOrganizationId}", newGradeDto);
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         #endregion
@@ -171,6 +204,11 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgAdmin", "1")
+            };
 
             int gradeId;
             using (var scope = factory.Services.CreateScope())
@@ -195,19 +233,24 @@ namespace Giraf.IntegrationTests.Endpoints
 
         // Test 8: Change the name of a grade when the grade does not exist.
         [Fact]
-        public async Task ChangeGradeName_ReturnsNotFound_WhenGradeDoesNotExist()
+        public async Task ChangeGradeName_ReturnsForbidden_WhenGradeDoesNotExist()
         {
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentGradeId = 9999;
             string newName = "Updated Grade Name";
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", "1")
+            };
 
             // Act
             var response = await client.PutAsync($"/grades/{nonExistentGradeId}/change-name?newName={newName}", null);
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         #endregion
@@ -221,6 +264,11 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new GradeSeederWithCitizen());
             var client = factory.CreateClient();
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", "1")
+            };
 
             int gradeId;
             List<int> citizenIds;
@@ -258,6 +306,11 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", "1")
+            };
 
             int nonExistentGradeId = 9999;
             List<int> citizenIds;
@@ -291,6 +344,11 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new GradeSeederWithCitizen());
             var client = factory.CreateClient();
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", "1")
+            };
 
             int gradeId;
             List<int> citizenIds;
@@ -325,6 +383,11 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", "1")
+            };
 
             int nonExistentGradeId = 9999;
             List<int> citizenIds;
@@ -358,6 +421,11 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgAdmin", "1")
+            };
 
             int gradeId;
             using (var scope = factory.Services.CreateScope())
@@ -385,18 +453,23 @@ namespace Giraf.IntegrationTests.Endpoints
 
         // Test 14: Delete a grade when the grade does not exist.
         [Fact]
-        public async Task DeleteGrade_ReturnsNotFound_WhenGradeDoesNotExist()
+        public async Task DeleteGrade_ReturnsForbidden_WhenGradeDoesNotExist()
         {
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             int nonExistentGradeId = 9999;
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", "1")
+            };
 
             // Act
             var response = await client.DeleteAsync($"/grades/{nonExistentGradeId}");
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
         }
 
         #endregion
