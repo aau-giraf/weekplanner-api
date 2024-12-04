@@ -69,7 +69,6 @@ public static class PictogramEndpoints
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
 
-
         group.MapGet("/{pictogramId:int}", async (int pictogramId, GirafDbContext dbContext) =>
             {
               try
@@ -90,6 +89,7 @@ public static class PictogramEndpoints
             })
             .WithName("GetPictogramById")
             .WithDescription("Gets a specific pictogram by Id.")
+            .RequireAuthorization("OrganizationMember")
             .WithTags("Pictograms")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
@@ -125,7 +125,6 @@ public static class PictogramEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
-
         group.MapDelete("/{pictogramId:int}", async (int pictogramId, GirafDbContext dbContext) =>
             {
               try
@@ -151,12 +150,11 @@ public static class PictogramEndpoints
             .WithName("DeletePictogram")
             .WithDescription("Deletes a pictogram by Id.")
             .WithTags("Pictograms")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        
         return group;
     }
-    
 }
