@@ -53,8 +53,6 @@ namespace Giraf.IntegrationTests.Utils.DbSeeders
             var activity1 = new Activity
             {
                 Date = activityDate,
-                Name = "Activity 1",
-                Description = "GradeWith ActivitySeeder 1",
                 StartTime = new TimeOnly(8, 0),
                 EndTime = new TimeOnly(9, 0),
                 IsCompleted = false,
@@ -64,8 +62,6 @@ namespace Giraf.IntegrationTests.Utils.DbSeeders
             var activity2 = new Activity
             {
                 Date = activityDate,
-                Name = "Activity 2",
-                Description = "grade With Activity Seeder 2",
                 StartTime = new TimeOnly(18, 0),
                 EndTime = new TimeOnly(19, 0),
                 IsCompleted = false,
