@@ -4,7 +4,9 @@ using System.Security.Claims;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
+using GirafAPI.Entities.Pictograms;
 using GirafAPI.Entities.Pictograms.DTOs;
+using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,10 +30,38 @@ namespace Giraf.IntegrationTests.Endpoints
             using (var scope = factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await context.Organizations.FirstOrDefaultAsync();
+                var organization = await context.Organizations
+                    .Include(o => o.Users)
+                    .FirstOrDefaultAsync();
                 Assert.NotNull(organization);
                 organizationId = organization.Id;
+
+                // Create and associate the test user
+                var testUser = new GirafUser
+                {
+                    Id = "test-user-id",
+                    UserName = "testuser",
+                    FirstName = "Test",
+                    LastName = "User",
+                    Email = "testuser@example.com",
+                    NormalizedUserName = "TESTUSER",
+                    NormalizedEmail = "TESTUSER@EXAMPLE.COM",
+                    PasswordHash = "TestPasswordHash",
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                };
+
+                organization.Users.Add(testUser);
+                context.Users.Add(testUser);
+                await context.SaveChangesAsync();
             }
+
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new("OrgMember", organizationId.ToString())
+            };
 
             // Prepare multipart form data
             var formData = new MultipartFormDataContent();
@@ -124,6 +154,13 @@ namespace Giraf.IntegrationTests.Endpoints
                 organizationId = organization.Id;
             }
 
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new("OrgMember", organizationId.ToString())
+            };
+
             // Prepare multipart form data without pictogramName
             var formData = new MultipartFormDataContent();
 
@@ -154,14 +191,24 @@ namespace Giraf.IntegrationTests.Endpoints
             var client = factory.CreateClient();
 
             int pictogramId;
+            int organizationId;
 
             using (var scope = factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
                 var pictogram = await context.Pictograms.FirstOrDefaultAsync();
+                var organization = await context.Organizations.FirstOrDefaultAsync();
                 Assert.NotNull(pictogram);
                 pictogramId = pictogram.Id;
+                organizationId = organization.Id;
             }
+
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new("OrgMember", organizationId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync($"/pictograms/{pictogramId}");
@@ -177,9 +224,25 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramById_ReturnsNotFound_WhenPictogramDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
             int nonExistentPictogramId = 9999;
+            int organizationId;
+
+            using (var scope = factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+                var organization = await context.Organizations.FirstOrDefaultAsync();
+                organizationId = organization.Id;
+            }
+
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new("OrgMember", organizationId.ToString())
+            };
+
 
             // Act
             var response = await client.GetAsync($"/pictograms/{nonExistentPictogramId}");
@@ -209,6 +272,14 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var currentPage = 1;
             var pageSize = 10;
+            
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new("OrgMember", organizationId.ToString())
+            };
+
 
             // Act
             var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}&currentPage={currentPage}&pageSize={pageSize}");
@@ -240,8 +311,8 @@ namespace Giraf.IntegrationTests.Endpoints
             // Set up the test claims
             TestAuthHandler.TestClaims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
-                new Claim("OrgMember", organizationId.ToString())
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new("OrgMember", organizationId.ToString())
             };
 
             var currentPage = 1;
@@ -269,14 +340,52 @@ namespace Giraf.IntegrationTests.Endpoints
             var client = factory.CreateClient();
 
             int pictogramId;
+            int organizationId;
 
             using (var scope = factory.Services.CreateScope())
             {
                 var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+
+                // Include the Users collection
+                var organization = await context.Organizations
+                    .Include(o => o.Users)
+                    .FirstOrDefaultAsync();
+                Assert.NotNull(organization);
+                organizationId = organization.Id;
+
                 var pictogram = await context.Pictograms.FirstOrDefaultAsync();
                 Assert.NotNull(pictogram);
                 pictogramId = pictogram.Id;
+                Assert.Equal(organizationId, pictogram.OrganizationId);
+
+                // Create and associate the test user
+                var testUser = new GirafUser
+                {
+                    Id = "test-user-id",
+                    UserName = "testuser",
+                    FirstName = "Test",
+                    LastName = "User",
+                    Email = "testuser@example.com",
+                    NormalizedUserName = "TESTUSER",
+                    NormalizedEmail = "TESTUSER@EXAMPLE.COM",
+                    PasswordHash = "TestPasswordHash",
+                    SecurityStamp = Guid.NewGuid().ToString(),
+                    ConcurrencyStamp = Guid.NewGuid().ToString()
+                };
+
+                organization.Users.Add(testUser);
+                context.Users.Add(testUser);
+                context.Organizations.Update(organization); // Ensure the organization is updated
+                await context.SaveChangesAsync();
+
             }
+
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new("OrgMember", organizationId.ToString())
+            };
 
             // Act
             var response = await client.DeleteAsync($"/pictograms/{pictogramId}");
@@ -297,10 +406,25 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeletePictogram_ReturnsNotFound_WhenPictogramDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
             int nonExistentPictogramId = 9999;
+            int organizationId;
+
+            using (var scope = factory.Services.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+                var organization = await context.Organizations.FirstOrDefaultAsync();
+                organizationId = organization.Id;
+            }
+
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, "test-user-id"),
+                new("OrgMember", organizationId.ToString())
+            };
 
             // Act
             var response = await client.DeleteAsync($"/pictograms/{nonExistentPictogramId}");
