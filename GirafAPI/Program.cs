@@ -1,7 +1,5 @@
-using GirafAPI.Data;
 using GirafAPI.Endpoints;
 using GirafAPI.Extensions;
-using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,8 +47,6 @@ if (!app.Environment.IsEnvironment("Testing"))
     await app.AddDefaultPictograms();
 }
 
-
-
 if (app.Environment.IsDevelopment())
 {
     app.Run("http://0.0.0.0:5171");
@@ -59,4 +55,3 @@ else
 {
     app.Run();
 }
-
