@@ -245,11 +245,8 @@ namespace Giraf.IntegrationTests.Endpoints
                 new Claim("OrgMember", organizationId.ToString())
             };
 
-            var currentPage = 1;
-            var pageSize = 10;
-
             // Act
-            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}&currentPage={currentPage}&pageSize={pageSize}");
+            var response = await client.GetAsync($"/pictograms/organization/{organizationId}");
 
             // Assert
             response.EnsureSuccessStatusCode();

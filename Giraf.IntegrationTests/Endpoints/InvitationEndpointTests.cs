@@ -318,7 +318,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsBadRequest_IfRecieverNotFound()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new UserWithOrganizationsSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new OrganizationWithUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             using var scope = factory.Services.CreateScope();

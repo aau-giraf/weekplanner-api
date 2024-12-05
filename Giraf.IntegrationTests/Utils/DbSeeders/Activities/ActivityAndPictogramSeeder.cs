@@ -57,8 +57,6 @@ namespace Giraf.IntegrationTests.Utils.DbSeeders
             var activity = new Activity
             {
                 Date = DateOnly.FromDateTime(DateTime.UtcNow),
-                Name = "Activity with Pictogram",
-                Description = "Activity description",
                 StartTime = new TimeOnly(10, 0),
                 EndTime = new TimeOnly(11, 0),
                 IsCompleted = false,

@@ -81,6 +81,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(organization);
                 organizationId = organization.Id;
             }
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgMember", organizationId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync($"/organizations/{organizationId}");
@@ -100,7 +106,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
-            var nonExistentOrganizationId = 9999;
+            var nonExistentOrganizationId = 1;
             var testUserId = "test-user-id";
 
             // Set up the test claims
