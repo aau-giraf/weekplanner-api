@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
@@ -32,6 +33,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 Password = "P@ssw0rd!"
             };
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgAdmin", testOrgId.ToString())
+            };
+            
             // Act
             var response = await client.PostAsJsonAsync("/users", newUserDto);
 
@@ -51,6 +58,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgAdmin", testOrgId.ToString())
+            };
+            
             var newUserDto = new CreateUserDTO
             {
                 FirstName = "invaliduser",
@@ -58,6 +71,8 @@ namespace Giraf.IntegrationTests.Endpoints
                 Email = "invaliduser@example.com",
                 Password = ""  // invalid password
             };
+
+            
 
             // Act
             var response = await client.PostAsJsonAsync("/users", newUserDto);
@@ -92,6 +107,12 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var updateUserDto = new UpdateUserDTO("UpdatedFirstName", "UpdatedLastName");
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgAdmin", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.PutAsJsonAsync($"/users/{userId}", updateUserDto);
 
@@ -120,6 +141,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var updateUserDto = new UpdateUserDTO("NonExistentFirstName", "NonExistentLastName");
             var nonExistentUserId = "nonexistent_user_id";
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgAdmin", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.PutAsJsonAsync($"/users/{nonExistentUserId}", updateUserDto);
 
@@ -139,6 +166,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(sp => new MultipleUsersSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.GetAsync("/users");
 
@@ -156,6 +189,12 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync("/users");
@@ -179,6 +218,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var existingUser = await dbContext.Users.FirstOrDefaultAsync();
             Assert.NotNull(existingUser);
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.GetAsync($"/users/{existingUser.Id}");
 
@@ -199,6 +244,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var client = factory.CreateClient();
 
             var nonExistentUserId = "nonexistent_user_id";
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync($"/users/{nonExistentUserId}");
@@ -231,6 +282,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 newPassword: "NewP@ssw0rd!"
             );
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.PutAsJsonAsync($"/users/{user.Id}/change-password", updatePasswordDto);
 
@@ -254,6 +311,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 oldPassword: "P@ssw0rd!",
                 newPassword: "NewP@ssw0rd!"
             );
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Act
             var response = await client.PutAsJsonAsync($"/users/{nonExistentUserId}/change-password", updatePasswordDto);
@@ -283,6 +346,12 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var updateUsernameDto = new UpdateUsernameDTO("updatedUser");
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.PutAsJsonAsync($"/users/{user.Id}/change-username", updateUsernameDto);
 
@@ -307,6 +376,12 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var nonExistentUserId = "nonexistent_user_id";
             var updateUsernameDto = new UpdateUsernameDTO("anotherusername");
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Act
             var response = await client.PutAsJsonAsync($"/users/{nonExistentUserId}/change-username", updateUsernameDto);
@@ -341,6 +416,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 Password = BasicUserWithPasswordSeeder.SeededUserPassword // Use the correct password
             };
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+
             // Act
             var request = new HttpRequestMessage(HttpMethod.Delete, $"/users/{user.Id}")
             {
@@ -367,6 +448,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var client = factory.CreateClient();
 
             var nonExistentUserId = "nonexistent_user_id";
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Act
             var response = await client.DeleteAsync($"/users/{nonExistentUserId}");

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GirafAPI.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    [Migration("20241126132157_InitialCreate")]
+    [Migration("20241205115204_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
