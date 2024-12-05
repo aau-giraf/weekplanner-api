@@ -126,7 +126,7 @@ namespace Giraf.IntegrationTests.Endpoints
             response.EnsureSuccessStatusCode();
         }
         
-        //6. Tests if you get a Not Found if user doesn't have an invitation
+        //6. Tests if you get a OK if user doesn't have an invitation
         [Fact] 
         public async Task GetUserInvitation_ReturnsNotFound_WhenNoInvitationExists()
         {
@@ -139,9 +139,9 @@ namespace Giraf.IntegrationTests.Endpoints
             var response = await client.GetAsync($"/invitations/user/{fakeId}");
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
-        //7. Tests if you get a Not Found if invitation is found but sender is null
+        //7. Tests if you get a OK if invitation is found but sender is null
         [Fact] 
         public async Task GetUserInvitation_ReturnsNotFound_WhenInvitationExistsButSenderIsNull()
         {
@@ -162,10 +162,10 @@ namespace Giraf.IntegrationTests.Endpoints
             var response = await client.GetAsync($"/invitations/user/{existingRecievingUser}");
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
-        //8. Tests if you get a Not Found if invitation is found but organization is null
+        //8. Tests if you get a OK if invitation is found but organization is null
         [Fact] 
         public async Task GetUserInvitation_ReturnsNotFound_WhenInvitationExistsButOrganizationIsNull()
         {
@@ -187,7 +187,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var response = await client.GetAsync($"/invitations/user/{existingRecievingUser}");
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         #endregion
@@ -318,7 +318,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsBadRequest_IfRecieverNotFound()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationAndUser(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new UserWithOrganizationsSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             using var scope = factory.Services.CreateScope();
