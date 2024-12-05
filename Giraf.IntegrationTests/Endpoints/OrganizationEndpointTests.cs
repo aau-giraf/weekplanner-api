@@ -7,6 +7,7 @@ using GirafAPI.Data;
 using GirafAPI.Entities.Organizations.DTOs;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -121,7 +122,7 @@ namespace Giraf.IntegrationTests.Endpoints
         #region Create Organization Tests
 
         // 5. Test POST /organizations to create a new organization
-        [Fact]
+        [HttpPost][Fact]
         public async Task PostOrganization_ReturnsCreated_WhenUserIsValid()
         {
             // Arrange
@@ -130,26 +131,38 @@ namespace Giraf.IntegrationTests.Endpoints
 
             using var scope = factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+
+            // Fetch a user from the database and assert it's not null
             var user = await dbContext.Users.FirstOrDefaultAsync();
             Assert.NotNull(user);
+            Assert.IsType<GirafUser>(user);
 
             // Set up the test claims
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
+            Assert.Contains(TestAuthHandler.TestClaims, c => c.Type == ClaimTypes.NameIdentifier && c.Value == user.Id);
 
+            // Create DTO for the new organization
             var newOrgDto = new CreateOrganizationDTO { Name = "New Organization" };
+            Assert.NotNull(newOrgDto);
+            Assert.Equal("New Organization", newOrgDto.Name); // Verify DTO has the correct name
 
             // Act
-            var response = await client.PostAsJsonAsync($"/organizations", newOrgDto);
+            var response = await client.PostAsJsonAsync("/organizations", newOrgDto);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            response.EnsureSuccessStatusCode(); // Ensure the response is successful
             var createdOrganization = await response.Content.ReadFromJsonAsync<OrganizationDTO>();
             Assert.NotNull(createdOrganization);
             Assert.Equal("New Organization", createdOrganization.Name);
+
+            // Additional checks to verify created organization structure
+            Assert.IsType<OrganizationDTO>(createdOrganization);
+            Assert.NotEmpty(createdOrganization.Name);
         }
+
 
         // 6. Test POST /organizations when user does not exist
         [Fact]
