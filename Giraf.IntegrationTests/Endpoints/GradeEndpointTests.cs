@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class GradeEndpointsTests
     {
         #region 1. Get Grade by ID Tests
@@ -22,10 +23,19 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
             
-            var testOrgId = 1;
+            int orgId;
+            using (var scope = factory.Services.CreateScope())
+            {
+                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
+                Assert.NotNull(organization);
+                orgId = organization.Id;
+            }
+            
             TestAuthHandler.TestClaims = new List<Claim>
             {
-                new Claim("OrgMember", testOrgId.ToString())
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgMember", orgId.ToString())
             };
 
             int gradeId;
@@ -59,6 +69,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var testOrgId = 1;
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", testOrgId.ToString())
             };
 
@@ -92,6 +103,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", organizationId.ToString())
             };
 
@@ -116,6 +128,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", nonExistentOrganizationId.ToString())
             };
 
@@ -149,6 +162,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgAdmin", organizationId.ToString())
             };
 
@@ -178,6 +192,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", nonExistentOrganizationId.ToString())
             };
 
@@ -207,6 +222,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgAdmin", "1")
             };
 
@@ -243,6 +259,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", "1")
             };
 
@@ -267,6 +284,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", "1")
             };
 
@@ -309,6 +327,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", "1")
             };
 
@@ -347,6 +366,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", "1")
             };
 
@@ -386,6 +406,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", "1")
             };
 
@@ -424,6 +445,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgAdmin", "1")
             };
 
@@ -462,6 +484,7 @@ namespace Giraf.IntegrationTests.Endpoints
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
                 new Claim("OrgMember", "1")
             };
 

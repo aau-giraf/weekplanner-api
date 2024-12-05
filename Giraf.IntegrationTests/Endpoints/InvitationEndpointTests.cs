@@ -13,6 +13,7 @@ using System.Net.Http.Json;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class InvitationEndpointsTests
     {
         #region Get Invitation by ID Tests - Test 1-4

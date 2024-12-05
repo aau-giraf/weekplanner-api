@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class CitizensEndpointTests
     {
         #region Get All Citizens Tests
