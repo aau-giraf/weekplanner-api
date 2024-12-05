@@ -269,7 +269,7 @@ namespace Giraf.IntegrationTests.Endpoints
         
         #endregion
     
-        #region Post Invitation - Tests 12-13
+        #region Post Invitation - Tests 12-13 
 
         [Fact]
         //12. Succesfully posts a new invitation
