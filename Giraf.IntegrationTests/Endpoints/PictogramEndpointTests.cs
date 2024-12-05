@@ -8,6 +8,7 @@ using GirafAPI.Entities.Pictograms;
 using GirafAPI.Entities.Pictograms.DTOs;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -332,7 +333,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Delete Pictogram Tests
 
-        [Fact]
+        [HttpDelete][Fact]
         public async Task DeletePictogram_ReturnsOk_WhenPictogramExists()
         {
             // Arrange
@@ -346,16 +347,20 @@ namespace Giraf.IntegrationTests.Endpoints
             {
                 var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
 
-                // Include the Users collection
+                // Fetch an organization and verify its existence
                 var organization = await context.Organizations
                     .Include(o => o.Users)
                     .FirstOrDefaultAsync();
                 Assert.NotNull(organization);
-                organizationId = organization.Id;
 
+                organizationId = organization.Id;
+                Assert.True(organizationId > 0, "Organization ID should be a positive integer.");
+
+                // Fetch a pictogram and verify its existence
                 var pictogram = await context.Pictograms.FirstOrDefaultAsync();
                 Assert.NotNull(pictogram);
                 pictogramId = pictogram.Id;
+                Assert.True(pictogramId > 0, "Pictogram ID should be a positive integer.");
                 Assert.Equal(organizationId, pictogram.OrganizationId);
 
                 // Create and associate the test user
@@ -372,12 +377,21 @@ namespace Giraf.IntegrationTests.Endpoints
                     SecurityStamp = Guid.NewGuid().ToString(),
                     ConcurrencyStamp = Guid.NewGuid().ToString()
                 };
+                Assert.NotNull(testUser);
+                Assert.Equal("test-user-id", testUser.Id);
 
                 organization.Users.Add(testUser);
                 context.Users.Add(testUser);
-                context.Organizations.Update(organization); // Ensure the organization is updated
+                context.Organizations.Update(organization);
                 await context.SaveChangesAsync();
 
+                Assert.NotEmpty(organization.Users);
+
+                // Verify user was added
+                var tester = await context.Users.FirstOrDefaultAsync(u => u.Id == "test-user-id");
+                Assert.NotNull(tester);
+                Assert.Equal("test-user-id", tester.Id);
+                Assert.Equal("testuser@example.com", tester.Email);
             }
 
             // Set up the test claims
@@ -386,6 +400,8 @@ namespace Giraf.IntegrationTests.Endpoints
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
                 new("OrgMember", organizationId.ToString())
             };
+            Assert.Contains(TestAuthHandler.TestClaims, c => c.Type == ClaimTypes.NameIdentifier && c.Value == "test-user-id");
+            Assert.Contains(TestAuthHandler.TestClaims, c => c.Type == "OrgMember" && c.Value == organizationId.ToString());
 
             // Act
             var response = await client.DeleteAsync($"/pictograms/{pictogramId}");
