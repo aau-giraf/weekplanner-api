@@ -4,6 +4,7 @@ using GirafAPI.Data;
 using GirafAPI.Entities.Invitations.DTOs;
 using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -311,9 +312,41 @@ namespace Giraf.IntegrationTests.Endpoints
             // Assert
             response.EnsureSuccessStatusCode();
         }
+
+        [Fact]
+        //13. Throws bad request if reciever is Bad Request.
+        public async Task PostInvitation_ReturnsBadRequest_IfRecieverNotFound()
+        {
+            // Arrange
+            var factory = new GirafWebApplicationFactory(sp => new OrganizationAndUser(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var client = factory.CreateClient();
+
+            using var scope = factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+
+            var sender = await dbContext.Users.FirstOrDefaultAsync();
+            Assert.NotNull(sender);
+
+            var existingOrganization = await dbContext.Organizations.FirstOrDefaultAsync();
+            Assert.NotNull(existingOrganization);
+
+            var fakeRecieverEmail = "fake@email.com";
+
+            var newInvitationDto = new CreateInvitationDTO(existingOrganization.Id, fakeRecieverEmail, sender.Id);
+
+            // Act
+            var response = await client.PostAsJsonAsync("/invitations/", newInvitationDto);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+
         #endregion
     
-        #region Put Invitation by ID and response - Test 14-
+        #region Put Invitation by ID and response - Test 14-18
+        
         //14. Tests if you can succesfully accept an invitaion
         [Fact]
         public async Task PutInvitationById_ReturnsOk_WhenInvitationIsAccepted()
@@ -342,6 +375,156 @@ namespace Giraf.IntegrationTests.Endpoints
             // Reload the invitation from the database
             var deletedInvitation = await dbContext.Invitations.FindAsync(existingInvitation.Id);
             Assert.Null(deletedInvitation);
+        }
+
+        //15. Tests if you can succesfully decline an invitaion
+        [Fact]
+        public async Task PutInvitationById_ReturnsOk_WhenInvitationIsDeclined()
+        {
+            // Arrange
+            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var client = factory.CreateClient();
+
+            // Retrieve the actual user ID
+            using var scope = factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
+            Assert.NotNull(existingInvitation);
+
+            var responseDto = new InvitationResponseDTO { Response = false };
+
+            // Act
+            var response = await client.PutAsJsonAsync($"/invitations/respond/{existingInvitation.Id}", responseDto);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+
+            // Detach the existingInvitation entity to ensure a fresh query
+            dbContext.Entry(existingInvitation).State = EntityState.Detached;
+
+            // Reload the invitation from the database
+            var deletedInvitation = await dbContext.Invitations.FindAsync(existingInvitation.Id);
+            Assert.Null(deletedInvitation);
+        }
+
+        //16. Test that makes sure a non-existing invitation Id returns Bad Request.
+        [Fact]
+        public async Task PutInvitationById_ReturnsNotFound_WhenInvitationIdDoesNotExist()
+        {
+            // Arrange
+            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var client = factory.CreateClient();
+
+            var FakeInvitaionId = "fakeInvitation";
+
+            var responseDto = new InvitationResponseDTO { Response = true };
+
+            // Act
+            var response = await client.PutAsJsonAsync($"/invitations/respond/{FakeInvitaionId}", responseDto);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        //17. Test that makes sure that an accepted invitation without an organization returns Not Found
+        [Fact]
+        public async Task PutInvitationById_ReturnsNotFound_WhenInvitationDoesNotHaveAnOrganization()
+        {
+             // Arrange
+            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var client = factory.CreateClient();
+
+            // Retrieve the actual user ID
+            using var scope = factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
+            Assert.NotNull(existingInvitation);
+
+            //Organization ID in the database is 123
+            existingInvitation.OrganizationId = 1000;
+            await dbContext.SaveChangesAsync();
+
+            var responseDto = new InvitationResponseDTO { Response = true };
+
+            // Act
+            var response = await client.PutAsJsonAsync($"/invitations/respond/{existingInvitation.Id}", responseDto);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        //18. Test that makes sure that an accepted invitation without an reciever returns Not Found
+        [Fact]
+        public async Task PutInvitationById_ReturnsNotFound_WhenInvitationDoesNotHaveAReciever()
+        {
+            // Arrange
+            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var client = factory.CreateClient();
+
+            // Retrieve the actual user ID
+            using var scope = factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
+            Assert.NotNull(existingInvitation);
+
+            existingInvitation.ReceiverId = "";
+            await dbContext.SaveChangesAsync();
+
+            var responseDto = new InvitationResponseDTO { Response = true };
+
+            // Act
+            var response = await client.PutAsJsonAsync($"/invitations/respond/{existingInvitation.Id}", responseDto);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+        #endregion
+    
+        #region Delete Invitation by ID - Test 18-
+
+        //18. Tests if you can succesfully accept an invitaion
+        [Fact]
+        public async Task DeleteInvitationById_ReturnsOk_WhenInvitationIsDeleted()
+        {
+            // Arrange
+            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var client = factory.CreateClient();
+
+            // Retrieve the actual user ID
+            using var scope = factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
+            Assert.NotNull(existingInvitation);
+
+            // Act
+            var response = await client.DeleteAsync($"/invitations/{existingInvitation.Id}");
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+
+            // Detach the existingInvitation entity to ensure a fresh query
+            dbContext.Entry(existingInvitation).State = EntityState.Detached;
+
+            // Reload the invitation from the database
+            var deletedInvitation = await dbContext.Invitations.FindAsync(existingInvitation.Id);
+            Assert.Null(deletedInvitation);
+        }
+
+        //19. Test that makes sure that endpoint returns Bad Request when invitation does not exist
+        [Fact]
+        public async Task DeleteInvitationById_ReturnsBadRequest_WhenInvitationIdDoesNotExist()
+        {
+            // Arrange
+            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var client = factory.CreateClient();
+
+            var FakeInvitaionId = "fakeInvitation";
+
+            // Act
+            var response = await client.DeleteAsync($"/invitations/{FakeInvitaionId}");
+
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         #endregion
