@@ -225,8 +225,6 @@ namespace Giraf.IntegrationTests.Endpoints
             var newActivityDto = new CreateActivityDTO
             (
                 Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                Name: "Test Activity",
-                Description: "This is a test activity",
                 StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
                 EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
                 PictogramId: pictogramId // Provide the valid PictogramId
@@ -240,7 +238,6 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var activityDto = await response.Content.ReadFromJsonAsync<ActivityDTO>();
             Assert.NotNull(activityDto);
-            Assert.Equal(newActivityDto.Name, activityDto.Name);
         }
 
 
@@ -255,8 +252,6 @@ namespace Giraf.IntegrationTests.Endpoints
             var newActivityDto = new CreateActivityDTO
             (
                 Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                Name: "Test Activity",
-                Description: "This is a test activity",
                 StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
                 EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
                 PictogramId: null
@@ -310,8 +305,6 @@ namespace Giraf.IntegrationTests.Endpoints
             var newActivityDto = new CreateActivityDTO
             (
                 Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                Name: "Test Activity",
-                Description: "This is a test activity",
                 StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
                 EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
                 PictogramId: pictogramId // Provide the valid PictogramId
@@ -325,7 +318,6 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
             var activityDto = await response.Content.ReadFromJsonAsync<ActivityDTO>();
             Assert.NotNull(activityDto);
-            Assert.Equal(newActivityDto.Name, activityDto.Name);
         }
 
 
@@ -340,8 +332,6 @@ namespace Giraf.IntegrationTests.Endpoints
             var newActivityDto = new CreateActivityDTO
             (
                 Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                Name: "Test Activity",
-                Description: "This is a test activity",
                 StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
                 EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
                 PictogramId: null
@@ -376,8 +366,6 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var updateActivityDto = new UpdateActivityDTO
             (
-                Name: "Updated Activity",
-                Description: "Updated description",
                 Date: DateOnly.FromDateTime(DateTime.UtcNow),
                 StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
                 EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
@@ -398,8 +386,6 @@ namespace Giraf.IntegrationTests.Endpoints
                 var dbContext = verificationScope.ServiceProvider.GetRequiredService<GirafDbContext>();
                 var updatedActivity = await dbContext.Activities.FindAsync(activityId);
                 Assert.NotNull(updatedActivity);
-                Assert.Equal("Updated Activity", updatedActivity.Name);
-                Assert.Equal("Updated description", updatedActivity.Description);
                 Assert.Equal(updateActivityDto.IsCompleted, updatedActivity.IsCompleted);
             }
         }
@@ -415,8 +401,6 @@ namespace Giraf.IntegrationTests.Endpoints
             var newActivityDto = new CreateActivityDTO
             (
                 Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                Name: "Test Activity",
-                Description: "This is a test activity",
                 StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
                 EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
                 PictogramId: null

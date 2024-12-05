@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GirafAPI.Data.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    [Migration("20241125041729_initial_migration")]
-    partial class initial_migration
+    [Migration("20241204134150_DBMigrations")]
+    partial class DBMigrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -32,10 +32,6 @@ namespace GirafAPI.Data.Migrations
                     b.Property<DateOnly>("Date")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.Property<TimeOnly>("EndTime")
                         .HasColumnType("TEXT");
 
@@ -45,11 +41,7 @@ namespace GirafAPI.Data.Migrations
                     b.Property<bool>("IsCompleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PictogramId")
+                    b.Property<int?>("PictogramId")
                         .HasColumnType("INTEGER");
 
                     b.Property<TimeOnly>("StartTime")
@@ -212,10 +204,12 @@ namespace GirafAPI.Data.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedUserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
@@ -406,9 +400,7 @@ namespace GirafAPI.Data.Migrations
 
                     b.HasOne("GirafAPI.Entities.Pictograms.Pictogram", "Pictogram")
                         .WithMany()
-                        .HasForeignKey("PictogramId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PictogramId");
 
                     b.Navigation("Pictogram");
                 });
