@@ -140,6 +140,7 @@ public static class InvitationEndpoints
             })
             .WithName("GetInvitationByOrg")
             .WithDescription("Get all invitations for an organization.")
+            .RequireAuthorization("OrganizationMember")
             .WithTags("Invitation")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -167,6 +168,7 @@ public static class InvitationEndpoints
         })
         .WithName("CreateInvitation")
         .WithDescription("Creates a new invitation.")
+        .RequireAuthorization("OrganizationMember")
         .WithTags("Invitation")
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status500InternalServerError);
@@ -221,6 +223,7 @@ public static class InvitationEndpoints
             })
             .WithName("RespondToInvitation")
             .WithDescription("Accept or reject invitation.")
+            .RequireAuthorization("RespondInvitationPolicy")
             .WithTags("Invitation")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)

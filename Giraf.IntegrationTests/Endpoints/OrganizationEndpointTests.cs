@@ -326,7 +326,6 @@ namespace Giraf.IntegrationTests.Endpoints
                 new Claim("OrgMember", organizationId.ToString())
             };
 
-
             // Act
             var response = await client.PutAsync($"/organizations/{organizationId}/remove-user/{userId}", null);
 

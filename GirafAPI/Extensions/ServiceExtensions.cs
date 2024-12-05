@@ -81,8 +81,13 @@ namespace GirafAPI.Extensions
 
         public static IServiceCollection ConfigureAuthorizationPolicies(this IServiceCollection services)
         {
+            // Basic Organization Authorization
             services.AddSingleton<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
             services.AddSingleton<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
+
+            // Invitation Authorization Handler
+            services.AddSingleton<IAuthorizationHandler, RespondInvitationHandler>();
+            services.AddHttpContextAccessor();
             
             services.AddAuthorization(options =>
             {
@@ -90,6 +95,10 @@ namespace GirafAPI.Extensions
                     policy.Requirements.Add(new OrgMemberRequirement()));
                 options.AddPolicy("OrganizationAdmin", policy =>
                     policy.Requirements.Add(new OrgAdminRequirement()));
+                
+                // RespondInvitation policy
+                options.AddPolicy("RespondInvitationPolicy", policy =>
+                    policy.Requirements.Add(new RespondInvitationRequirement()));
             });
 
             return services;
