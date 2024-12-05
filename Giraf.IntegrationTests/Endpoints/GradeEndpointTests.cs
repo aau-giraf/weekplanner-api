@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class GradeEndpointsTests
     {
         #region 1. Get Grade by ID Tests

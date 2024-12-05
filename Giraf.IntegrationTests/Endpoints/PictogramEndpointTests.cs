@@ -12,6 +12,7 @@ using Xunit;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class PictogramEndpointsTests
     {
         #region Create Pictogram Tests

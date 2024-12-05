@@ -33,6 +33,7 @@ public static class CitizenEndpoints
             })
             .WithName("GetAllCitizens")
             .WithTags("Citizens")
+            .RequireAuthorization("OrganizationMember")
             .WithDescription("Retrieves a list of all citizens.")
             .Produces<List<CitizenDTO>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -52,6 +53,7 @@ public static class CitizenEndpoints
             })
             .WithName("GetCitizenById")
             .WithTags("Citizens")
+            .RequireAuthorization("OrganizationMember")
             .WithDescription("Retrieves a citizen by their ID.")
             .Produces<CitizenDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
@@ -100,6 +102,7 @@ public static class CitizenEndpoints
             })
             .WithName("UpdateCitizen")
             .WithTags("Citizens")
+            .RequireAuthorization("OrganizationMember")
             .WithDescription("Updates an existing citizen.")
             .Accepts<UpdateCitizenDTO>("application/json")
             .Produces(StatusCodes.Status200OK)
@@ -138,6 +141,7 @@ public static class CitizenEndpoints
             .WithName("AddCitizen")
             .WithDescription("Add citizen to organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -174,6 +178,7 @@ public static class CitizenEndpoints
             .WithName("RemoveCitizen")
             .WithDescription("Remove citizen from organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);

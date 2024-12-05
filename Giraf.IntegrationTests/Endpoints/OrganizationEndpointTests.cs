@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class OrganizationEndpointsTests
     {
         #region Get Organizations for User Tests
@@ -211,7 +212,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
-            var nonExistentOrgId = 9999;
+            var nonExistentOrgId = 1;
             var newName = "Nonexistent Organization Name";
 
             // Act

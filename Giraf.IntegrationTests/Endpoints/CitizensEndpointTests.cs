@@ -1,18 +1,18 @@
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.Citizens.DTOs;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
+using System.Security.Claims;
+
+
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class CitizensEndpointTests
     {
         #region Get All Citizens Tests
@@ -25,9 +25,16 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new MultipleCitizensSeeder());
             var client = factory.CreateClient();
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.GetAsync("/citizens");
 
+        
             // Assert
             response.EnsureSuccessStatusCode();
             var citizens = await response.Content.ReadFromJsonAsync<List<CitizenDTO>>();
@@ -42,6 +49,12 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync("/citizens");
@@ -65,6 +78,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+            
             // First, get the list of citizens to obtain the ID
             var citizensResponse = await client.GetAsync("/citizens");
             citizensResponse.EnsureSuccessStatusCode();
@@ -72,6 +91,8 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.NotNull(citizens);
 
             var citizenId = citizens[0].Id;
+
+            
 
             // Act
             var response = await client.GetAsync($"/citizens/{citizenId}");
@@ -93,6 +114,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.GetAsync("/citizens/999");
 
@@ -111,6 +138,12 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Get the citizen's ID
             var citizensResponse = await client.GetAsync("/citizens");
@@ -148,6 +181,12 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var updateCitizenDto = new UpdateCitizenDTO("FirstName", "LastName");
 
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
+
             // Act
             var response = await client.PutAsJsonAsync("/citizens/999", updateCitizenDto);
 
@@ -168,30 +207,35 @@ namespace Giraf.IntegrationTests.Endpoints
             var client = factory.CreateClient();
 
             // Get the organization ID
-            using (var scope = factory.Services.CreateScope())
+            var scope = factory.Services.CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var organization = await dbContext.Organizations.FirstOrDefaultAsync();
+            Assert.NotNull(organization);
+            var organizationId = organization.Id;
+
+            var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                var organizationId = organization.Id;
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
-                var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
+            // Act
+            var response = await client.PostAsJsonAsync($"/citizens/{organizationId}/add-citizen", createCitizenDto);
 
-                // Act
-                var response = await client.PostAsJsonAsync($"/citizens/{organizationId}/add-citizen", createCitizenDto);
+            // Assert
+            response.EnsureSuccessStatusCode();
 
-                // Assert
-                response.EnsureSuccessStatusCode();
-
-                // Verify that the citizen was added
-                var getCitizensResponse = await client.GetAsync("/citizens");
-                getCitizensResponse.EnsureSuccessStatusCode();
-                var citizens = await getCitizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
-                Assert.NotNull(citizens);
-                Assert.Single(citizens);
-                Assert.Equal("New", citizens[0].FirstName);
-                Assert.Equal("Citizen", citizens[0].LastName);
-            }
+            // Verify that the citizen was added
+            var getCitizensResponse = await client.GetAsync("/citizens");
+            getCitizensResponse.EnsureSuccessStatusCode();
+            var citizens = await getCitizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
+            Assert.NotNull(citizens);
+            Assert.Single(citizens);
+            Assert.Equal("New", citizens[0].FirstName);
+            Assert.Equal("Citizen", citizens[0].LastName);
+            
         }
 
         // 8. Test POST /citizens/{id}/add-citizen when the organization does not exist.
@@ -203,6 +247,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var client = factory.CreateClient();
 
             var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
+
+            var testOrgId = 1;
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim("OrgMember", testOrgId.ToString())
+            };
 
             // Act
             var response = await client.PostAsJsonAsync("/citizens/999/add-citizen", createCitizenDto);
@@ -235,6 +285,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(citizen);
                 var citizenId = citizen.Id;
 
+                var testOrgId = 1;
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim("OrgMember", testOrgId.ToString())
+                };
+
                 // Act
                 var response = await client.DeleteAsync($"/citizens/{organizationId}/remove-citizen/{citizenId}");
 
@@ -266,6 +322,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(organization);
                 var organizationId = organization.Id;
 
+                var testOrgId = 1;
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim("OrgMember", testOrgId.ToString())
+                };
+
                 // Act
                 var response = await client.DeleteAsync($"/citizens/{organizationId}/remove-citizen/999");
 
@@ -296,6 +358,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 var citizenNotInOrg = await dbContext.Citizens.FirstOrDefaultAsync(c => c.Organization.Id == organization2.Id);
                 Assert.NotNull(citizenNotInOrg);
                 var citizenId = citizenNotInOrg.Id;
+
+                var testOrgId = 1;
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim("OrgMember", testOrgId.ToString())
+                };
 
                 // Act
                 var response = await client.DeleteAsync($"/citizens/{organization1.Id}/remove-citizen/{citizenId}");

@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class ActivityEndpointTests
     {
         #region GET /weekplan/ - Get all activities
