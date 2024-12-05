@@ -115,6 +115,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
+            var testOrgId = 1;
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim("OrgMember", testOrgId.ToString())
+                };
+            
             int organizationId;
 
             using (var scope = factory.Services.CreateScope())
@@ -200,6 +206,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
             var client = factory.CreateClient();
 
+            var testOrgId = 1;
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim("OrgMember", testOrgId.ToString())
+                };
+
             int organizationId;
 
             using var scope = factory.Services.CreateScope();
@@ -228,6 +240,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
             var client = factory.CreateClient();
 
+            var testOrgId = 1;
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim("OrgMember", testOrgId.ToString())
+                };
+
             int organizationId;
 
             using (var scope = factory.Services.CreateScope())
@@ -238,15 +256,11 @@ namespace Giraf.IntegrationTests.Endpoints
                 organizationId = organization.Id;
             }
 
-            // Set up the test claims
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
-                new Claim("OrgMember", organizationId.ToString())
-            };
+            var currentPage = 1;
+            var pageSize = 10;
 
             // Act
-            var response = await client.GetAsync($"/pictograms/organization/{organizationId}");
+            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}&currentPage={currentPage}&pageSize={pageSize}");
 
             // Assert
             response.EnsureSuccessStatusCode();

@@ -62,7 +62,7 @@ public static class PictogramEndpoints
             .DisableAntiforgery()
             .WithName("CreatePictogram")
             .WithDescription("Creates a pictogram")
-            .RequireAuthorization("OrganizationMember")
+            .RequireAuthorization("OrgMember")
             .WithTags("Pictograms")
             .Accepts<IFormFile>("multipart/form-data")
             .Accepts<CreatePictogramDTO>("multipart/form-data")
@@ -120,7 +120,7 @@ public static class PictogramEndpoints
             .WithName("GetPictogramsByOrgId")
             .WithDescription("Gets all the pictograms belonging to the specified organization.")
             .WithTags("Pictograms")
-            .RequireAuthorization("OrganizationMember")
+            .RequireAuthorization("OrgMember")
             .Produces<List<PictogramDTO>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
