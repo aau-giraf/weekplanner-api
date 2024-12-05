@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class ActivityEndpointTests
     {
         #region GET /weekplan/ - Get all activities
@@ -363,7 +364,7 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(activity);
                 activityId = activity.Id;
             }
-
+            
             var updateActivityDto = new UpdateActivityDTO
             (
                 Date: DateOnly.FromDateTime(DateTime.UtcNow),

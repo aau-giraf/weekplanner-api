@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class OrganizationEndpointsTests
     {
         #region Get Organizations for User Tests
@@ -79,6 +81,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(organization);
                 organizationId = organization.Id;
             }
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgMember", organizationId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync($"/organizations/{organizationId}");
@@ -97,7 +105,16 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
-            var nonExistentOrganizationId = 9999;
+
+            var nonExistentOrganizationId = 1;
+            var testUserId = "test-user-id";
+
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, testUserId),
+                new Claim("OrgMember", nonExistentOrganizationId.ToString())
+            };
 
             // Act
             var response = await client.GetAsync($"/organizations/{nonExistentOrganizationId}");
@@ -118,17 +135,21 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(sp => new BasicUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
-            // Retrieve the seeded user's ID from the database
             using var scope = factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-
             var user = await dbContext.Users.FirstOrDefaultAsync();
             Assert.NotNull(user);
+
+            // Set up the test claims
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
+            };
 
             var newOrgDto = new CreateOrganizationDTO { Name = "New Organization" };
 
             // Act
-            var response = await client.PostAsJsonAsync($"/organizations?id={user.Id}", newOrgDto);
+            var response = await client.PostAsJsonAsync($"/organizations", newOrgDto);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -291,6 +312,14 @@ namespace Giraf.IntegrationTests.Endpoints
 
                 userId = user.Id;
             }
+
+            // Set the test claims for authentication
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, userId),
+                new Claim("OrgMember", organizationId.ToString())
+            };
+
 
             // Act
             var response = await client.PutAsync($"/organizations/{organizationId}/remove-user/{userId}", null);

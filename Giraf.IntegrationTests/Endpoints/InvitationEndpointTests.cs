@@ -14,6 +14,7 @@ using System.Net.Http.Json;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class InvitationEndpointsTests
     {
         #region Get Invitation by ID Tests - Test 1-4
@@ -276,7 +277,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsCreated_IfSucessfullyCreated()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationAndUser(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new UserWithOrganizationsSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             using var scope = factory.Services.CreateScope();
@@ -317,7 +318,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsBadRequest_IfRecieverNotFound()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationAndUser(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new OrganizationWithUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             using var scope = factory.Services.CreateScope();

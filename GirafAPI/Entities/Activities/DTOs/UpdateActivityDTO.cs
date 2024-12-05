@@ -9,5 +9,5 @@ public record UpdateActivityDTO
     [Required]TimeOnly StartTime,
     [Required]TimeOnly EndTime,
     [Required] bool IsCompleted,
-    int PictogramId
+    int? PictogramId
 );
