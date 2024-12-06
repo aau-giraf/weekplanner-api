@@ -198,10 +198,15 @@ namespace Giraf.IntegrationTests.Endpoints
 
                 organizationId = organization.Id;
             }
-
-            var newName = "Updated Organization Name";
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgAdmin", organizationId.ToString())
+            };
 
             // Act
+            var newName = "Updated Organization Name";
             var response = await client.PutAsync($"/organizations/{organizationId}/change-name?newName={newName}", null);
 
             // Assert
@@ -219,9 +224,15 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentOrgId = 9999;
-            var newName = "Nonexistent Organization Name";
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgAdmin", nonExistentOrgId.ToString())
+            };
 
             // Act
+            var newName = "Nonexistent Organization Name";
             var response = await client.PutAsync($"/organizations/{nonExistentOrgId}/change-name?newName={newName}", null);
 
             // Assert
@@ -249,6 +260,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 Assert.NotNull(organization);
                 organizationId = organization.Id;
             }
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgAdmin", organizationId.ToString())
+            };
 
             // Act
             var response = await client.DeleteAsync($"/organizations/{organizationId}");
@@ -273,6 +290,12 @@ namespace Giraf.IntegrationTests.Endpoints
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
             var nonExistentOrgId = 9999;
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgAdmin", nonExistentOrgId.ToString())
+            };
 
             // Act
             var response = await client.DeleteAsync($"/organizations/{nonExistentOrgId}");
@@ -317,7 +340,7 @@ namespace Giraf.IntegrationTests.Endpoints
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim("OrgMember", organizationId.ToString())
+                new Claim("OrgAdmin", organizationId.ToString())
             };
 
 
@@ -350,10 +373,15 @@ namespace Giraf.IntegrationTests.Endpoints
 
                 organizationId = organization.Id;
             }
-
-            var nonExistentUserId = "nonexistent_user_id";
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgAdmin", organizationId.ToString())
+            };
 
             // Act
+            var nonExistentUserId = "nonexistent_user_id";
             var response = await client.PutAsync($"/organizations/{organizationId}/remove-user/{nonExistentUserId}", null);
 
             // Assert
@@ -377,6 +405,12 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var nonExistentOrgId = 9999; // Using an ID that doesn't exist in the database
             var userId = user.Id;
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgAdmin", nonExistentOrgId.ToString())
+            };
 
             // Act
             var response = await client.PutAsync($"/organizations/{nonExistentOrgId}/remove-user/{userId}", null);
