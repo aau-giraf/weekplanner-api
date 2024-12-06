@@ -89,12 +89,6 @@ public static class OrganizationEndpoints
                 {
                     try
                     {
-                        var userClaims = httpContext.User.Claims;
-                        foreach (var claim in userClaims)
-                        {
-                            Console.WriteLine($"{claim.Type}: {claim.Value}");
-                        }
-                        
                         var userId = userManager.GetUserId(httpContext.User);
                         
                         var user = userManager.FindByIdAsync(userId).GetAwaiter().GetResult();
@@ -174,6 +168,7 @@ public static class OrganizationEndpoints
                     return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
                 }
             })
+            .RequireAuthorization("OrganizationAdmin")
             .WithName("DeleteOrganization")
             .WithDescription("Deletes the organization.")
             .WithTags("Organizations")

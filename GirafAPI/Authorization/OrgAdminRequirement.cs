@@ -1,4 +1,8 @@
+using System.Security.Claims;
+using GirafAPI.Data;
+using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace GirafAPI.Authorization;
 
@@ -7,18 +11,25 @@ public class OrgAdminRequirement : IAuthorizationRequirement;
 public class OrgAdminAuthorizationHandler : AuthorizationHandler<OrgAdminRequirement>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly UserManager<GirafUser> _userManager;
 
-    public OrgAdminAuthorizationHandler(IHttpContextAccessor httpContextAccessor)
+    public OrgAdminAuthorizationHandler(IHttpContextAccessor httpContextAccessor, UserManager<GirafUser> userManager)
     {
         _httpContextAccessor = httpContextAccessor;
+        _userManager = userManager;
     }
 
     protected override Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         OrgAdminRequirement requirement)
     {
-        var claims = context.User;
-        var orgIds = claims.Claims
+        var userId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
+        var user = _userManager.FindByIdAsync(userId).GetAwaiter().GetResult();
+        
+        
+        var claims = _userManager.GetClaimsAsync(user).GetAwaiter().GetResult();
+        
+        var orgIds = claims
             .Where(c => c.Type == "OrgAdmin")
             .Select(c => c.Value)
             .ToList();
