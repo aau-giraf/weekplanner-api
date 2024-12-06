@@ -35,7 +35,7 @@ public static class GradeEndpoints
         .WithName("GetGradeById")
         .WithTags("Grade")
         .WithDescription("Gets a grade by id.")
-        .RequireAuthorization("OrgMember")
+        .RequireAuthorization("OrganizationMember")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
@@ -66,7 +66,7 @@ public static class GradeEndpoints
         .WithName("GetGradesInOrganization")
         .WithTags("Grade")
         .WithDescription("Get all grades within organization.")
-        .RequireAuthorization("OrgMember")
+        .RequireAuthorization("OrganizationMember")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
@@ -97,7 +97,7 @@ public static class GradeEndpoints
         .WithName("CreateGrade")
         .WithTags("Grade")
         .WithDescription("Creates a new grade.")
-        .RequireAuthorization("OrgAdmin")
+        .RequireAuthorization("OrganizationAdmin")
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
@@ -125,7 +125,7 @@ public static class GradeEndpoints
         .WithName("ChangeGradeName")
         .WithTags("Grade")
         .WithDescription("Change name of grade.")
-        .RequireAuthorization("OrgAdmin")
+        .RequireAuthorization("OrganizationAdmin")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
@@ -183,7 +183,7 @@ public static class GradeEndpoints
             .WithName("AddCitizensToGrade")
             .WithTags("Grade")
             .WithDescription("Add one or more citizens to a grade.")
-            .RequireAuthorization("OrgMember")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -240,7 +240,7 @@ public static class GradeEndpoints
             .WithName("RemoveCitizenFromGrade")
             .WithTags("Grade")
             .WithDescription("Remove one or more citizens from a grade.")
-            .RequireAuthorization("OrgMember")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -267,7 +267,7 @@ public static class GradeEndpoints
             .WithName("DeleteGrade")
             .WithTags("Grade")
             .WithDescription("Delete a grade.")
-            .RequireAuthorization("OrgAdmin")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);  
