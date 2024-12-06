@@ -47,6 +47,7 @@ public static class OrganizationEndpoints
             .WithName("GetOrganizations")
             .WithDescription("Gets organizations for user.")
             .WithTags("Organizations")
+            .RequireAuthorization()
             .Produces<List<OrganizationNameOnlyDTO>>()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -87,12 +88,6 @@ public static class OrganizationEndpoints
                 {
                     try
                     {
-                        var userClaims = httpContext.User.Claims;
-                        foreach (var claim in userClaims)
-                        {
-                            Console.WriteLine($"{claim.Type}: {claim.Value}");
-                        }
-                        
                         var userId = userManager.GetUserId(httpContext.User);
                         
                         var user = userManager.FindByIdAsync(userId).GetAwaiter().GetResult();
@@ -149,6 +144,7 @@ public static class OrganizationEndpoints
             .WithName("ChangeOrganizationName")
             .WithDescription("Changes the name of the organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -172,9 +168,11 @@ public static class OrganizationEndpoints
                     return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
                 }
             })
+            .RequireAuthorization("OrganizationAdmin")
             .WithName("DeleteOrganization")
             .WithDescription("Deletes the organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -218,6 +216,7 @@ public static class OrganizationEndpoints
             .WithName("RemoveUser")
             .WithDescription("Removes user from organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -254,6 +253,7 @@ public static class OrganizationEndpoints
             .WithName("GetOrganizationByGradeId")
             .WithDescription("Gets organization by grade id.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -294,6 +294,7 @@ public static class OrganizationEndpoints
             .WithName("AddOrganizationAdmin")
             .WithDescription("Adds an admin to an organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -335,6 +336,7 @@ public static class OrganizationEndpoints
             .WithName("RemoveOrganizationAdmin")
             .WithDescription("Removes an admin from an organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);

@@ -51,8 +51,6 @@ namespace Giraf.IntegrationTests.Utils.DbSeeders
             var activity = new Activity
             {
                 Date = DateOnly.FromDateTime(DateTime.UtcNow),
-                Name = "Sample Activity",
-                Description = "This is a sample activity for testing.",
                 StartTime = TimeOnly.FromDateTime(DateTime.UtcNow),
                 EndTime = TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
                 IsCompleted = false,

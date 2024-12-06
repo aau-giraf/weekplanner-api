@@ -34,6 +34,7 @@ public static class ActivityEndpoints
         .WithName("GetAllActivities")
         .WithDescription("Gets all activities.")
         .WithTags("Activities")
+        .RequireAuthorization()
         .Produces<List<ActivityDTO>>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status500InternalServerError);
 
@@ -77,6 +78,7 @@ public static class ActivityEndpoints
         .WithName("GetActivitiesForCitizenOnDate")
         .WithDescription("Gets activities for a specific citizen on a given date.")
         .WithTags("Activities")
+        .RequireAuthorization()
         .Produces<List<ActivityDTO>>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
@@ -125,6 +127,7 @@ public static class ActivityEndpoints
             .WithName("GetActivitiesForGradeOnDate")
             .WithDescription("Gets activities for a specific grade on a given date.")
             .WithTags("Activities")
+            .RequireAuthorization()
             .Produces<List<ActivityDTO>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -149,6 +152,7 @@ public static class ActivityEndpoints
         .WithName("GetActivityById")
         .WithDescription("Gets a specific activity by ID.")
         .WithTags("Activities")
+        .RequireAuthorization()
         .Produces<ActivityDTO>(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
@@ -195,6 +199,7 @@ public static class ActivityEndpoints
         .WithName("CreateActivityForCitizen")
         .WithDescription("Creates a new activity for a citizen.")
         .WithTags("Activities")
+        .RequireAuthorization()
         .Accepts<CreateActivityDTO>("application/json")
         .Produces<ActivityDTO>(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status404NotFound)
@@ -241,6 +246,7 @@ public static class ActivityEndpoints
             .WithName("CreateActivityForGrade")
             .WithDescription("Creates a new activity for a grade.")
             .WithTags("Activities")
+            .RequireAuthorization()
             .Accepts<CreateActivityDTO>("application/json")
             .Produces<ActivityDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status404NotFound)
@@ -273,8 +279,6 @@ public static class ActivityEndpoints
                         citizen.Activities.Add(new Activity
                         {
                             Date = newDate,
-                            Name = activity.Name,
-                            Description = activity.Description,
                             StartTime = activity.StartTime,
                             EndTime = activity.EndTime,
                             IsCompleted = activity.IsCompleted
@@ -296,7 +300,8 @@ public static class ActivityEndpoints
                 //unexpected errors
                 return Results.Problem("An error occurred while copying the activities.", statusCode: StatusCodes.Status500InternalServerError);
             }
-        });
+        })
+        .RequireAuthorization();
 
         
         // PUT updated activity
@@ -339,6 +344,7 @@ public static class ActivityEndpoints
             .WithName("UpdateActivity")
             .WithDescription("Updates an existing activity using ID.")
             .WithTags("Activities")
+            .RequireAuthorization()
             .Accepts<UpdateActivityDTO>("application/json")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
@@ -373,7 +379,8 @@ public static class ActivityEndpoints
                 // unexpected errors
                 return Results.Problem("An error occurred while updating the activity status.", statusCode: StatusCodes.Status500InternalServerError);
             }
-        });
+        })
+        .RequireAuthorization();
 
 
         // DELETE activity
@@ -404,6 +411,7 @@ public static class ActivityEndpoints
         .WithName("DeleteActivity")
         .WithDescription("Deletes an activity by ID.")
         .WithTags("Activities")
+        .RequireAuthorization()
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status400BadRequest)
@@ -443,6 +451,7 @@ public static class ActivityEndpoints
             .WithName("AssignPictogram")
             .WithDescription("Assigns a pictogram by ID.")
             .WithTags("Activities")
+            .RequireAuthorization()
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);

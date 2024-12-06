@@ -54,6 +54,7 @@ public static class InvitationEndpoints
             .WithDescription("Get invitation by id.")
             .RequireAuthorization("InvitationRecipientOrAdmin")
             .WithTags("Invitation")
+            .RequireAuthorization()
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
 
@@ -67,7 +68,7 @@ public static class InvitationEndpoints
 
                 if (invitations.Count == 0)
                 {
-                    return Results.Ok(Array.Empty<InvitationDTO>());
+                    return Results.NotFound("Invitation not found.");
                 }
 
                 var invitationDtos = new List<InvitationDTO>();
@@ -76,12 +77,12 @@ public static class InvitationEndpoints
                     GirafUser? sender = await dbContext.Users.FindAsync(invitation.SenderId);
                     if (sender is null)
                     {
-                        continue;
+                        return Results.NotFound("Invitation sender not found.");
                     }
                     Organization? organization = await dbContext.Organizations.FindAsync(invitation.OrganizationId);
                     if (organization is null)
                     {
-                        continue;
+                        return Results.NotFound("Organization not found.");
                     }
                     var invitationDto = invitation.ToDTO(organization.Name, $"{sender.FirstName} {sender.LastName}");
                     invitationDtos.Add(invitationDto);
@@ -98,17 +99,18 @@ public static class InvitationEndpoints
         .WithDescription("Get all invitations for user.")
         .RequireAuthorization("OwnInvitationOrAdmin")
         .WithTags("Invitation")
+        .RequireAuthorization()
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
         
-        group.MapGet("/org/{id}", async (int id, GirafDbContext dbContext) =>
+        group.MapGet("/org/{orgId}", async (int orgId, GirafDbContext dbContext) =>
             {
                 try
                 {
                     var invitations = await dbContext.Invitations
-                        .Where(i => i.OrganizationId == id)
+                        .Where(i => i.OrganizationId == orgId)
                         .ToListAsync();
 
                     if (invitations.Count == 0)
@@ -243,6 +245,7 @@ public static class InvitationEndpoints
             .WithDescription("Accept or reject invitation.")
             .RequireAuthorization("RespondInvitation")
             .WithTags("Invitation")
+            .RequireAuthorization()
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -270,6 +273,7 @@ public static class InvitationEndpoints
             .WithDescription("Delete invitation.")
             .RequireAuthorization("OrganizationAdmin")
             .WithTags("Invitation")
+            .RequireAuthorization()
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);

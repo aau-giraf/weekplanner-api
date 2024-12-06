@@ -229,6 +229,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
                 // Authorize as the receiving user
                 TestAuthHandler.TestClaims.Add(new Claim(ClaimTypes.NameIdentifier, existingRecievingUser.Id));
+            await dbContext.SaveChangesAsync();
 
                 // Act
                 var response = await client.GetAsync($"/invitations/user/{existingRecievingUser.Id}");
