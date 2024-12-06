@@ -36,9 +36,6 @@ namespace GirafAPI.Endpoints
                     new Claim(ClaimTypes.Name, user.UserName)
                 };
 
-                var userClaims = await userManager.GetClaimsAsync(user);
-                claims.AddRange(userClaims);
-
                 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
                 var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
