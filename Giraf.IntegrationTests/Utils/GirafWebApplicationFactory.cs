@@ -56,12 +56,12 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
             // Add authorization policies
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("OrgMember", policy =>
+                options.AddPolicy("OrganizationMember", policy =>
                 {
                     policy.RequireClaim("OrgMember");
                 });
 
-                options.AddPolicy("OrgAdmin", policy =>
+                options.AddPolicy("OrganizationAdmin", policy =>
                 {
                     policy.RequireClaim("OrgAdmin");
                 });
