@@ -71,6 +71,10 @@ public class BasicInvitationSeeder :  DbSeeder
         dbContext.Invitations.Add(testInvitation);
         dbContext.SaveChanges();
         
+
+        Console.WriteLine("[SEEDER] Created RecieverUser: " + reciever.Id);
+        Console.WriteLine("[SEEDER] Created SenderUser: " + sender.Id);
+        Console.WriteLine("[SEEDER] Created Organization with Id 123 and Invitation with Id=" + testInvitation.Id);
     }   
 }
 

@@ -13,8 +13,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class OrganizationEndpointsTests
     {
+        
         #region Get Organizations for User Tests
 
         // 1. Test GET /organizations/user/{id} when user has organizations
@@ -104,6 +106,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var testUserId = "test-user-id";
 
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, testUserId),
@@ -115,6 +118,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            TestAuthHandler.TestClaims.Clear();
         }
 
         #endregion
@@ -162,7 +166,6 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.IsType<OrganizationDTO>(createdOrganization);
             Assert.NotEmpty(createdOrganization.Name);
         }
-
 
         // 6. Test POST /organizations when user does not exist
         [Fact]
@@ -391,5 +394,6 @@ namespace Giraf.IntegrationTests.Endpoints
         }
 
         #endregion
+        
     }
 }

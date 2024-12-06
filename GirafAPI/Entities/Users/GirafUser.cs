@@ -1,4 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using GirafAPI.Entities.Invitations;
 using GirafAPI.Entities.Organizations;
 using Microsoft.AspNetCore.Identity;
 
@@ -43,4 +45,9 @@ public class GirafUser : IdentityUser
     public string LastName { get; set; }
 
     public ICollection<Organization> Organizations { get; set; } = new List<Organization>();
+    [InverseProperty(nameof(Invitation.Sender))]
+    public virtual ICollection<Invitation> SentInvitations { get; set; } = new List<Invitation>();
+
+    [InverseProperty(nameof(Invitation.Receiver))]
+    public virtual ICollection<Invitation> ReceivedInvitations { get; set; } = new List<Invitation>();
 }

@@ -19,12 +19,16 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        Console.WriteLine("[AUTH HANDLER] Authenticating... Current claims:");
+        foreach (var c in TestClaims)
+        {
+            Console.WriteLine($"[AUTH HANDLER] {c.Type} = {c.Value}");
+        }
+
         var identity = new ClaimsIdentity(TestClaims, TestAuthenticationScheme);
         var principal = new ClaimsPrincipal(identity);
         var ticket = new AuthenticationTicket(principal, TestAuthenticationScheme);
 
-        var result = AuthenticateResult.Success(ticket);
-
-        return Task.FromResult(result);
+        return Task.FromResult(AuthenticateResult.Success(ticket));
     }
 }
