@@ -19,15 +19,21 @@ public class OrgAdminAuthorizationHandler : AuthorizationHandler<OrgAdminRequire
         _userManager = userManager;
     }
 
-    protected override Task HandleRequirementAsync(
+    protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         OrgAdminRequirement requirement)
     {
         var userId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
-        var user = _userManager.FindByIdAsync(userId).GetAwaiter().GetResult();
-        
-        
-        var claims = _userManager.GetClaimsAsync(user).GetAwaiter().GetResult();
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            context.Fail();
+            return;
+        }
+
+
+        var claims = await _userManager.GetClaimsAsync(user);
         
         var orgIds = claims
             .Where(c => c.Type == "OrgAdmin")
@@ -40,10 +46,9 @@ public class OrgAdminAuthorizationHandler : AuthorizationHandler<OrgAdminRequire
         if (orgIds.Contains(orgIdInUrl))
         {
             context.Succeed(requirement);
-            return Task.CompletedTask;
+            return;
         }
         
         context.Fail();
-        return Task.CompletedTask;
     }
 }
