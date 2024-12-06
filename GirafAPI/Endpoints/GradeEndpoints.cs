@@ -130,7 +130,7 @@ public static class GradeEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{orgId}/{gradeId}/add-citizens", async (int gradeId, int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/{gradeId}/add-citizens", async (int orgId, int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
             {
                 try
                 {
