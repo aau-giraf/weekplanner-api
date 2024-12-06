@@ -172,7 +172,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
 
             // Act
-            var response = await client.PostAsJsonAsync($"/grades/?orgId={organizationId}", newGradeDto);
+            var response = await client.PostAsJsonAsync($"/grades/{organizationId}", newGradeDto);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -202,7 +202,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
 
             // Act
-            var response = await client.PostAsJsonAsync($"/grades/?orgId={nonExistentOrganizationId}", newGradeDto);
+            var response = await client.PostAsJsonAsync($"/grades/{nonExistentOrganizationId}", newGradeDto);
 
             // Assert
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);

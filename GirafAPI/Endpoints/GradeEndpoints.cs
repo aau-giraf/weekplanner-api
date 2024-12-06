@@ -71,7 +71,7 @@ public static class GradeEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPost("/", async (int orgId, CreateGradeDTO newGrade, GirafDbContext dbContext) =>
+        group.MapPost("/{orgId}", async (int orgId, CreateGradeDTO newGrade, GirafDbContext dbContext) =>
         {
             try
             {
