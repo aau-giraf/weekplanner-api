@@ -192,10 +192,7 @@ namespace Giraf.IntegrationTests.Endpoints
                 var response = await client.GetAsync($"/invitations/user/{fakeId}");
 
                 // Assert
-                response.EnsureSuccessStatusCode();
-                var invitationDtos = await response.Content.ReadFromJsonAsync<IEnumerable<InvitationDTO>>();
-                Assert.NotNull(invitationDtos);
-                Assert.Empty(invitationDtos);
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             }
             finally
             {
@@ -229,17 +226,13 @@ namespace Giraf.IntegrationTests.Endpoints
 
                 // Authorize as the receiving user
                 TestAuthHandler.TestClaims.Add(new Claim(ClaimTypes.NameIdentifier, existingRecievingUser.Id));
-            await dbContext.SaveChangesAsync();
+                await dbContext.SaveChangesAsync();
 
                 // Act
                 var response = await client.GetAsync($"/invitations/user/{existingRecievingUser.Id}");
 
                 // Assert
-                response.EnsureSuccessStatusCode();
-                // No valid invitations found after filtering sender-less ones
-                var invitationDtos = await response.Content.ReadFromJsonAsync<IEnumerable<InvitationDTO>>();
-                Assert.NotNull(invitationDtos);
-                Assert.Empty(invitationDtos);
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             }
             finally
             {
@@ -278,11 +271,7 @@ namespace Giraf.IntegrationTests.Endpoints
                 var response = await client.GetAsync($"/invitations/user/{existingRecievingUser.Id}");
 
                 // Assert
-                response.EnsureSuccessStatusCode();
-                // Invitation is filtered out since organization doesn't exist, resulting in empty array
-                var invitationDtos = await response.Content.ReadFromJsonAsync<IEnumerable<InvitationDTO>>();
-                Assert.NotNull(invitationDtos);
-                Assert.Empty(invitationDtos);
+                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             }
             finally
             {
