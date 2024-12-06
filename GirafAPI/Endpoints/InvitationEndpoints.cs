@@ -52,6 +52,7 @@ public static class InvitationEndpoints
             })
             .WithName("GetInvitationById")
             .WithDescription("Get invitation by id.")
+            .RequireAuthorization("InvitationRecipientOrAdmin")
             .WithTags("Invitation")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -95,6 +96,7 @@ public static class InvitationEndpoints
         })
         .WithName("GetInvitationsByUserId")
         .WithDescription("Get all invitations for user.")
+        .RequireAuthorization("OwnInvitationOrAdmin")
         .WithTags("Invitation")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
@@ -140,38 +142,54 @@ public static class InvitationEndpoints
             })
             .WithName("GetInvitationByOrg")
             .WithDescription("Get all invitations for an organization.")
-            .RequireAuthorization("OrganizationMember")
+            .RequireAuthorization("OrganizationAdmin")
             .WithTags("Invitation")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
         
         group.MapPost("/", async (CreateInvitationDTO newInvitation, GirafDbContext dbContext, UserManager<GirafUser> userManager) =>
-        {
-            try
             {
-                var receiver = await userManager.FindByEmailAsync(newInvitation.ReceiverEmail);
-                if (receiver == null)
+                try
                 {
-                    return Results.BadRequest("Receiver email not found.");
-                }
+                    var receiver = await userManager.FindByEmailAsync(newInvitation.ReceiverEmail);
+                    if (receiver == null)
+                    {
+                        return Results.BadRequest("Receiver email not found.");
+                    }
 
-                var invitation = newInvitation.ToEntity(receiver.Id);
-                dbContext.Invitations.Add(invitation);
-                await dbContext.SaveChangesAsync();
-                
-                return Results.Created($"/invitations/{invitation.Id}", invitation);
-            }
-            catch (Exception ex)
-            {
-                return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
-            }
-        })
-        .WithName("CreateInvitation")
-        .WithDescription("Creates a new invitation.")
-        .RequireAuthorization("OrganizationMember")
-        .WithTags("Invitation")
-        .Produces(StatusCodes.Status201Created)
-        .Produces(StatusCodes.Status500InternalServerError);
+                    var invitation = newInvitation.ToEntity(receiver.Id);
+                    dbContext.Invitations.Add(invitation);
+                    await dbContext.SaveChangesAsync();
+
+                    // Fetch related data for the DTO
+                    var sender = await dbContext.Users.FindAsync(invitation.SenderId);
+                    var organization = await dbContext.Organizations.FindAsync(invitation.OrganizationId);
+
+                    if (sender == null || organization == null)
+                    {
+                        return Results.Problem("Unable to load related data.", statusCode: StatusCodes.Status500InternalServerError);
+                    }
+
+                    // Map to InvitationDTO, preventing cycles
+                    var invitationDto = invitation.ToDTO(
+                        organizationName: organization.Name,
+                        senderName: $"{sender.FirstName} {sender.LastName}"
+                    );
+
+                    return Results.Created($"/invitations/{invitation.Id}", invitationDto);
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
+                }
+            })
+            .WithName("CreateInvitation")
+            .WithDescription("Creates a new invitation.")
+            .RequireAuthorization("OrganizationMember")
+            .WithTags("Invitation")
+            .Produces<InvitationDTO>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status500InternalServerError);
+
         
         group.MapPut("/respond/{id}", async (int id, InvitationResponseDTO responseDto, GirafDbContext dbContext, UserManager<GirafUser> userManager) =>
             {
@@ -223,7 +241,7 @@ public static class InvitationEndpoints
             })
             .WithName("RespondToInvitation")
             .WithDescription("Accept or reject invitation.")
-            .RequireAuthorization("RespondInvitationPolicy")
+            .RequireAuthorization("RespondInvitation")
             .WithTags("Invitation")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
@@ -250,6 +268,7 @@ public static class InvitationEndpoints
             })
             .WithName("DeleteInvitation")
             .WithDescription("Delete invitation.")
+            .RequireAuthorization("OrganizationAdmin")
             .WithTags("Invitation")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)

@@ -21,7 +21,8 @@ public static class InvitationMapping
             invitation.Id,
             invitation.OrganizationId,
             organizationName,
-            senderName
+            senderName,
+            invitation.ReceiverId
             );
     }
 }

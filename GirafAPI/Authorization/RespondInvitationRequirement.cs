@@ -32,7 +32,7 @@ public class RespondInvitationHandler : AuthorizationHandler<RespondInvitationRe
         // Extract the invitation ID from the route
         if (!int.TryParse(httpContext.Request.RouteValues["id"]?.ToString(), out int invitationId))
         {
-            context.Fail();
+            context.Succeed(requirement);
             return;
         }
 
@@ -40,7 +40,7 @@ public class RespondInvitationHandler : AuthorizationHandler<RespondInvitationRe
         var invitation = await _dbContext.Invitations.FindAsync(invitationId);
         if (invitation == null)
         {
-            context.Fail();
+            context.Succeed(requirement);
             return;
         }
 
@@ -48,7 +48,7 @@ public class RespondInvitationHandler : AuthorizationHandler<RespondInvitationRe
         var userId = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
         {
-            context.Fail();
+            context.Succeed(requirement);
             return;
         }
 

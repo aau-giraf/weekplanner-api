@@ -82,11 +82,12 @@ namespace GirafAPI.Extensions
         public static IServiceCollection ConfigureAuthorizationPolicies(this IServiceCollection services)
         {
             // Basic Organization Authorization
-            services.AddSingleton<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
-            services.AddSingleton<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OwnInvitationOrAdminHandler>();
+            services.AddScoped<IAuthorizationHandler, RespondInvitationHandler>();
+            services.AddScoped<IAuthorizationHandler, InvitationRecipientOrAdminHandler>();
 
-            // Invitation Authorization Handler
-            services.AddSingleton<IAuthorizationHandler, RespondInvitationHandler>();
             services.AddHttpContextAccessor();
             
             services.AddAuthorization(options =>
@@ -97,8 +98,14 @@ namespace GirafAPI.Extensions
                     policy.Requirements.Add(new OrgAdminRequirement()));
                 
                 // RespondInvitation policy
-                options.AddPolicy("RespondInvitationPolicy", policy =>
+                options.AddPolicy("RespondInvitation", policy =>
                     policy.Requirements.Add(new RespondInvitationRequirement()));
+                // InvitationRecipientOrAdmin policy
+                options.AddPolicy("InvitationRecipientOrAdmin", policy =>
+                    policy.Requirements.Add(new InvitationRecipientOrAdminRequirement()));
+                // OwnInvitationOrAdmin policy
+                options.AddPolicy("OwnInvitationOrAdmin", policy =>
+                    policy.Requirements.Add(new OwnInvitationOrAdminRequirement()));
             });
 
             return services;

@@ -8,5 +8,6 @@ public record InvitationDTO
     int Id,
     int OrganizationId,
     string OrganizationName,
-    string SenderName
+    string SenderName,
+    string ReceiverId
 );

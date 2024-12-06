@@ -15,8 +15,10 @@ using Xunit;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class PictogramEndpointsTests
     {
+        
         #region Create Pictogram Tests
 
         [Fact]
@@ -58,6 +60,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
@@ -156,6 +159,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
@@ -205,6 +209,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
@@ -238,6 +243,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
@@ -275,6 +281,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var pageSize = 10;
             
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
@@ -310,6 +317,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
@@ -395,6 +403,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
@@ -436,6 +445,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Set up the test claims
+            TestAuthHandler.TestClaims.Clear();
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, "test-user-id"),
@@ -450,5 +460,6 @@ namespace Giraf.IntegrationTests.Endpoints
         }
 
         #endregion
+        
     }
 }
