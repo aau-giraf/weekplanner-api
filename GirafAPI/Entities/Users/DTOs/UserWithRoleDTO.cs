@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GirafAPI.Entities.Users.DTOs;
 
-public record UserWithRole(
+public record UserWithRoleDTO(
     [Required] string Id,
     [Required] string Email,
     [Required] [StringLength(100)] string FirstName,

@@ -65,6 +65,11 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
                 {
                     policy.RequireClaim("OrgAdmin");
                 });
+                
+                options.AddPolicy("OrganizationOwner", policy =>
+                {
+                    policy.RequireClaim("OrgOwner");
+                });
             });
 
             // Build the service provider and create a scope

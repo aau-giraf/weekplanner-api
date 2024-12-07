@@ -90,6 +90,8 @@ namespace GirafAPI.Extensions
                     policy.Requirements.Add(new OrgMemberRequirement()));
                 options.AddPolicy("OrganizationAdmin", policy =>
                     policy.Requirements.Add(new OrgAdminRequirement()));
+                options.AddPolicy("OrganizationOwner", policy =>
+                    policy.Requirements.Add(new OrgOwnerRequirement()));
             });
 
             return services;

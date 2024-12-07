@@ -70,10 +70,7 @@ public static class OrganizationEndpoints
                     await dbContext.Entry(organization)
                         .Collection(o => o.Grades).LoadAsync();
 
-                    var userId =
-                        httpContext.User.Claims.First(c =>
-                            c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
-                        );
+                    var userId = httpContext.User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier);
 
                     return Results.Ok(organization.ToWithClaimDTO(userId.Value, dbContext));
                 }
@@ -154,7 +151,7 @@ public static class OrganizationEndpoints
             .WithName("ChangeOrganizationName")
             .WithDescription("Changes the name of the organization.")
             .WithTags("Organizations")
-            .RequireAuthorization("OrganizationAdmin")
+            .RequireAuthorization("OrganizationOwner")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -178,11 +175,10 @@ public static class OrganizationEndpoints
                     return Results.Problem(ex.Message, statusCode: StatusCodes.Status500InternalServerError);
                 }
             })
-            .RequireAuthorization("OrganizationAdmin")
+            .RequireAuthorization("OrganizationOwner")
             .WithName("DeleteOrganization")
             .WithDescription("Deletes the organization.")
             .WithTags("Organizations")
-            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);

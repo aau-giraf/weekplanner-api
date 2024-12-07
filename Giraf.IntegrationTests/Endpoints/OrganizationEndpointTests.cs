@@ -68,23 +68,32 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationById_ReturnsOrganization_WhenOrganizationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory(sp => new OrganizationWithUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             int organizationId;
+            string userId;
 
-            // Retrieve the organization ID after the database is seeded
+            // Retrieve the organization and user IDs after the database is seeded
             using (var scope = factory.Services.CreateScope())
             {
                 var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
+                var organization = await dbContext.Organizations
+                    .Include(o => o.Users)
+                    .FirstOrDefaultAsync();
                 Assert.NotNull(organization);
+
                 organizationId = organization.Id;
+
+                var user = organization.Users.FirstOrDefault();
+                Assert.NotNull(user);
+
+                userId = user.Id;
             }
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim(ClaimTypes.NameIdentifier, userId),
                 new Claim("OrgMember", organizationId.ToString())
             };
 
@@ -202,7 +211,7 @@ namespace Giraf.IntegrationTests.Endpoints
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", organizationId.ToString())
+                new Claim("OrgOwner", organizationId.ToString())
             };
 
             // Act
@@ -228,7 +237,7 @@ namespace Giraf.IntegrationTests.Endpoints
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", nonExistentOrgId.ToString())
+                new Claim("OrgOwner", nonExistentOrgId.ToString())
             };
 
             // Act
@@ -264,7 +273,7 @@ namespace Giraf.IntegrationTests.Endpoints
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", organizationId.ToString())
+                new Claim("OrgOwner", organizationId.ToString())
             };
 
             // Act
@@ -294,7 +303,7 @@ namespace Giraf.IntegrationTests.Endpoints
             TestAuthHandler.TestClaims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", nonExistentOrgId.ToString())
+                new Claim("OrgOwner", nonExistentOrgId.ToString())
             };
 
             // Act

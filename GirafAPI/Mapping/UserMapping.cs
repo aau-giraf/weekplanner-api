@@ -35,7 +35,7 @@ public static class UserMapping
         );
     }
 
-    public static UserWithRole ToUserWithClaims(this GirafUser user, Organization organization,
+    public static UserWithRoleDTO ToUserWithClaims(this GirafUser user, Organization organization,
         GirafDbContext dbContext)
     {
         var claimList = dbContext.UserClaims
@@ -45,7 +45,7 @@ public static class UserMapping
 
         var highestClaim = ClaimUtils.GetHighestClaim(claimList);
 
-        return new UserWithRole(
+        return new UserWithRoleDTO(
             user.Id,
             user.Email,
             user.FirstName,
