@@ -14,48 +14,51 @@ namespace GirafAPI.Endpoints
     {
         public static void MapLoginEndpoint(this WebApplication app)
         {
-            app.MapPost("/login", async (LoginDTO loginDTO, UserManager<GirafUser> userManager, SignInManager<GirafUser> signInManager,  IOptions<JwtSettings> jwtSettings) =>
-            {
-                var user = await userManager.FindByNameAsync(loginDTO.Username);
-                if (user == null)
-                {
-                    return Results.BadRequest("Invalid username or password");
-                }
-                var signIn = await signInManager.PasswordSignInAsync(user, 
-                                                                               loginDTO.Password, 
-                                                                               isPersistent: false, 
-                                                                               lockoutOnFailure: false);
-                if (!signIn.Succeeded)
-                {
-                    return Results.BadRequest("Invalid username or password");
-                }
+            app.MapPost("/login",
+                    async (LoginDTO loginDTO, UserManager<GirafUser> userManager,
+                        SignInManager<GirafUser> signInManager, IOptions<JwtSettings> jwtSettings) =>
+                    {
+                        var user = await userManager.FindByNameAsync(loginDTO.Username);
+                        if (user == null)
+                        {
+                            return Results.BadRequest("Invalid username or password");
+                        }
 
-                var claims = new List<Claim>
-                {
-                    new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                    new Claim(ClaimTypes.Name, user.UserName)
-                };
+                        var signIn = await signInManager.PasswordSignInAsync(user,
+                            loginDTO.Password,
+                            isPersistent: false,
+                            lockoutOnFailure: false);
+                        if (!signIn.Succeeded)
+                        {
+                            return Results.BadRequest("Invalid username or password");
+                        }
 
-                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
-                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                        var claims = new List<Claim>
+                        {
+                            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                            new Claim(ClaimTypes.Name, user.UserName)
+                        };
 
-                var token = new JwtSecurityToken(
-                    issuer: jwtSettings.Value.Issuer,
-                    audience: jwtSettings.Value.Audience,
-                    claims: claims,
-                    expires: DateTime.UtcNow.AddHours(1),
-                    signingCredentials: creds);
+                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Value.SecretKey));
+                        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-                var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+                        var token = new JwtSecurityToken(
+                            issuer: jwtSettings.Value.Issuer,
+                            audience: jwtSettings.Value.Audience,
+                            claims: claims,
+                            expires: DateTime.UtcNow.AddHours(1),
+                            signingCredentials: creds);
 
-                return Results.Ok(new { Token = tokenString });
-            })
-            .WithName("UserLogin")
-            .WithTags("Authentication")
-            .WithDescription("Authenticates a user and returns a JWT token.")
-            .Accepts<LoginDTO>("application/json")
-            .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest);
+                        var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
+
+                        return Results.Ok(new { Token = tokenString });
+                    })
+                .WithName("UserLogin")
+                .WithTags("Authentication")
+                .WithDescription("Authenticates a user and returns a JWT token.")
+                .Accepts<LoginDTO>("application/json")
+                .Produces(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status400BadRequest);
         }
     }
 }
