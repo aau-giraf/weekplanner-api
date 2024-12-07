@@ -48,7 +48,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Act
-            var response = await client.GetAsync($"/grades/{gradeId}");
+            var response = await client.GetAsync($"/grades/{orgId}/{gradeId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -74,7 +74,7 @@ namespace Giraf.IntegrationTests.Endpoints
             };
 
             // Act
-            var response = await client.GetAsync($"/grades/{nonExistentGradeId}");
+            var response = await client.GetAsync($"/grades/{testOrgId}/{nonExistentGradeId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -219,6 +219,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
+            var orgId = 1;
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
@@ -238,7 +239,7 @@ namespace Giraf.IntegrationTests.Endpoints
             string newName = "Updated Grade Name";
 
             // Act
-            var response = await client.PutAsync($"/grades/{gradeId}/change-name?newName={newName}", null);
+            var response = await client.PutAsync($"/grades/{orgId}/{gradeId}/change-name?newName={newName}", null);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -254,6 +255,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
+            var orgId = 1;
             int nonExistentGradeId = 9999;
             string newName = "Updated Grade Name";
             
@@ -264,7 +266,7 @@ namespace Giraf.IntegrationTests.Endpoints
             };
 
             // Act
-            var response = await client.PutAsync($"/grades/{nonExistentGradeId}/change-name?newName={newName}", null);
+            var response = await client.PutAsync($"/grades/{orgId}/{nonExistentGradeId}/change-name?newName={newName}", null);
 
             // Assert
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
@@ -281,6 +283,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new GradeSeederWithCitizen());
             var client = factory.CreateClient();
+            var orgId = 1;
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
@@ -307,7 +310,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Act
-            var response = await client.PutAsJsonAsync($"/grades/{gradeId}/add-citizens", citizenIds);
+            var response = await client.PutAsJsonAsync($"/grades/{orgId}/{gradeId}/add-citizens", citizenIds);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -324,6 +327,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
+            var orgId = 1;
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
@@ -346,7 +350,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Act
-            var response = await client.PutAsJsonAsync($"/grades/{nonExistentGradeId}/add-citizens", citizenIds);
+            var response = await client.PutAsJsonAsync($"/grades/{orgId}/{nonExistentGradeId}/add-citizens", citizenIds);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -363,6 +367,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new GradeSeederWithCitizen());
             var client = factory.CreateClient();
+            var orgId = 1;
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
@@ -387,7 +392,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Act
-            var response = await client.PutAsJsonAsync($"/grades/{gradeId}/remove-citizens", citizenIds);
+            var response = await client.PutAsJsonAsync($"/grades/{orgId}/{gradeId}/remove-citizens", citizenIds);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -403,6 +408,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
             var client = factory.CreateClient();
+            var orgId = 1;
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
@@ -425,7 +431,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Act
-            var response = await client.PutAsJsonAsync($"/grades/{nonExistentGradeId}/remove-citizens", citizenIds);
+            var response = await client.PutAsJsonAsync($"/grades/{orgId}/{nonExistentGradeId}/remove-citizens", citizenIds);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -442,6 +448,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
             var client = factory.CreateClient();
+            var orgId = 1;
             
             TestAuthHandler.TestClaims = new List<Claim>
             {
@@ -459,7 +466,7 @@ namespace Giraf.IntegrationTests.Endpoints
             }
 
             // Act
-            var response = await client.DeleteAsync($"/grades/{gradeId}");
+            var response = await client.DeleteAsync($"/grades/{orgId}/{gradeId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -480,6 +487,7 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
+            var orgId = 1;
             int nonExistentGradeId = 9999;
             
             TestAuthHandler.TestClaims = new List<Claim>
@@ -489,7 +497,7 @@ namespace Giraf.IntegrationTests.Endpoints
             };
 
             // Act
-            var response = await client.DeleteAsync($"/grades/{nonExistentGradeId}");
+            var response = await client.DeleteAsync($"/grades/{orgId}/{nonExistentGradeId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);

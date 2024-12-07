@@ -11,11 +11,11 @@ public static class GradeEndpoints
     {
         var group = app.MapGroup("grades");
         
-        group.MapGet("/{id}", async (int id, GirafDbContext dbContext) =>
+        group.MapGet("/{orgId}/{gradeId}", async (int orgId, int gradeId, GirafDbContext dbContext) =>
         {
             try
             {
-                var grade = await dbContext.Grades.FindAsync(id);
+                var grade = await dbContext.Grades.FindAsync(gradeId);
 
                 if (grade is null)
                 {
@@ -102,11 +102,11 @@ public static class GradeEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{id}/change-name", async (int id, string newName, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/{gradeId}/change-name", async (int orgId, int gradeId, string newName, GirafDbContext dbContext) =>
         {
             try
             {
-                var grade = await dbContext.Grades.FindAsync(id);
+                var grade = await dbContext.Grades.FindAsync(gradeId);
 
                 if (grade is null)
                 {
@@ -130,7 +130,7 @@ public static class GradeEndpoints
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{gradeId}/add-citizens", async (int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/{gradeId}/add-citizens", async (int orgId, int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
             {
                 try
                 {
@@ -188,7 +188,7 @@ public static class GradeEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{gradeId}/remove-citizens", async (int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/{gradeId}/remove-citizens", async (int orgId, int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
             {
                 try
                 {
@@ -245,7 +245,7 @@ public static class GradeEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapDelete("/{id}", async (int id, GirafDbContext dbContext) =>
+        group.MapDelete("/{orgId}/{id}", async (int orgId, int id, GirafDbContext dbContext) =>
             {
                 try
                 {
