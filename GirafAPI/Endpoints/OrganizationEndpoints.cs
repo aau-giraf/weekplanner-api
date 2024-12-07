@@ -231,11 +231,11 @@ public static class OrganizationEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("/grades/{orgId}", async (int orgId, GirafDbContext dbContext) =>
+        group.MapGet("/grades/{gradeId}", async (int gradeId, GirafDbContext dbContext) =>
             {
                 try
                 {
-                    Grade? grade = await dbContext.Grades.FindAsync(orgId);
+                    Grade? grade = await dbContext.Grades.FindAsync(gradeId);
                     if (grade is null)
                     {
                         return Results.NotFound();
@@ -265,7 +265,7 @@ public static class OrganizationEndpoints
             .WithName("GetOrganizationByGradeId")
             .WithDescription("Gets organization by grade id.")
             .WithTags("Organizations")
-            .RequireAuthorization("OrganizationMember")
+            .RequireAuthorization()
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
