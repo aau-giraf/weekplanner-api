@@ -225,9 +225,9 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var newActivityDto = new CreateActivityDTO
             (
-                Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
-                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
+                Date: DateOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)).ToString(),
                 PictogramId: pictogramId // Provide the valid PictogramId
             );
 
@@ -252,9 +252,9 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var newActivityDto = new CreateActivityDTO
             (
-                Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
-                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
+                Date: DateOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)).ToString(),
                 PictogramId: null
             );
 
@@ -305,9 +305,9 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var newActivityDto = new CreateActivityDTO
             (
-                Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
-                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
+                Date: DateOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)).ToString(),
                 PictogramId: pictogramId // Provide the valid PictogramId
             );
 
@@ -332,9 +332,9 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var newActivityDto = new CreateActivityDTO
             (
-                Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
-                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
+                Date: DateOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)).ToString(),
                 PictogramId: null
             );
 
@@ -367,9 +367,9 @@ namespace Giraf.IntegrationTests.Endpoints
             
             var updateActivityDto = new UpdateActivityDTO
             (
-                Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
-                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
+                Date: DateOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)).ToString(),
                 IsCompleted: true,
                 PictogramId: 1,
                 CitizenId: 1
@@ -401,9 +401,9 @@ namespace Giraf.IntegrationTests.Endpoints
 
             var newActivityDto = new CreateActivityDTO
             (
-                Date: DateOnly.FromDateTime(DateTime.UtcNow),
-                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow),
-                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)),
+                Date: DateOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                StartTime: TimeOnly.FromDateTime(DateTime.UtcNow).ToString(),
+                EndTime: TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(1)).ToString(),
                 PictogramId: null
             );
 

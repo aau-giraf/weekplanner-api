@@ -10,9 +10,9 @@ public static class ActivityMapping
     {
         return new Activity
         {
-            Date = activityDto.Date,
-            StartTime = activityDto.StartTime,
-            EndTime = activityDto.EndTime,
+            Date = DateOnly.Parse(activityDto.Date),
+            StartTime = TimeOnly.Parse(activityDto.StartTime),
+            EndTime = TimeOnly.Parse(activityDto.EndTime),
             IsCompleted = false
         };
     }
@@ -21,9 +21,9 @@ public static class ActivityMapping
     {
         return new Activity
         {
-            Date = activityDto.Date,
-            StartTime = activityDto.StartTime,
-            EndTime = activityDto.EndTime,
+            Date = DateOnly.Parse(activityDto.Date),
+            StartTime = TimeOnly.Parse(activityDto.StartTime),
+            EndTime = TimeOnly.Parse(activityDto.EndTime),
             IsCompleted = false,
             Pictogram = pictogram
         };
@@ -34,9 +34,9 @@ public static class ActivityMapping
         return new Activity
         {
             Id = id,
-            Date = activityDto.Date,
-            StartTime = activityDto.StartTime,
-            EndTime = activityDto.EndTime,
+            Date = DateOnly.Parse(activityDto.Date),
+            StartTime = TimeOnly.Parse(activityDto.StartTime),
+            EndTime = TimeOnly.Parse(activityDto.EndTime),
             IsCompleted = activityDto.IsCompleted,
         };
     }
@@ -46,9 +46,9 @@ public static class ActivityMapping
         return new Activity
         {
             Id = id,
-            Date = activityDto.Date,
-            StartTime = activityDto.StartTime,
-            EndTime = activityDto.EndTime,
+            Date = DateOnly.Parse(activityDto.Date),
+            StartTime = TimeOnly.Parse(activityDto.StartTime),
+            EndTime = TimeOnly.Parse(activityDto.EndTime),
             IsCompleted = activityDto.IsCompleted,
             Pictogram = pictogram
         };
