@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
@@ -14,7 +15,7 @@ using Xunit;
 namespace Giraf.IntegrationTests.Endpoints
 {
     [Collection("IntegrationTests")]
-    public class CitizensEndpointTests
+    public class CitizenEndpointTests
     {
         #region Get All Citizens Tests
 
@@ -175,6 +176,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 var organization = await dbContext.Organizations.FirstOrDefaultAsync();
                 Assert.NotNull(organization);
                 var organizationId = organization.Id;
+                
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                    new Claim("OrgAdmin", organizationId.ToString())
+                };
 
                 var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
 
@@ -202,6 +209,12 @@ namespace Giraf.IntegrationTests.Endpoints
             // Arrange
             var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
             var client = factory.CreateClient();
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgAdmin", "badOrgId")
+            };
 
             var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
 
@@ -231,6 +244,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 var organization = await dbContext.Organizations.FirstOrDefaultAsync();
                 Assert.NotNull(organization);
                 var organizationId = organization.Id;
+                
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                    new Claim("OrgAdmin", organizationId.ToString())
+                };
 
                 var citizen = await dbContext.Citizens.FirstOrDefaultAsync();
                 Assert.NotNull(citizen);
@@ -266,6 +285,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 var organization = await dbContext.Organizations.FirstOrDefaultAsync();
                 Assert.NotNull(organization);
                 var organizationId = organization.Id;
+                
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                    new Claim("OrgAdmin", organizationId.ToString())
+                };
 
                 // Act
                 var response = await client.DeleteAsync($"/citizens/{organizationId}/remove-citizen/999");
@@ -297,6 +322,12 @@ namespace Giraf.IntegrationTests.Endpoints
                 var citizenNotInOrg = await dbContext.Citizens.FirstOrDefaultAsync(c => c.Organization.Id == organization2.Id);
                 Assert.NotNull(citizenNotInOrg);
                 var citizenId = citizenNotInOrg.Id;
+                
+                TestAuthHandler.TestClaims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                    new Claim("OrgAdmin", organization1.Id.ToString())
+                };
 
                 // Act
                 var response = await client.DeleteAsync($"/citizens/{organization1.Id}/remove-citizen/{citizenId}");
