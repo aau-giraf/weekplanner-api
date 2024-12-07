@@ -11,7 +11,7 @@ public static class PictogramEndpoints
 {
     public static RouteGroupBuilder MapPictogramEndpoints(this WebApplication app)
     {
-        var group = app.MapGroup("pictograms").AllowAnonymous();
+        var group = app.MapGroup("pictograms");
 
         // Can't use a DTO here since for the endpoint to work correctly with images, the image and the dto must both be multipart/form-data
         // but minimal apis can't map from multipart/form-data to a record DTO, only from application/json
@@ -62,12 +62,12 @@ public static class PictogramEndpoints
             .DisableAntiforgery()
             .WithName("CreatePictogram")
             .WithDescription("Creates a pictogram")
+            .RequireAuthorization("OrganizationMember")
             .WithTags("Pictograms")
             .Accepts<IFormFile>("multipart/form-data")
             .Accepts<CreatePictogramDTO>("multipart/form-data")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest);
-
 
         group.MapGet("/{pictogramId:int}", async (int pictogramId, GirafDbContext dbContext) =>
             {
@@ -89,6 +89,7 @@ public static class PictogramEndpoints
             })
             .WithName("GetPictogramById")
             .WithDescription("Gets a specific pictogram by Id.")
+            .RequireAuthorization("OrganizationMember")
             .WithTags("Pictograms")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
@@ -119,10 +120,10 @@ public static class PictogramEndpoints
             .WithName("GetPictogramsByOrgId")
             .WithDescription("Gets all the pictograms belonging to the specified organization.")
             .WithTags("Pictograms")
+            .RequireAuthorization("OrganizationMember")
             .Produces<List<PictogramDTO>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
-
 
         group.MapDelete("/{pictogramId:int}", async (int pictogramId, GirafDbContext dbContext) =>
             {
@@ -149,12 +150,11 @@ public static class PictogramEndpoints
             .WithName("DeletePictogram")
             .WithDescription("Deletes a pictogram by Id.")
             .WithTags("Pictograms")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        
         return group;
     }
-    
 }

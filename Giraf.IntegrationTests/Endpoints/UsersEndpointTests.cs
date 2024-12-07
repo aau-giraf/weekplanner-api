@@ -15,6 +15,7 @@ namespace Giraf.IntegrationTests.Endpoints
     [Collection("IntegrationTests")]
     public class UsersEndpointTests
     {
+        
         #region Create User Tests
 
         // 1. Test POST /users - Creating a new user successfully
@@ -377,5 +378,6 @@ namespace Giraf.IntegrationTests.Endpoints
         }
 
         #endregion
+        
     }
 }

@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using GirafAPI.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Giraf.IntegrationTests.Utils;
 
@@ -54,6 +56,12 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.TestAuthenticationScheme, options => { });
 
             // Add authorization policies
+            services.AddScoped<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OwnInvitationOrAdminHandler>();
+            services.AddScoped<IAuthorizationHandler, RespondInvitationHandler>();
+            services.AddScoped<IAuthorizationHandler, InvitationRecipientOrAdminHandler>();
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("OrganizationMember", policy =>
@@ -65,7 +73,20 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
                 {
                     policy.RequireClaim("OrgAdmin");
                 });
+                options.AddPolicy("RespondInvitation", policy =>
+                {
+                    policy.Requirements.Add(new RespondInvitationRequirement());
+                });
+                options.AddPolicy("InvitationRecipientOrAdmin", policy =>
+                {
+                    policy.Requirements.Add(new InvitationRecipientOrAdminRequirement());
+                });
+                options.AddPolicy("OwnInvitationOrAdmin", policy =>
+                {
+                    policy.Requirements.Add(new OwnInvitationOrAdminRequirement());
+                });
             });
+            Console.WriteLine("[FACTORY] Authorization policies and handlers registered.");
 
             // Build the service provider and create a scope
             var serviceProvider = services.BuildServiceProvider();

@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using GirafAPI.Entities.Grades;
 using GirafAPI.Entities.Citizens;
 using GirafAPI.Entities.Users;
+using GirafAPI.Entities.Invitations;
 
 namespace GirafAPI.Entities.Organizations;
 
@@ -17,4 +18,5 @@ public class Organization
     public required ICollection<Grade> Grades { get; set; }
     
     public required ICollection<Citizen> Citizens { get; set; }
+    public virtual ICollection<Invitation> Invitations { get; set; } = new List<Invitation>();
 }

@@ -15,6 +15,7 @@ namespace Giraf.IntegrationTests.Endpoints
     [Collection("IntegrationTests")]
     public class ActivityEndpointTests
     {
+        
         #region GET /weekplan/ - Get all activities
 
         [Fact]
@@ -599,5 +600,6 @@ namespace Giraf.IntegrationTests.Endpoints
         }
 
         #endregion
+        
     }
 }

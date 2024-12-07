@@ -11,6 +11,7 @@ namespace Giraf.IntegrationTests.Endpoints
     [Collection("IntegrationTests")]
     public class LoginEndpointTests
     {
+        
         [Fact]
         public async Task Login_ReturnsOk_WithValidCredentials()
         {
@@ -78,5 +79,6 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             public required string Token { get; set; }
         }
+        
     }
 }

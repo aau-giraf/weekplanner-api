@@ -16,6 +16,7 @@ namespace Giraf.IntegrationTests.Endpoints
     [Collection("IntegrationTests")]
     public class CitizensEndpointTests
     {
+        
         #region Get All Citizens Tests
 
         // 1. Testing GET /citizens, with multiple existing citizens in the DB
@@ -307,5 +308,6 @@ namespace Giraf.IntegrationTests.Endpoints
         }
 
         #endregion
+        
     }
 }
