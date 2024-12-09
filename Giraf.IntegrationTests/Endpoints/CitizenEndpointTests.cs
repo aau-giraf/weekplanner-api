@@ -169,8 +169,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var scope = factory.Services.CreateScope();
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
             var organizationId = seeder.Organizations.First().Id;

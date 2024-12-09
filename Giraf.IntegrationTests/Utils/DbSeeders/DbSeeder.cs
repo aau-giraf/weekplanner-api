@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using GirafAPI.Data;
 using GirafAPI.Entities.Activities;
@@ -35,6 +36,8 @@ public abstract class DbSeeder
         };
         var ownerResult = userManager.CreateAsync(owner, "Password123!").GetAwaiter().GetResult();
         Users.Add("owner", ownerResult.Succeeded ? owner : null);
+        userManager.AddClaimAsync(owner, new Claim(ClaimTypes.Name, owner.UserName));
+        userManager.AddClaimAsync(owner, new Claim(JwtRegisteredClaimNames.Sub, owner.Id));
         
         var admin = new GirafUser
         {
@@ -46,6 +49,8 @@ public abstract class DbSeeder
         };
         var adminResult = userManager.CreateAsync(admin, "Password123!").GetAwaiter().GetResult();
         Users.Add("admin", adminResult.Succeeded ? admin : null);
+        userManager.AddClaimAsync(admin, new Claim(ClaimTypes.Name, admin.UserName));
+        userManager.AddClaimAsync(admin, new Claim(JwtRegisteredClaimNames.Sub, admin.Id));
         
         var member = new GirafUser
         {
@@ -57,6 +62,8 @@ public abstract class DbSeeder
         };
         var memberResult = userManager.CreateAsync(member, "Password123!").GetAwaiter().GetResult();
         Users.Add("member", memberResult.Succeeded ? member : null);
+        userManager.AddClaimAsync(member, new Claim(ClaimTypes.Name, member.UserName));
+        userManager.AddClaimAsync(member, new Claim(JwtRegisteredClaimNames.Sub, member.Id));
     }
 
     public void SeedSingleUser(UserManager<GirafUser> userManager)
@@ -71,6 +78,8 @@ public abstract class DbSeeder
         };
         var ownerResult = userManager.CreateAsync(user, "Password123!").GetAwaiter().GetResult();
         Users.Add("user", ownerResult.Succeeded ? user : null);
+        userManager.AddClaimAsync(user, new Claim(ClaimTypes.Name, user.UserName));
+        userManager.AddClaimAsync(user, new Claim(JwtRegisteredClaimNames.Sub, user.Id));
     }
 
     public void SeedOrganization(GirafDbContext dbContext,

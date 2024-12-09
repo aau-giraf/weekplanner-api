@@ -110,7 +110,7 @@ public static class CitizenEndpoints
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPost("/{orgId}/add-citizen",
+        group.MapPost("/{orgId:int}/add-citizen",
                 async (int orgId, CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
                 {
                     try
@@ -146,7 +146,7 @@ public static class CitizenEndpoints
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapDelete("/{orgId}/remove-citizen/{citizenId}",
+        group.MapDelete("/{orgId:int}/remove-citizen/{citizenId}",
                 async (int orgId, int citizenId, GirafDbContext dbContext) =>
                 {
                     try

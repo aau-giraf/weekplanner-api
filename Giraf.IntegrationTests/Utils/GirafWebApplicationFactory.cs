@@ -1,3 +1,4 @@
+using System.Text;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Authorization;
 using GirafAPI.Data;
@@ -10,8 +11,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Giraf.IntegrationTests.Utils;
 
@@ -36,20 +39,13 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
             });
 
             // Configure JwtSettings for testing
-            services.Configure<JwtSettings>( options =>
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.Issuer = "TestIssuer";
-                options.Audience = "TestAudience";
-                options.SecretKey = "ThisIsASecretKeyForTestingPurposes!";
+                options.TokenValidationParameters.ValidIssuer = "TestIssuer";
+                options.TokenValidationParameters.ValidAudience = "TestAudience";
+                options.TokenValidationParameters.IssuerSigningKey =
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThisIsASecretKeyForTestingPurposes!"));
             });
-
-            // Add the test authentication scheme
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = TestAuthHandler.TestAuthenticationScheme;
-                options.DefaultChallengeScheme = TestAuthHandler.TestAuthenticationScheme;
-            })
-            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.TestAuthenticationScheme, options => { });
 
             // Add authorization policies
             services.AddScoped<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
