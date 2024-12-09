@@ -5,6 +5,8 @@ using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.Grades.DTOs;
+using GirafAPI.Entities.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,32 +22,19 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetGradeById_ReturnsGrade_WhenGradeExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            
-            int orgId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                orgId = organization.Id;
-            }
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", orgId.ToString())
-            };
 
-            int gradeId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var grade = await dbContext.Grades.FirstOrDefaultAsync();
-                Assert.NotNull(grade);
-                gradeId = grade.Id;
-            }
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+            var userClaims = await userManager.GetClaimsAsync(seeder.Users["member"]);
+            TestAuthHandler.TestClaims = userClaims.ToList();
+            
+            int orgId = seeder.Organizations[0].Id;
+
+            int gradeId = seeder.Grades[0].Id;
 
             // Act
             var response = await client.GetAsync($"/grades/{orgId}/{gradeId}");
@@ -62,16 +51,18 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetGradeById_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            int nonExistentGradeId = 9999;
             
-            var testOrgId = 1;
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", testOrgId.ToString())
-            };
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+            var userClaims = await userManager.GetClaimsAsync(seeder.Users["member"]);
+            TestAuthHandler.TestClaims = userClaims.ToList();
+            
+            int nonExistentGradeId = 9999;
+            var testOrgId = seeder.Organizations[0].Id;
 
             // Act
             var response = await client.GetAsync($"/grades/{testOrgId}/{nonExistentGradeId}");
@@ -89,23 +80,17 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetGradesInOrganization_ReturnsGrades_WhenOrganizationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                organizationId = organization.Id;
-            }
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", organizationId.ToString())
-            };
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+            var userClaims = await userManager.GetClaimsAsync(seeder.Users["member"]);
+            TestAuthHandler.TestClaims = userClaims.ToList();
+
+            int organizationId = seeder.Organizations[0].Id;
 
             // Act
             var response = await client.GetAsync($"/grades/org/{organizationId}");
@@ -122,15 +107,17 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetGradesInOrganization_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            int nonExistentOrganizationId = 9999;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", nonExistentOrganizationId.ToString())
-            };
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+            var userClaims = await userManager.GetClaimsAsync(seeder.Users["member"]);
+            TestAuthHandler.TestClaims = userClaims.ToList();
+            
+            int nonExistentOrganizationId = 9999;
 
             // Act
             var response = await client.GetAsync($"/grades/org/{nonExistentOrganizationId}");
@@ -148,23 +135,17 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateGrade_ReturnsCreated_WhenOrganizationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                organizationId = organization.Id;
-            }
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", organizationId.ToString())
-            };
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+            var userClaims = await userManager.GetClaimsAsync(seeder.Users["member"]);
+            TestAuthHandler.TestClaims = userClaims.ToList();
+
+            int organizationId = seeder.Organizations[0].Id;
 
             var newGradeDto = new CreateGradeDTO
             (
@@ -186,15 +167,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateGrade_ReturnsForbidden_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
-            int nonExistentOrganizationId = 9999;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", nonExistentOrganizationId.ToString())
-            };
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            
+            int nonExistentOrganizationId = 9999;
 
             var newGradeDto = new CreateGradeDTO
             (
@@ -217,24 +198,16 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task ChangeGradeName_ReturnsOk_WhenGradeExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            var orgId = 1;
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", "1")
-            };
 
-            int gradeId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var grade = await dbContext.Grades.FirstOrDefaultAsync();
-                Assert.NotNull(grade);
-                gradeId = grade.Id;
-            }
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            
+            var orgId = seeder.Organizations[0].Id;
+            int gradeId = seeder.Grades[0].Id;
 
             string newName = "Updated Grade Name";
 
@@ -253,17 +226,17 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task ChangeGradeName_ReturnsForbidden_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            var orgId = 1;
+            
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            
+            var orgId = seeder.Organizations[0].Id;
             int nonExistentGradeId = 9999;
             string newName = "Updated Grade Name";
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", "1")
-            };
 
             // Act
             var response = await client.PutAsync($"/grades/{orgId}/{nonExistentGradeId}/change-name?newName={newName}", null);
@@ -281,33 +254,18 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AddCitizensToGrade_ReturnsOk_WhenGradeAndCitizensExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new GradeSeederWithCitizen());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            var orgId = 1;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", "1")
-            };
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            
+            var orgId = seeder.Organizations[0].Id;
 
-            int gradeId;
-            List<int> citizenIds;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var grade = await dbContext.Grades.FirstOrDefaultAsync();
-                Assert.NotNull(grade);
-                gradeId = grade.Id;
-
-                var citizens = await dbContext.Citizens.ToListAsync();
-                Assert.NotEmpty(citizens);
-                citizenIds = new List<int>();
-                foreach (var citizen in citizens)
-                {
-                    citizenIds.Add(citizen.Id);
-                }
-            }
+            int gradeId = seeder.Grades[0].Id;
+            List<int> citizenIds = seeder.Citizens.Select(c => c.Id).ToList();
 
             // Act
             var response = await client.PutAsJsonAsync($"/grades/{orgId}/{gradeId}/add-citizens", citizenIds);
@@ -325,29 +283,19 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AddCitizensToGrade_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedCitizens(scope.ServiceProvider.GetRequiredService<GirafDbContext>(), seeder.Organizations[0]);
             var client = factory.CreateClient();
-            var orgId = 1;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", "1")
-            };
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            
+            var orgId = seeder.Organizations[0].Id;
 
             int nonExistentGradeId = 9999;
-            List<int> citizenIds;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var citizens = await dbContext.Citizens.ToListAsync();
-                Assert.NotEmpty(citizens);
-                citizenIds = new List<int>();
-                foreach (var citizen in citizens)
-                {
-                    citizenIds.Add(citizen.Id);
-                }
-            }
+            List<int> citizenIds = seeder.Citizens.Select(c => c.Id).ToList();
 
             // Act
             var response = await client.PutAsJsonAsync($"/grades/{orgId}/{nonExistentGradeId}/add-citizens", citizenIds);
@@ -365,31 +313,17 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizensFromGrade_ReturnsOk_WhenGradeAndCitizensExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new GradeSeederWithCitizen());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            var orgId = 1;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", "1")
-            };
-
-            int gradeId;
-            List<int> citizenIds;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var grade = await dbContext.Grades.Include(g => g.Citizens).FirstOrDefaultAsync();
-                Assert.NotNull(grade);
-                gradeId = grade.Id;
-
-                citizenIds = new List<int>();
-                foreach (var citizen in grade.Citizens)
-                {
-                    citizenIds.Add(citizen.Id);
-                }
-            }
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            
+            var orgId = seeder.Organizations[0].Id;
+            int gradeId = seeder.Grades[0].Id;
+            List<int> citizenIds = seeder.Citizens.Select(c => c.Id).ToList();
 
             // Act
             var response = await client.PutAsJsonAsync($"/grades/{orgId}/{gradeId}/remove-citizens", citizenIds);
@@ -406,29 +340,18 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizensFromGrade_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedCitizens(scope.ServiceProvider.GetRequiredService<GirafDbContext>(), seeder.Organizations[0]);
             var client = factory.CreateClient();
-            var orgId = 1;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", "1")
-            };
-
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            
+            var orgId = seeder.Organizations[0].Id;
             int nonExistentGradeId = 9999;
-            List<int> citizenIds;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var citizens = await dbContext.Citizens.ToListAsync();
-                Assert.NotEmpty(citizens);
-                citizenIds = new List<int>();
-                foreach (var citizen in citizens)
-                {
-                    citizenIds.Add(citizen.Id);
-                }
-            }
+            List<int> citizenIds = seeder.Citizens.Select(c => c.Id).ToList();
 
             // Act
             var response = await client.PutAsJsonAsync($"/grades/{orgId}/{nonExistentGradeId}/remove-citizens", citizenIds);
@@ -446,24 +369,16 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteGrade_ReturnsNoContent_WhenGradeExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicGradeSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            var orgId = 1;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", "1")
-            };
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
 
-            int gradeId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var grade = await dbContext.Grades.FirstOrDefaultAsync();
-                Assert.NotNull(grade);
-                gradeId = grade.Id;
-            }
+            int orgId = seeder.Organizations[0].Id;
+            int gradeId = seeder.Grades[0].Id;
 
             // Act
             var response = await client.DeleteAsync($"/grades/{orgId}/{gradeId}");
@@ -485,16 +400,16 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteGrade_ReturnsForbidden_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            var orgId = 1;
-            int nonExistentGradeId = 9999;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgMember", "1")
-            };
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            
+            var orgId = seeder.Organizations[0].Id;
+            int nonExistentGradeId = 9999;
 
             // Act
             var response = await client.DeleteAsync($"/grades/{orgId}/{nonExistentGradeId}");

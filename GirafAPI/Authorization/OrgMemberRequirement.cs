@@ -1,3 +1,4 @@
+using GirafAPI.Data;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -10,11 +11,15 @@ public class OrgMemberAuthorizationHandler : AuthorizationHandler<OrgMemberRequi
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager<GirafUser> _userManager;
+    private readonly GirafDbContext _dbContext;
 
-    public OrgMemberAuthorizationHandler(IHttpContextAccessor httpContextAccessor, UserManager<GirafUser> userManager)
+    public OrgMemberAuthorizationHandler(IHttpContextAccessor httpContextAccessor, 
+                                         UserManager<GirafUser> userManager,
+                                         GirafDbContext dbContext)
     {
         _httpContextAccessor = httpContextAccessor;
         _userManager = userManager;
+        _dbContext = dbContext;
     }
 
     protected override async Task HandleRequirementAsync(
@@ -40,6 +45,14 @@ public class OrgMemberAuthorizationHandler : AuthorizationHandler<OrgMemberRequi
         
         var httpContext = _httpContextAccessor.HttpContext;
         var orgIdInUrl = httpContext.Request.RouteValues["orgId"];
+        
+        var organization = await _dbContext.Organizations.FindAsync(orgIdInUrl);
+        if (organization == null)
+        {
+            // Succeed and let the endpoint return NotFound
+            context.Succeed(requirement);
+            return;
+        }
 
         if (orgIds.Contains(orgIdInUrl))
         {

@@ -1,16 +1,12 @@
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Json;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.Citizens.DTOs;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
+using GirafAPI.Entities.Users;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
@@ -24,8 +20,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetAllCitizens_ReturnsListOfCitizens()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new MultipleCitizensSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
 
             // Act
             var response = await client.GetAsync("/citizens");
@@ -42,7 +43,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetAllCitizens_ReturnsEmptyList_WhenNoCitizens()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
             var client = factory.CreateClient();
 
             // Act
@@ -64,16 +65,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetCitizenById_ReturnsCitizen_WhenCitizenExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            // First, get the list of citizens to obtain the ID
-            var citizensResponse = await client.GetAsync("/citizens");
-            citizensResponse.EnsureSuccessStatusCode();
-            var citizens = await citizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
-            Assert.NotNull(citizens);
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
 
-            var citizenId = citizens[0].Id;
+            var citizenId = seeder.Citizens[0].Id;
 
             // Act
             var response = await client.GetAsync($"/citizens/{citizenId}");
@@ -92,7 +92,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetCitizenById_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
             var client = factory.CreateClient();
 
             // Act
@@ -111,17 +111,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task UpdateCitizen_ReturnsOk_WhenCitizenExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            // Get the citizen's ID
-            var citizensResponse = await client.GetAsync("/citizens");
-            citizensResponse.EnsureSuccessStatusCode();
-            var citizens = await citizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
-            Assert.NotNull(citizens);
-            Assert.Single(citizens);
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
 
-            var citizenId = citizens[0].Id;
+            var citizenId = seeder.Citizens[0].Id;
 
             var updateCitizenDto = new UpdateCitizenDTO("UpdatedFirstName", "UpdatedLastName");
 
@@ -145,7 +143,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task UpdateCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
             var client = factory.CreateClient();
 
             var updateCitizenDto = new UpdateCitizenDTO("FirstName", "LastName");
@@ -166,40 +164,30 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AddCitizen_ReturnsOk_WhenOrganizationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            // Get the organization ID
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                var organizationId = organization.Id;
-                
-                TestAuthHandler.TestClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                    new Claim("OrgAdmin", organizationId.ToString())
-                };
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
 
-                var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
+            var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
+            var organizationId = seeder.Organizations.First().Id;
 
-                // Act
-                var response = await client.PostAsJsonAsync($"/citizens/{organizationId}/add-citizen", createCitizenDto);
+            // Act
+            var response = await client.PostAsJsonAsync($"/citizens/{organizationId}/add-citizen", createCitizenDto);
 
-                // Assert
-                response.EnsureSuccessStatusCode();
+            // Assert
+            response.EnsureSuccessStatusCode();
 
-                // Verify that the citizen was added
-                var getCitizensResponse = await client.GetAsync("/citizens");
-                getCitizensResponse.EnsureSuccessStatusCode();
-                var citizens = await getCitizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
-                Assert.NotNull(citizens);
-                Assert.Single(citizens);
-                Assert.Equal("New", citizens[0].FirstName);
-                Assert.Equal("Citizen", citizens[0].LastName);
-            }
+            // Verify that the citizen was added
+            var getCitizensResponse = await client.GetAsync("/citizens");
+            getCitizensResponse.EnsureSuccessStatusCode();
+            var citizens = await getCitizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
+            Assert.NotNull(citizens);
+            Assert.Equal("New", citizens[3].FirstName);
+            Assert.Equal("Citizen", citizens[3].LastName);
         }
 
         // 8. Test POST /citizens/{id}/add-citizen when the organization does not exist.
@@ -207,14 +195,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AddCitizen_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", "badOrgId")
-            };
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
 
             var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
 
@@ -234,40 +221,31 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizen_ReturnsNoContent_WhenCitizenExistsInOrganization()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new CitizenWithOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+
             // Get the organization ID and citizen ID
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                var organizationId = organization.Id;
-                
-                TestAuthHandler.TestClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                    new Claim("OrgAdmin", organizationId.ToString())
-                };
+            var organizationId = seeder.Organizations.First().Id;
+            
+            var citizenId = seeder.Citizens[0].Id;
 
-                var citizen = await dbContext.Citizens.FirstOrDefaultAsync();
-                Assert.NotNull(citizen);
-                var citizenId = citizen.Id;
+            // Act
+            var response = await client.DeleteAsync($"/citizens/{organizationId}/remove-citizen/{citizenId}");
 
-                // Act
-                var response = await client.DeleteAsync($"/citizens/{organizationId}/remove-citizen/{citizenId}");
+            // Assert
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-
-                // Verify that the citizen was removed
-                var getCitizensResponse = await client.GetAsync("/citizens");
-                getCitizensResponse.EnsureSuccessStatusCode();
-                var citizens = await getCitizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
-                Assert.NotNull(citizens);
-                Assert.Empty(citizens);
-            }
+            // Verify that the citizen was removed
+            var getCitizensResponse = await client.GetAsync("/citizens");
+            getCitizensResponse.EnsureSuccessStatusCode();
+            var citizens = await getCitizensResponse.Content.ReadFromJsonAsync<List<CitizenDTO>>();
+            Assert.NotNull(citizens);
+            Assert.Equal(2, citizens.Count);
         }
 
         // 10. Test DELETE /citizens/{id}/remove-citizen/{citizenId} when the citizen does not exist.
@@ -275,29 +253,21 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            // Get the organization ID
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                var organizationId = organization.Id;
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
                 
-                TestAuthHandler.TestClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                    new Claim("OrgAdmin", organizationId.ToString())
-                };
+            var organizationId = seeder.Organizations.First().Id;
 
-                // Act
-                var response = await client.DeleteAsync($"/citizens/{organizationId}/remove-citizen/999");
+            // Act
+            var response = await client.DeleteAsync($"/citizens/{organizationId}/remove-citizen/999");
 
-                // Assert
-                Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         // 11. Test DELETE /citizens/{id}/remove-citizen/{citizenId} when the citizen does not belong to the organization.
@@ -305,36 +275,29 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task RemoveCitizen_ReturnsBadRequest_WhenCitizenNotInOrganization()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new MultipleOrganizationsAndCitizensSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedOrganization(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>(),
+                seeder.Users["owner"],
+                new List<GirafUser>(),
+                new List<GirafUser>()
+            );
             var client = factory.CreateClient();
 
-            // Get the organization ID and a citizen ID from a different organization
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            
+            var organizationId = seeder.Organizations[1].Id;
+            var citizenId = seeder.Citizens[0].Id;
 
-                var organizations = await dbContext.Organizations.ToListAsync();
-                Assert.True(organizations.Count >= 2);
+            // Act
+            var response = await client.DeleteAsync($"/citizens/{organizationId}/remove-citizen/{citizenId}");
 
-                var organization1 = organizations[0];
-                var organization2 = organizations[1];
-
-                var citizenNotInOrg = await dbContext.Citizens.FirstOrDefaultAsync(c => c.Organization.Id == organization2.Id);
-                Assert.NotNull(citizenNotInOrg);
-                var citizenId = citizenNotInOrg.Id;
-                
-                TestAuthHandler.TestClaims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                    new Claim("OrgAdmin", organization1.Id.ToString())
-                };
-
-                // Act
-                var response = await client.DeleteAsync($"/citizens/{organization1.Id}/remove-citizen/{citizenId}");
-
-                // Assert
-                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            }
+            // Assert
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         #endregion

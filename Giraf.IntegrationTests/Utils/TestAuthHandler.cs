@@ -3,11 +3,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using GirafAPI.Entities.Users;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
     public const string TestAuthenticationScheme = "TestScheme";
-    public static List<Claim> TestClaims = new List<Claim>();
+    public static List<Claim> TestClaims = new();
 
     public TestAuthHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
@@ -26,5 +29,12 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
         var result = AuthenticateResult.Success(ticket);
 
         return Task.FromResult(result);
+    }
+
+    public static void SetTestClaims(IServiceScope scope, GirafUser user)
+    {
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+        var userClaims = userManager.GetClaimsAsync(user).GetAwaiter().GetResult();
+        TestClaims = userClaims.ToList();
     }
 }

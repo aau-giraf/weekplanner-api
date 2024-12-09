@@ -83,6 +83,7 @@ namespace GirafAPI.Extensions
         {
             services.AddScoped<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
             services.AddScoped<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OrgOwnerAuthorizationHandler>();
             
             services.AddAuthorization(options =>
             {
