@@ -26,7 +26,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             // Act
             var response = await client.GetAsync("/citizens");
@@ -71,7 +71,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             var citizenId = seeder.Citizens[0].Id;
 
@@ -117,7 +117,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             var citizenId = seeder.Citizens[0].Id;
 
@@ -169,6 +169,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var scope = factory.Services.CreateScope();
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+            
             client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
@@ -200,7 +201,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
             
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             var createCitizenDto = new CreateCitizenDTO("New", "Citizen");
 
@@ -226,7 +227,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             // Get the organization ID and citizen ID
             var organizationId = seeder.Organizations.First().Id;
@@ -258,7 +259,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
                 
             var organizationId = seeder.Organizations.First().Id;
 
@@ -287,7 +288,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
             
             var organizationId = seeder.Organizations[1].Id;
             var citizenId = seeder.Citizens[0].Id;

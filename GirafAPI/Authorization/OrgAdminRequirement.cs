@@ -1,4 +1,5 @@
 using GirafAPI.Data;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -45,7 +46,18 @@ public class OrgAdminAuthorizationHandler : AuthorizationHandler<OrgAdminRequire
         
         var httpContext = _httpContextAccessor.HttpContext;
         var orgIdInUrl = httpContext.Request.RouteValues["orgId"];
-        var organization = await _dbContext.Organizations.FindAsync(orgIdInUrl);
+        Organization organization;
+        
+        if (orgIdInUrl is string) // The test environment sends route values as strings
+        {
+            int orgId = Convert.ToInt32(orgIdInUrl);
+            organization = await _dbContext.Organizations.FindAsync(orgId);
+        }
+        else
+        {
+            organization = await _dbContext.Organizations.FindAsync(orgIdInUrl);
+        }
+        
         if (organization == null)
         {
             // Succeed and let the endpoint return NotFound
