@@ -15,13 +15,16 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task Login_ReturnsOk_WithValidCredentials()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
             var loginDto = new LoginDTO
             {
-                Username = LoginUserSeeder.SeededUserName,
-                Password = LoginUserSeeder.SeededUserPassword
+                Username = seeder.Users["member"].UserName,
+                Password = "Password123!"
             };
 
             // Act
@@ -37,13 +40,16 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task Login_ReturnsBadRequest_WithInvalidUsername()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
             var loginDto = new LoginDTO
             {
                 Username = "invaliduser",
-                Password = LoginUserSeeder.SeededUserPassword
+                Password = "Password123!"
             };
 
             // Act
@@ -57,12 +63,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task Login_ReturnsBadRequest_WithInvalidPassword()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new LoginUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
             var loginDto = new LoginDTO
             {
-                Username = LoginUserSeeder.SeededUserName,
+                Username = seeder.Users["member"].UserName,
                 Password = "WrongPassword!"
             };
 
