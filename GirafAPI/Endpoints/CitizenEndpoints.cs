@@ -14,7 +14,7 @@ public static class CitizenEndpoints
     {
         var group = app.MapGroup("citizens");
 
-        // GET /citizens
+        // GET /citizens (mainly for debugging)
         group.MapGet("/", async (GirafDbContext dbContext) =>
             {
                 try
@@ -34,6 +34,7 @@ public static class CitizenEndpoints
             .WithName("GetAllCitizens")
             .WithTags("Citizens")
             .WithDescription("Retrieves a list of all citizens.")
+            .RequireAuthorization()
             .Produces<List<CitizenDTO>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status500InternalServerError);
 
@@ -53,6 +54,7 @@ public static class CitizenEndpoints
             .WithName("GetCitizenById")
             .WithTags("Citizens")
             .WithDescription("Retrieves a citizen by their ID.")
+            .RequireAuthorization()
             .Produces<CitizenDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
@@ -101,18 +103,19 @@ public static class CitizenEndpoints
             .WithName("UpdateCitizen")
             .WithTags("Citizens")
             .WithDescription("Updates an existing citizen.")
+            .RequireAuthorization()
             .Accepts<UpdateCitizenDTO>("application/json")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPost("/{id}/add-citizen",
-                async (int id, CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
+        group.MapPost("/{orgId}/add-citizen",
+                async (int orgId, CreateCitizenDTO newCitizen, GirafDbContext dbContext) =>
                 {
                     try
                     {
-                        var organization = await dbContext.Organizations.FindAsync(id);
+                        var organization = await dbContext.Organizations.FindAsync(orgId);
                         if (organization is null)
                         {
                             return Results.NotFound();
@@ -138,12 +141,13 @@ public static class CitizenEndpoints
             .WithName("AddCitizen")
             .WithDescription("Add citizen to organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapDelete("/{id}/remove-citizen/{citizenId}",
-                async (int id, int citizenId, GirafDbContext dbContext) =>
+        group.MapDelete("/{orgId}/remove-citizen/{citizenId}",
+                async (int orgId, int citizenId, GirafDbContext dbContext) =>
                 {
                     try
                     {
@@ -156,7 +160,7 @@ public static class CitizenEndpoints
                             return Results.NotFound();
                         }
                         
-                        if (citizen.Organization.Id != id)
+                        if (citizen.Organization.Id != orgId)
                         {
                             return Results.BadRequest("Citizen does not belong to the specified organization.");
                         }
@@ -174,6 +178,7 @@ public static class CitizenEndpoints
             .WithName("RemoveCitizen")
             .WithDescription("Remove citizen from organization.")
             .WithTags("Organizations")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);

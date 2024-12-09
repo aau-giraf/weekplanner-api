@@ -10,10 +10,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
+using System.Security.Claims;
 
 
 namespace Giraf.IntegrationTests.Endpoints
 {
+    [Collection("IntegrationTests")]
     public class InvitationEndpointsTests
     {
         #region Get Invitation by ID Tests - Test 1-4
@@ -156,6 +158,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
             Assert.NotNull(existingInvitation);
             existingInvitation.SenderId = "";
+            await dbContext.SaveChangesAsync();
 
             // Act
             var response = await client.GetAsync($"/invitations/user/{existingRecievingUser}");
@@ -225,17 +228,23 @@ namespace Giraf.IntegrationTests.Endpoints
 
             using var scope = factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingOrganization = await dbContext.Organizations.FirstOrDefaultAsync();
-            Assert.NotNull(existingOrganization);
+            var organization = await dbContext.Organizations.FirstOrDefaultAsync();
+            Assert.NotNull(organization);
+            
+            TestAuthHandler.TestClaims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
+                new Claim("OrgAdmin", organization.Id.ToString())
+            };
 
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
+            var invitation = await dbContext.Invitations.FirstOrDefaultAsync();
+            Assert.NotNull(invitation);
             //The current test organization has an ID of 123
-            existingInvitation.OrganizationId = 321;
+            invitation.OrganizationId = 321;
             dbContext.SaveChanges();
 
             // Act
-            var response = await client.GetAsync($"/invitations/org/{existingOrganization.Id}");
+            var response = await client.GetAsync($"/invitations/org/{organization.Id}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -276,7 +285,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsCreated_IfSucessfullyCreated()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationAndUser(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new UserWithOrganizationsSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             using var scope = factory.Services.CreateScope();
@@ -317,7 +326,7 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsBadRequest_IfRecieverNotFound()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationAndUser(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory(sp => new OrganizationWithUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
             var client = factory.CreateClient();
 
             using var scope = factory.Services.CreateScope();

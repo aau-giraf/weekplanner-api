@@ -11,11 +11,11 @@ public static class GradeEndpoints
     {
         var group = app.MapGroup("grades");
         
-        group.MapGet("/{id}", async (int id, GirafDbContext dbContext) =>
+        group.MapGet("/{orgId}/{gradeId}", async (int orgId, int gradeId, GirafDbContext dbContext) =>
         {
             try
             {
-                var grade = await dbContext.Grades.FindAsync(id);
+                var grade = await dbContext.Grades.FindAsync(gradeId);
 
                 if (grade is null)
                 {
@@ -35,6 +35,7 @@ public static class GradeEndpoints
         .WithName("GetGradeById")
         .WithTags("Grade")
         .WithDescription("Gets a grade by id.")
+        .RequireAuthorization("OrganizationMember")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
@@ -65,11 +66,12 @@ public static class GradeEndpoints
         .WithName("GetGradesInOrganization")
         .WithTags("Grade")
         .WithDescription("Get all grades within organization.")
+        .RequireAuthorization("OrganizationMember")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPost("/", async (int orgId, CreateGradeDTO newGrade, GirafDbContext dbContext) =>
+        group.MapPost("/{orgId}", async (int orgId, CreateGradeDTO newGrade, GirafDbContext dbContext) =>
         {
             try
             {
@@ -95,15 +97,16 @@ public static class GradeEndpoints
         .WithName("CreateGrade")
         .WithTags("Grade")
         .WithDescription("Creates a new grade.")
+        .RequireAuthorization("OrganizationAdmin")
         .Produces(StatusCodes.Status201Created)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{id}/change-name", async (int id, string newName, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/{gradeId}/change-name", async (int orgId, int gradeId, string newName, GirafDbContext dbContext) =>
         {
             try
             {
-                var grade = await dbContext.Grades.FindAsync(id);
+                var grade = await dbContext.Grades.FindAsync(gradeId);
 
                 if (grade is null)
                 {
@@ -122,11 +125,12 @@ public static class GradeEndpoints
         .WithName("ChangeGradeName")
         .WithTags("Grade")
         .WithDescription("Change name of grade.")
+        .RequireAuthorization("OrganizationAdmin")
         .Produces(StatusCodes.Status200OK)
         .Produces(StatusCodes.Status404NotFound)
         .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{gradeId}/add-citizens", async (int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/{gradeId}/add-citizens", async (int orgId, int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
             {
                 try
                 {
@@ -179,11 +183,12 @@ public static class GradeEndpoints
             .WithName("AddCitizensToGrade")
             .WithTags("Grade")
             .WithDescription("Add one or more citizens to a grade.")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapPut("/{gradeId}/remove-citizens", async (int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
+        group.MapPut("/{orgId}/{gradeId}/remove-citizens", async (int orgId, int gradeId, List<int> citizenIds, GirafDbContext dbContext) =>
             {
                 try
                 {
@@ -235,11 +240,12 @@ public static class GradeEndpoints
             .WithName("RemoveCitizenFromGrade")
             .WithTags("Grade")
             .WithDescription("Remove one or more citizens from a grade.")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
         
-        group.MapDelete("/{id}", async (int id, GirafDbContext dbContext) =>
+        group.MapDelete("/{orgId}/{id}", async (int orgId, int id, GirafDbContext dbContext) =>
             {
                 try
                 {
@@ -261,6 +267,7 @@ public static class GradeEndpoints
             .WithName("DeleteGrade")
             .WithTags("Grade")
             .WithDescription("Delete a grade.")
+            .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);  

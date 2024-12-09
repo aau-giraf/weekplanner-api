@@ -4,14 +4,17 @@ using Microsoft.AspNetCore.Identity;
 
 namespace GirafAPI.Authorization;
 
-public class OrgMemberRequirement : IAuthorizationRequirement;
+public class OrgOwnerRequirement : IAuthorizationRequirement
+{
+    
+}
 
-public class OrgMemberAuthorizationHandler : AuthorizationHandler<OrgMemberRequirement>
+public class OrgOwnerAuthorizationHandler : AuthorizationHandler<OrgOwnerRequirement>
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UserManager<GirafUser> _userManager;
 
-    public OrgMemberAuthorizationHandler(IHttpContextAccessor httpContextAccessor, UserManager<GirafUser> userManager)
+    public OrgOwnerAuthorizationHandler(IHttpContextAccessor httpContextAccessor, UserManager<GirafUser> userManager)
     {
         _httpContextAccessor = httpContextAccessor;
         _userManager = userManager;
@@ -19,9 +22,8 @@ public class OrgMemberAuthorizationHandler : AuthorizationHandler<OrgMemberRequi
 
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
-        OrgMemberRequirement requirement)
+        OrgOwnerRequirement requirement)
     {
-        
         var userId = _userManager.GetUserId(_httpContextAccessor.HttpContext.User);
         var user = await _userManager.FindByIdAsync(userId);
 
@@ -31,10 +33,11 @@ public class OrgMemberAuthorizationHandler : AuthorizationHandler<OrgMemberRequi
             return;
         }
 
+
         var claims = await _userManager.GetClaimsAsync(user);
         
         var orgIds = claims
-            .Where(c => c.Type == "OrgMember")
+            .Where(c => c.Type == "OrgOwner")
             .Select(c => c.Value)
             .ToList();
         
