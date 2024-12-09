@@ -260,7 +260,7 @@ public static class ActivityEndpoints
 
 
         group.MapPost("/activity/copy-citizen/{citizenId:int}",
-                async (int citizenId, string sourceDateStr, string destinationDateStr, List<int> toCopyIds,
+                async (int citizenId, string dateStr, string newDateStr, List<int> toCopyIds,
                     GirafDbContext dbContext) =>
                 {
                     try
@@ -271,8 +271,8 @@ public static class ActivityEndpoints
                             return Results.NotFound();
                         }
 
-                        var sourceDate = DateOnly.Parse(sourceDateStr);
-                        var targetDate = DateOnly.Parse(destinationDateStr);
+                        var sourceDate = DateOnly.Parse(dateStr);
+                        var targetDate = DateOnly.Parse(newDateStr);
 
                         var activities = await dbContext.Entry(citizen)
                             .Collection(c => c.Activities)
@@ -324,8 +324,7 @@ public static class ActivityEndpoints
             .RequireAuthorization();
 
         group.MapPost("/activity/copy-grade/{gradeId:int}",
-                async (int gradeId, string sourceDateStr, string destinationDateStr, List<int> toCopyIds,
-                    GirafDbContext dbContext) =>
+                async (int gradeId, string dateStr, string newDateStr, List<int> toCopyIds, GirafDbContext dbContext) =>
                 {
                     try
                     {
@@ -335,8 +334,8 @@ public static class ActivityEndpoints
                             return Results.NotFound();
                         }
 
-                        var sourceDate = DateOnly.Parse(sourceDateStr);
-                        var targetDate = DateOnly.Parse(destinationDateStr);
+                        var sourceDate = DateOnly.Parse(dateStr);
+                        var targetDate = DateOnly.Parse(newDateStr);
 
                         var activities = await dbContext.Entry(grade)
                             .Collection(c => c.Activities)
