@@ -249,14 +249,27 @@ public static class GradeEndpoints
             {
                 try
                 {
-                    var grade = await dbContext.Grades.FindAsync(id);
+                    // Find the grade by ID
+                    var grade = await dbContext.Grades
+                        .Include(g => g.Citizens) // Assuming there's a navigation property for citizens
+                        .FirstOrDefaultAsync(g => g.Id == id);
 
                     if (grade is null)
                     {
                         return Results.NotFound("Grade not found.");
                     }
 
-                    await dbContext.Grades.Where(g => g.Id == grade.Id).ExecuteDeleteAsync();
+                    // Clear the citizens list if it exists
+                    if (grade.Citizens != null)
+                    {
+                        grade.Citizens.Clear(); // Empties the list of citizens
+                        await dbContext.SaveChangesAsync(); // Save the change
+                    }
+
+                    // Now delete the grade
+                    dbContext.Grades.Remove(grade);
+                    await dbContext.SaveChangesAsync();
+
                     return Results.NoContent();
                 }
                 catch (Exception ex)
@@ -270,7 +283,7 @@ public static class GradeEndpoints
             .RequireAuthorization("OrganizationAdmin")
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
-            .Produces(StatusCodes.Status500InternalServerError);  
+            .Produces(StatusCodes.Status500InternalServerError);
         
         return group;
     }
