@@ -238,9 +238,12 @@ namespace Giraf.IntegrationTests.Endpoints
             TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
 
             int organizationId = seeder.Organizations[0].Id;
+            
+            var currentPage = 1;
+            var pageSize = 10;
 
             // Act
-            var response = await client.GetAsync($"/pictograms/organization/{organizationId}");
+            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}&currentPage={currentPage}&pageSize={pageSize}");
 
             // Assert
             response.EnsureSuccessStatusCode();

@@ -13,23 +13,13 @@ namespace Giraf.IntegrationTests.Utils.DbSeeders;
 
 public abstract class DbSeeder
 {
-    public Dictionary<String, GirafUser> Users { get; set; }
-    public List<Organization> Organizations { get; set; }
-    public List<Citizen> Citizens { get; set; }
-    public List<Pictogram> Pictograms { get; set; }
-    public List<Activity> Activities { get; set; }
-    public List<Grade> Grades { get; set; }
-    public List<Invitation> Invitations { get; set; }
-
-    public DbSeeder()
-    {
-        Users = new Dictionary<string, GirafUser>();
-        Organizations = new List<Organization>();
-        Citizens = new List<Citizen>();
-        Pictograms = new List<Pictogram>();
-        Activities = new List<Activity>();
-        Grades = new List<Grade>();
-    }
+    public Dictionary<String, GirafUser> Users { get; } = new();
+    public List<Organization> Organizations { get; } = new();
+    public List<Citizen> Citizens { get; } = new();
+    public List<Pictogram> Pictograms { get; } = new();
+    public List<Activity> Activities { get; } = new();
+    public List<Grade> Grades { get; } = new();
+    public List<Invitation> Invitations { get; } = new();
     
     public abstract void SeedData(GirafDbContext dbContext, UserManager<GirafUser> userManager);
 
@@ -255,5 +245,6 @@ public abstract class DbSeeder
         
         dbContext.Invitations.Add(invitation);
         dbContext.SaveChanges();
+        Invitations.Add(invitation);
     }
 }
