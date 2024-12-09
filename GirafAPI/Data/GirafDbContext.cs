@@ -10,13 +10,37 @@ using GirafAPI.Entities.Users;
 
 namespace GirafAPI.Data
 {
-    public class GirafDbContext(DbContextOptions<GirafDbContext> options) : IdentityDbContext<GirafUser>(options)
+    public class GirafDbContext : IdentityDbContext<GirafUser>
     {
-        public DbSet<Citizen> Citizens => Set<Citizen>();
-        public DbSet<Activity> Activities => Set<Activity>();
-        public DbSet<Organization> Organizations => Set<Organization>();
-        public DbSet<Invitation> Invitations => Set<Invitation>();
+        public GirafDbContext(DbContextOptions<GirafDbContext> options) : base(options)
+        {
+        }
+
+        public DbSet<Citizen> Citizens { get; set; }
+        public DbSet<Activity> Activities { get; set; }
+        public DbSet<Organization> Organizations { get; set; }
+        public DbSet<Invitation> Invitations { get; set; }
         public DbSet<Grade> Grades { get; set; }
-        public DbSet<Pictogram> Pictograms => Set<Pictogram>();
+        public DbSet<Pictogram> Pictograms { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder); 
+
+            modelBuilder.Entity<Citizen>()
+                .HasMany(c => c.Activities)        
+                .WithOne()                          
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Grade>()
+                .HasMany(g => g.Activities)
+                .WithOne()
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            modelBuilder.Entity<Pictogram>()
+                .HasMany<Activity>()  
+                .WithOne(a => a.Pictogram)           
+                .OnDelete(DeleteBehavior.SetNull); 
+        }
     }
 }

@@ -4,15 +4,29 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development  # Change to Production as needed
-      - ASPNETCORE_URLS=http://+:5171
+      ASPNETCORE_ENVIRONMENT: Development  # Change to Production as needed
+      ASPNETCORE_URLS: http://+:5171
+      ConnectionStrings__DbConnection: "Host=postgres_db;Port=5432;Database=your_database_name;Username=postgres;Password=YourStrong!Passw0rd"
     ports:
       - "5171:5171"  # Change to your preferred port -> host_port:container_port
+    depends_on:
+      - postgres_db
+  
+  # You can connect to the db directly from Rider.
+  # 1. Choose connect to new datasoruce
+  # 2. Choose PostgreSQL
+  # 3. Choose Add data source manually
+  # 4. Fill in the User and Password
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: YourStrong!Passw0rd
+      POSTGRES_DB: your_database_name
+    ports:
+      - "5432:5432"
     volumes:
-      - .:/app
-      - /app/bin
-      - /app/obj
-      - pictograms:/app/pictograms
-
+      - pgdata:/var/lib/postgresql/data
 volumes:
-  pictograms:
+  pgdata:

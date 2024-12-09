@@ -3,6 +3,7 @@ using System;
 using GirafAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GirafAPI.Data.Migrations
 {
     [DbContext(typeof(GirafDbContext))]
-    partial class GirafDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241209103936_Init")]
+    partial class Init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -410,18 +413,15 @@ namespace GirafAPI.Data.Migrations
                 {
                     b.HasOne("GirafAPI.Entities.Citizens.Citizen", null)
                         .WithMany("Activities")
-                        .HasForeignKey("CitizenId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("CitizenId");
 
                     b.HasOne("GirafAPI.Entities.Grades.Grade", null)
                         .WithMany("Activities")
-                        .HasForeignKey("GradeId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("GradeId");
 
                     b.HasOne("GirafAPI.Entities.Pictograms.Pictogram", "Pictogram")
                         .WithMany()
-                        .HasForeignKey("PictogramId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("PictogramId");
 
                     b.Navigation("Pictogram");
                 });

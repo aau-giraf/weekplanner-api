@@ -20,12 +20,9 @@ builder.Services.AddAntiforgery(options =>
 var app = builder.Build();
 
 // Configure middleware
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseStaticFiles();

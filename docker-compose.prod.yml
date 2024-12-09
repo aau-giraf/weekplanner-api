@@ -2,23 +2,37 @@ services:
   aspnet_app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ASPNETCORE_URLS: http://+:5171 # In production, map to port 8080
+      ASPNETCORE_URLS: http://+:5171
+      ConnectionStrings__DbConnection: "Host=postgres_db;Port=5432;Database=your_database_name;Username=postgres;Password=YourStrong!Passw0rd"
     ports:
-      - "5171:5171" # Serve over default HTTP port
+      - "5171:5171"
     depends_on:
-      - mssql
-  mssql:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: mssql_db
+      postgres_db:
+        condition: service_healthy
+
+  # You can connect to the db directly from Rider.
+  # 1. Choose connect to new datasoruce
+  # 2. Choose PostgreSQL
+  # 3. Choose Add data source manually
+  # 4. Fill in the User and Password
+  postgres_db:
+    image: postgres:15
+    container_name: postgres_db
     environment:
-      - SA_PASSWORD=YourStrong!Passw0rd
-      - ACCEPT_EULA=Y
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: YourStrong!Passw0rd
+      POSTGRES_DB: your_database_name
     ports:
-      - "1433:1433"
+      - "5432:5432"
     volumes:
-      - mssql_data:/var/opt/mssql
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 volumes:
-  mssql_data:
+  pgdata:
