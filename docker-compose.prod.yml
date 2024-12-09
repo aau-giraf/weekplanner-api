@@ -2,7 +2,7 @@ services:
   aspnet_app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:5171
@@ -10,7 +10,8 @@ services:
     ports:
       - "5171:5171"
     depends_on:
-      - postgres_db
+      postgres_db:
+        condition: service_healthy
 
   # You can connect to the db directly from Rider.
   # 1. Choose connect to new datasoruce
@@ -28,5 +29,10 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
 volumes:
   pgdata:
