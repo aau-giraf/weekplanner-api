@@ -38,7 +38,7 @@ namespace Giraf.IntegrationTests.Endpoints
                 );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
             var invitationId = seeder.Invitations.First().Id;
@@ -46,7 +46,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
             // Assert
             response.EnsureSuccessStatusCode();
-            var invitation = await response.Content.ReadFromJsonAsync<Invitation>();
+            var invitation = await response.Content.ReadFromJsonAsync<InvitationDTO>();
             Assert.NotNull(invitation);
         }
 
@@ -61,7 +61,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
             
             var fakeId = 123;
 
@@ -90,7 +90,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
         
             // Act
             var invitationId = seeder.Invitations.First().Id;
@@ -118,7 +118,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
         
             // Act
             var invitationId = seeder.Invitations.First().Id;
@@ -149,7 +149,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["user"]);
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             // Act
             var userId = seeder.Users["user"].Id;
@@ -171,7 +171,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["user"]);
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
             
             var fakeId = 123;
 
@@ -199,7 +199,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["user"]);
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             // Act
             var userId = seeder.Users["user"].Id;
@@ -227,7 +227,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["user"]);
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             // Act
             var userId = seeder.Users["user"].Id;
@@ -260,7 +260,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
             var orgId = seeder.Organizations[0].Id;
@@ -289,7 +289,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
             var orgId = seeder.Organizations[0].Id;
@@ -318,7 +318,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
             var orgId = seeder.Organizations[0].Id;
@@ -344,7 +344,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var sender = seeder.Users["owner"];
             var receiver = seeder.Users["user"];
@@ -371,7 +371,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var sender = seeder.Users["owner"];
             var fakeRecieverEmail = "fake@email.com";
@@ -409,7 +409,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["user"]);
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             var responseDto = new InvitationResponseDTO { Response = true };
 
@@ -444,7 +444,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["user"]);
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             var responseDto = new InvitationResponseDTO { Response = false };
 
@@ -472,7 +472,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var FakeInvitaionId = "fakeInvitation";
 
@@ -503,7 +503,7 @@ namespace Giraf.IntegrationTests.Endpoints
              );
              var client = factory.CreateClient();
 
-             TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+             client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var responseDto = new InvitationResponseDTO { Response = true };
 
@@ -533,7 +533,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var responseDto = new InvitationResponseDTO { Response = true };
 
@@ -566,7 +566,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
             var invitationId = seeder.Invitations[0].Id;
@@ -592,7 +592,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["owner"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var FakeInvitaionId = "fakeInvitation";
 

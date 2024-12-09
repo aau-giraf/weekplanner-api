@@ -239,6 +239,17 @@ public abstract class DbSeeder
         Grades.Add(grade);
     }
 
+    public void AddCitizensToGrade(GirafDbContext dbContext, int gradeId, List<Citizen> citizens)
+    {
+        var grade = dbContext.Grades.Find(gradeId);
+        
+        foreach (var citizen in citizens)
+        {
+            grade.Citizens.Add(citizen);
+        }
+        dbContext.SaveChanges();
+    }
+
     public void SeedInvitation(GirafDbContext dbContext,
         int orgId,
         String senderId,

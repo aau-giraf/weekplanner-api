@@ -25,7 +25,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             // Act
             var response = await client.GetAsync("/weekplan");
@@ -47,7 +47,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             // Act
             var response = await client.GetAsync("/weekplan");
@@ -73,7 +73,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             // Act
             int citizenId = seeder.Citizens[0].Id;
@@ -92,7 +92,13 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
+            
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
             var nonExistentCitizenId = 999;
 
@@ -117,7 +123,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
             
             // Act
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
@@ -136,7 +142,13 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
             var nonExistentGradeId = 999;
 
@@ -161,7 +173,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             int activityId = seeder.Activities[0].Id;
 
@@ -180,7 +192,13 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentActivityId = 999;
 
             // Act
@@ -204,7 +222,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             int citizenId = seeder.Citizens[0].Id;
             int pictogramId = seeder.Pictograms[0].Id;
@@ -233,7 +251,14 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
+            
             var nonExistentCitizenId = 999;
 
             var newActivityDto = new CreateActivityDTO
@@ -265,7 +290,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             int gradeId = seeder.Grades.First().Id;
             int pictogramId = seeder.Pictograms.First().Id;
@@ -294,7 +319,13 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentGradeId = 999;
 
             var newActivityDto = new CreateActivityDTO
@@ -326,7 +357,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             int activityId = seeder.Activities[0].Id;
             
@@ -361,7 +392,13 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentActivityId = 999;
 
             var newActivityDto = new CreateActivityDTO
@@ -393,7 +430,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             int activityId = seeder.Activities[0].Id;
 
@@ -417,7 +454,13 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentActivityId = 999;
 
             // Act
@@ -441,7 +484,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             int activityId = seeder.Activities[0].Id;
 
@@ -468,7 +511,13 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
+            
             var nonExistentActivityId = 999;
             var isComplete = true;
 
@@ -493,7 +542,7 @@ namespace Giraf.IntegrationTests.Endpoints
             factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             int activityId = seeder.Activities[0].Id;
             int pictogramId = seeder.Pictograms[0].Id;
@@ -526,7 +575,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedPictogram(scope.ServiceProvider.GetRequiredService<GirafDbContext>(), seeder.Organizations[0]);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
             
             var nonExistentActivityId = 999;
             int pictogramId = seeder.Pictograms[0].Id;
@@ -561,7 +610,7 @@ namespace Giraf.IntegrationTests.Endpoints
                 seeder.Pictograms[0]);
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
             
             var nonExistentPictogramId = 999;
             int activityId = seeder.Activities[0].Id;

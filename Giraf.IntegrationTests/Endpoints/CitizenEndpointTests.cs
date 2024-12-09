@@ -44,7 +44,12 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             // Act
             var response = await client.GetAsync("/citizens");
@@ -93,7 +98,12 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             // Act
             var response = await client.GetAsync("/citizens/999");
@@ -144,7 +154,12 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var updateCitizenDto = new UpdateCitizenDTO("FirstName", "LastName");
 
@@ -288,7 +303,7 @@ namespace Giraf.IntegrationTests.Endpoints
             );
             var client = factory.CreateClient();
 
-            client.AttachClaimsToken(scope, seeder.Users["admin"]);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
             
             var organizationId = seeder.Organizations[1].Id;
             var citizenId = seeder.Citizens[0].Id;

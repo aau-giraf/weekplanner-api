@@ -216,7 +216,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
             
             var userId = seeder.Users["member"].Id;
 
@@ -245,7 +245,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var nonExistentUserId = "nonexistent_user_id";
             var updatePasswordDto = new UpdateUserPasswordDTO
@@ -276,7 +276,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var userId = seeder.Users["member"].Id;
             var updateUsernameDto = new UpdateUsernameDTO("updatedUser");
@@ -307,7 +307,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var nonExistentUserId = "nonexistent_user_id";
             var updateUsernameDto = new UpdateUsernameDTO("anotherusername");
@@ -334,7 +334,7 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            TestAuthHandler.SetTestClaims(scope, seeder.Users["member"]);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var userId = seeder.Users["member"].Id;
 
