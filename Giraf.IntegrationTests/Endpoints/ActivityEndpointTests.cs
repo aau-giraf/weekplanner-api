@@ -4,10 +4,8 @@ using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.Activities.DTOs;
-using GirafAPI.Entities.Pictograms;
 using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Giraf.IntegrationTests.Endpoints
@@ -21,8 +19,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetAllActivities_ReturnsListOfActivities_WhenActivitiesExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             // Act
             var response = await client.GetAsync("/weekplan");
@@ -38,8 +41,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetAllActivities_ReturnsEmptyList_WhenNoActivitiesExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             // Act
             var response = await client.GetAsync("/weekplan");
@@ -59,20 +67,17 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivitiesForCitizenOnDate_ReturnsActivities_WhenActivitiesExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new CitizenWithActivitiesSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
 
-            int citizenId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var citizen = await dbContext.Citizens.FirstOrDefaultAsync();
-                Assert.NotNull(citizen);
-                citizenId = citizen.Id;
-            }
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             // Act
+            int citizenId = seeder.Citizens[0].Id;
+            var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
             var response = await client.GetAsync($"/weekplan/{citizenId}?date={date}");
 
             // Assert
@@ -86,8 +91,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivitiesForCitizenOnDate_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
+            
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
             var nonExistentCitizenId = 999;
 
@@ -106,20 +117,17 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivitiesForGradeOnDate_ReturnsActivities_WhenActivitiesExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new GradeWithActivitiesSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
-            var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
 
-            int gradeId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var grade = await dbContext.Grades.FirstOrDefaultAsync();
-                Assert.NotNull(grade);
-                gradeId = grade.Id;
-            }
-
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             // Act
+            var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
+            int gradeId = seeder.Grades[0].Id;
             var response = await client.GetAsync($"/weekplan/grade/{gradeId}?date={date}");
 
             // Assert
@@ -133,8 +141,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivitiesForGradeOnDate_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var date = DateTime.UtcNow.Date.ToString("yyyy-MM-dd");
             var nonExistentGradeId = 999;
 
@@ -153,17 +167,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivityById_ReturnsActivity_WhenActivityExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int activityId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var activity = await dbContext.Activities.FirstOrDefaultAsync();
-                Assert.NotNull(activity);
-                activityId = activity.Id;
-            }
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+
+            int activityId = seeder.Activities[0].Id;
 
             // Act
             var response = await client.GetAsync($"/weekplan/activity/{activityId}");
@@ -179,8 +191,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetActivityById_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentActivityId = 999;
 
             // Act
@@ -198,30 +216,16 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateActivityForCitizen_ReturnsCreated_WhenCitizenExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicCitizenSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int citizenId;
-            int pictogramId;
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var citizen = await dbContext.Citizens.Include(c => c.Organization).FirstOrDefaultAsync();
-                Assert.NotNull(citizen);
-                citizenId = citizen.Id;
-
-                // Create a pictogram associated with the citizen's organization
-                var pictogram = new Pictogram
-                {
-                    PictogramName = "Test Pictogram",
-                    PictogramUrl = "http://example.com/pictogram.png",
-                    OrganizationId = citizen.Organization.Id
-                };
-                dbContext.Pictograms.Add(pictogram);
-                await dbContext.SaveChangesAsync();
-                pictogramId = pictogram.Id;
-            }
+            int citizenId = seeder.Citizens[0].Id;
+            int pictogramId = seeder.Pictograms[0].Id;
 
             var newActivityDto = new CreateActivityDTO
             (
@@ -246,8 +250,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateActivityForCitizen_ReturnsNotFound_WhenCitizenDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
+            
             var nonExistentCitizenId = 999;
 
             var newActivityDto = new CreateActivityDTO
@@ -273,35 +284,16 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateActivityForGrade_ReturnsCreated_WhenGradeExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new GradeWithActivitiesSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int gradeId;
-            int pictogramId;
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-
-                // Retrieve the grade
-                var grade = await dbContext.Grades.FirstOrDefaultAsync();
-                Assert.NotNull(grade);
-                gradeId = grade.Id;
-
-                // Retrieve the organization ID associated with the grade
-                int organizationId = grade.OrganizationId;
-
-                // Create a pictogram associated with the grade's organization
-                var pictogram = new Pictogram
-                {
-                    PictogramName = "Test Pictogram",
-                    PictogramUrl = "http://example.com/pictogram.png",
-                    OrganizationId = organizationId
-                };
-                dbContext.Pictograms.Add(pictogram);
-                await dbContext.SaveChangesAsync();
-                pictogramId = pictogram.Id;
-            }
+            int gradeId = seeder.Grades.First().Id;
+            int pictogramId = seeder.Pictograms.First().Id;
 
             var newActivityDto = new CreateActivityDTO
             (
@@ -326,8 +318,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreateActivityForGrade_ReturnsNotFound_WhenGradeDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentGradeId = 999;
 
             var newActivityDto = new CreateActivityDTO
@@ -353,17 +351,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task UpdateActivity_ReturnsOk_WhenActivityExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int activityId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var activity = await dbContext.Activities.FirstOrDefaultAsync();
-                Assert.NotNull(activity);
-                activityId = activity.Id;
-            }
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+
+            int activityId = seeder.Activities[0].Id;
             
             var updateActivityDto = new UpdateActivityDTO
             (
@@ -395,8 +391,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task UpdateActivity_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentActivityId = 999;
 
             var newActivityDto = new CreateActivityDTO
@@ -422,17 +424,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteActivity_ReturnsNoContent_WhenActivityExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int activityId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var activity = await dbContext.Activities.FirstOrDefaultAsync();
-                Assert.NotNull(activity);
-                activityId = activity.Id;
-            }
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+
+            int activityId = seeder.Activities[0].Id;
 
             // Act
             var response = await client.DeleteAsync($"/weekplan/activity/{activityId}");
@@ -453,8 +453,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteActivity_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentActivityId = 999;
 
             // Act
@@ -472,17 +478,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task SetActivityCompletionStatus_ReturnsOk_WhenActivityExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int activityId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var activity = await dbContext.Activities.FirstOrDefaultAsync();
-                Assert.NotNull(activity);
-                activityId = activity.Id;
-            }
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
+
+            int activityId = seeder.Activities[0].Id;
 
             var isComplete = true;
 
@@ -506,8 +510,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task SetActivityCompletionStatus_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
+            
             var nonExistentActivityId = 999;
             var isComplete = true;
 
@@ -526,21 +536,16 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AssignPictogram_ReturnsOk_WhenActivityAndPictogramExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new ActivityAndPictogramSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int activityId;
-            int pictogramId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var activity = await dbContext.Activities.FirstOrDefaultAsync();
-                var pictogram = await dbContext.Pictograms.FirstOrDefaultAsync();
-                Assert.NotNull(activity);
-                Assert.NotNull(pictogram);
-                activityId = activity.Id;
-                pictogramId = pictogram.Id;
-            }
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
+
+            int activityId = seeder.Activities[0].Id;
+            int pictogramId = seeder.Pictograms[0].Id;
 
             // Act
             var response = await client.PostAsync($"/weekplan/activity/assign-pictogram/{activityId}/{pictogramId}", null);
@@ -556,17 +561,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AssignPictogram_ReturnsNotFound_WhenActivityDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedOrganization(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>(),
+                seeder.Users["owner"],
+                new List<GirafUser>(),
+                new List<GirafUser>()
+                );
+            seeder.SeedPictogram(scope.ServiceProvider.GetRequiredService<GirafDbContext>(), seeder.Organizations[0]);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
+            
             var nonExistentActivityId = 999;
-            int pictogramId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var pictogram = await dbContext.Pictograms.FirstOrDefaultAsync();
-                Assert.NotNull(pictogram);
-                pictogramId = pictogram.Id;
-            }
+            int pictogramId = seeder.Pictograms[0].Id;
 
             // Act
             var response = await client.PostAsync($"/weekplan/activity/assign-pictogram/{nonExistentActivityId}/{pictogramId}", null);
@@ -579,17 +591,29 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task AssignPictogram_ReturnsNotFound_WhenPictogramDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicActivitySeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedOrganization(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>(),
+                seeder.Users["owner"],
+                new List<GirafUser>(),
+                new List<GirafUser>()
+            );
+            seeder.SeedCitizens(scope.ServiceProvider.GetRequiredService<GirafDbContext>(), seeder.Organizations[0]);
+            seeder.SeedPictogram(scope.ServiceProvider.GetRequiredService<GirafDbContext>(), seeder.Organizations[0]);
+            seeder.SeedCitizenActivity(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Citizens[0].Id,
+                seeder.Pictograms[0]);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentPictogramId = 999;
-            int activityId;
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var activity = await dbContext.Activities.FirstOrDefaultAsync();
-                Assert.NotNull(activity);
-                activityId = activity.Id;
-            }
+            int activityId = seeder.Activities[0].Id;
 
             // Act
             var response = await client.PostAsync($"/weekplan/activity/assign-pictogram/{activityId}/{nonExistentPictogramId}", null);

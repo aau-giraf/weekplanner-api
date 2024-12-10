@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using GirafAPI.Entities.Invitations;
 
 
 namespace Giraf.IntegrationTests.Endpoints
@@ -24,20 +25,29 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetInvitationById_ReturnsInvitation_WhenInvitationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+                );
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingInvitation = await dbContext.Invitations.FirstAsync();
-            Assert.NotNull(existingInvitation);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
-            var response = await client.GetAsync($"/invitations/{existingInvitation.Id}");
+            var invitationId = seeder.Invitations.First().Id;
+            var response = await client.GetAsync($"/invitations/{invitationId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
-            Assert.NotNull(existingInvitation);
+            var invitation = await response.Content.ReadFromJsonAsync<InvitationDTO>();
+            Assert.NotNull(invitation);
         }
 
         //2. Tests if you get a Not Found if invitation doesn't exist
@@ -45,8 +55,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetInvitationById_ReturnsNotFound_WhenInvitationDoesnotExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
+            
             var fakeId = 123;
 
             // Act
@@ -61,19 +77,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetInvitationById_ReturnsNotFound_WhenSenderDoesnotExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                "badId",
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingInvitation = await dbContext.Invitations.FirstAsync();
-            Assert.NotNull(existingInvitation);
-
-            existingInvitation.SenderId = "";
-            await dbContext.SaveChangesAsync();
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
         
             // Act
-            var response = await client.GetAsync($"/invitations/{existingInvitation.Id}");
+            var invitationId = seeder.Invitations.First().Id;
+            var response = await client.GetAsync($"/invitations/{invitationId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -84,20 +105,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetInvitationById_ReturnsNotFound_WhenOrganizationDoesnotExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                -1,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingInvitation = await dbContext.Invitations.FirstAsync();
-            Assert.NotNull(existingInvitation);
-
-            //The current test organization has an ID of 123
-            existingInvitation.OrganizationId = 321;
-            await dbContext.SaveChangesAsync();
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
         
             // Act
-            var response = await client.GetAsync($"/invitations/{existingInvitation.Id}");
+            var invitationId = seeder.Invitations.First().Id;
+            var response = await client.GetAsync($"/invitations/{invitationId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -111,17 +136,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetUserInvitation_ReturnsInvitation_WhenInvitationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingRecievingUser = await dbContext.Users.FirstOrDefaultAsync();
-            Assert.NotNull(existingRecievingUser);
-
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             // Act
-            var response = await client.GetAsync($"/invitations/user/{existingRecievingUser.Id}");
+            var userId = seeder.Users["user"].Id;
+            var response = await client.GetAsync($"/invitations/user/{userId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -132,8 +164,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetUserInvitation_ReturnsNotFound_WhenNoInvitationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
+            
             var fakeId = 123;
 
             // Act
@@ -147,21 +186,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetUserInvitation_ReturnsNotFound_WhenInvitationExistsButSenderIsNull()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                "badId",
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
-            
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingRecievingUser = await dbContext.Users.FirstOrDefaultAsync();
-            Assert.NotNull(existingRecievingUser);
 
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
-            existingInvitation.SenderId = "";
-            await dbContext.SaveChangesAsync();
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             // Act
-            var response = await client.GetAsync($"/invitations/user/{existingRecievingUser}");
+            var userId = seeder.Users["user"].Id;
+            var response = await client.GetAsync($"/invitations/user/{userId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -172,21 +214,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetUserInvitation_ReturnsNotFound_WhenInvitationExistsButOrganizationIsNull()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                -1,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
-            
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingRecievingUser = await dbContext.Users.FirstOrDefaultAsync();
-            Assert.NotNull(existingRecievingUser);
 
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
-            //The current test organization has an ID of 123
-            existingInvitation.OrganizationId = 321;
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             // Act
-            var response = await client.GetAsync($"/invitations/user/{existingRecievingUser}");
+            var userId = seeder.Users["user"].Id;
+            var response = await client.GetAsync($"/invitations/user/{userId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -202,16 +247,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationInvitation_ReturnsInvitation_WhenInvitationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingOrganization = await dbContext.Organizations.FirstOrDefaultAsync();
-            Assert.NotNull(existingOrganization);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
-            var response = await client.GetAsync($"/invitations/org/{existingOrganization.Id}");
+            var orgId = seeder.Organizations[0].Id;
+            var response = await client.GetAsync($"/invitations/org/{orgId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -223,28 +276,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationInvitation_ReturnsNotFound_WhenNoInvitationWithValidOrganizationIdExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                -1,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-            Assert.NotNull(organization);
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", organization.Id.ToString())
-            };
-
-            var invitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(invitation);
-            //The current test organization has an ID of 123
-            invitation.OrganizationId = 321;
-            dbContext.SaveChanges();
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
-            var response = await client.GetAsync($"/invitations/org/{organization.Id}");
+            var orgId = seeder.Organizations[0].Id;
+            var response = await client.GetAsync($"/invitations/org/{orgId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -256,21 +305,24 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationInvitation_ReturnsNotFound_WhenNoValidSenderExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                "badId",
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingOrganization = await dbContext.Organizations.FirstOrDefaultAsync();
-            Assert.NotNull(existingOrganization);
-
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
-            existingInvitation.SenderId = "";
-            dbContext.SaveChanges();
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
-            var response = await client.GetAsync($"/invitations/org/{existingOrganization.Id}");
+            var orgId = seeder.Organizations[0].Id;
+            var response = await client.GetAsync($"/invitations/org/{orgId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -285,34 +337,20 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsCreated_IfSucessfullyCreated()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new UserWithOrganizationsSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
-            var sender = await dbContext.Users.FirstOrDefaultAsync();
-            Assert.NotNull(sender);
+            var sender = seeder.Users["owner"];
+            var receiver = seeder.Users["user"];
+            var orgId = seeder.Organizations[0].Id;
 
-            var receiver = new GirafUser {
-                UserName = "RecieverUser",
-                Email = "RecieverUser@example.com",
-                FirstName = "RecieverUser",
-                LastName = "User",
-                Organizations = new List<Organization>()
-            };
-            var createResult = await userManager.CreateAsync(receiver, "ReceiverPassword123!");
-
-            if (!createResult.Succeeded)
-            {
-                throw new Exception($"Failed to create receiver user: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
-            }
-
-            var existingOrganization = await dbContext.Organizations.FirstOrDefaultAsync();
-            Assert.NotNull(existingOrganization);
-
-            var newInvitationDto = new CreateInvitationDTO(existingOrganization.Id, receiver.Email, sender.Id);
+            var newInvitationDto = new CreateInvitationDTO(orgId, receiver.Email, sender.Id);
 
             // Act
             var response = await client.PostAsJsonAsync("/invitations/", newInvitationDto);
@@ -326,22 +364,20 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostInvitation_ReturnsBadRequest_IfRecieverNotFound()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationWithUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
-            var sender = await dbContext.Users.FirstOrDefaultAsync();
-            Assert.NotNull(sender);
-
-            var existingOrganization = await dbContext.Organizations.FirstOrDefaultAsync();
-            Assert.NotNull(existingOrganization);
-
+            var sender = seeder.Users["owner"];
             var fakeRecieverEmail = "fake@email.com";
+            var orgId = seeder.Organizations[0].Id;
 
-            var newInvitationDto = new CreateInvitationDTO(existingOrganization.Id, fakeRecieverEmail, sender.Id);
+            var newInvitationDto = new CreateInvitationDTO(orgId, fakeRecieverEmail, sender.Id);
 
             // Act
             var response = await client.PostAsJsonAsync("/invitations/", newInvitationDto);
@@ -360,28 +396,33 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PutInvitationById_ReturnsOk_WhenInvitationIsAccepted()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            // Retrieve the actual user ID
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             var responseDto = new InvitationResponseDTO { Response = true };
 
             // Act
-            var response = await client.PutAsJsonAsync($"/invitations/respond/{existingInvitation.Id}", responseDto);
+            var invitationId = seeder.Invitations[0].Id;
+            var response = await client.PutAsJsonAsync($"/invitations/respond/{invitationId}", responseDto);
 
             // Assert
             response.EnsureSuccessStatusCode();
-
-            // Detach the existingInvitation entity to ensure a fresh query
-            dbContext.Entry(existingInvitation).State = EntityState.Detached;
-
-            // Reload the invitation from the database
-            var deletedInvitation = await dbContext.Invitations.FindAsync(existingInvitation.Id);
+            
+            var verificationScope = factory.Services.CreateScope();
+            var dbContext = verificationScope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var deletedInvitation = await dbContext.Invitations.FindAsync(invitationId);
             Assert.Null(deletedInvitation);
         }
 
@@ -390,28 +431,33 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PutInvitationById_ReturnsOk_WhenInvitationIsDeclined()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            // Retrieve the actual user ID
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
+            client.AttachClaimsToken(scope, seeder.Users["user"]);
 
             var responseDto = new InvitationResponseDTO { Response = false };
 
             // Act
-            var response = await client.PutAsJsonAsync($"/invitations/respond/{existingInvitation.Id}", responseDto);
+            var invitationId = seeder.Invitations[0].Id;
+            var response = await client.PutAsJsonAsync($"/invitations/respond/{invitationId}", responseDto);
 
             // Assert
             response.EnsureSuccessStatusCode();
 
-            // Detach the existingInvitation entity to ensure a fresh query
-            dbContext.Entry(existingInvitation).State = EntityState.Detached;
-
-            // Reload the invitation from the database
-            var deletedInvitation = await dbContext.Invitations.FindAsync(existingInvitation.Id);
+            var verificationScope = factory.Services.CreateScope();
+            var dbContext = verificationScope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var deletedInvitation = await dbContext.Invitations.FindAsync(invitationId);
             Assert.Null(deletedInvitation);
         }
 
@@ -420,8 +466,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PutInvitationById_ReturnsNotFound_WhenInvitationIdDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var FakeInvitaionId = "fakeInvitation";
 
@@ -439,23 +490,26 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PutInvitationById_ReturnsNotFound_WhenInvitationDoesNotHaveAnOrganization()
         {
              // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
-            var client = factory.CreateClient();
+             var factory = new GirafWebApplicationFactory();
+             var seeder = new OnlyUsersAndOrgDb();
+             var scope = factory.Services.CreateScope();
+             factory.SeedDb(scope, seeder);
+             seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+             seeder.SeedInvitation(
+                 scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                 -1,
+                 seeder.Users["owner"].Id,
+                 seeder.Users["user"].Id
+             );
+             var client = factory.CreateClient();
 
-            // Retrieve the actual user ID
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
-
-            //Organization ID in the database is 123
-            existingInvitation.OrganizationId = 1000;
-            await dbContext.SaveChangesAsync();
+             client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var responseDto = new InvitationResponseDTO { Response = true };
 
             // Act
-            var response = await client.PutAsJsonAsync($"/invitations/respond/{existingInvitation.Id}", responseDto);
+            var invitationId = seeder.Invitations[0].Id;
+            var response = await client.PutAsJsonAsync($"/invitations/respond/{invitationId}", responseDto);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -466,22 +520,26 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PutInvitationById_ReturnsNotFound_WhenInvitationDoesNotHaveAReciever()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                seeder.Users["owner"].Id,
+                "badId"
+            );
             var client = factory.CreateClient();
 
-            // Retrieve the actual user ID
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
-
-            existingInvitation.ReceiverId = "";
-            await dbContext.SaveChangesAsync();
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var responseDto = new InvitationResponseDTO { Response = true };
 
             // Act
-            var response = await client.PutAsJsonAsync($"/invitations/respond/{existingInvitation.Id}", responseDto);
+            var invitationId = seeder.Invitations[0].Id;
+            var response = await client.PutAsJsonAsync($"/invitations/respond/{invitationId}", responseDto);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -490,31 +548,36 @@ namespace Giraf.IntegrationTests.Endpoints
     
         #region Delete Invitation by ID - Test 18-
 
-        //18. Tests if you can succesfully accept an invitaion
+        //18. Tests if you can succesfully delete an invitaion
         [Fact]
         public async Task DeleteInvitationById_ReturnsOk_WhenInvitationIsDeleted()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedSingleUser(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
+            seeder.SeedInvitation(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                seeder.Organizations[0].Id,
+                seeder.Users["owner"].Id,
+                seeder.Users["user"].Id
+            );
             var client = factory.CreateClient();
 
-            // Retrieve the actual user ID
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var existingInvitation = await dbContext.Invitations.FirstOrDefaultAsync();
-            Assert.NotNull(existingInvitation);
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             // Act
-            var response = await client.DeleteAsync($"/invitations/{existingInvitation.Id}");
+            var invitationId = seeder.Invitations[0].Id;
+            var response = await client.DeleteAsync($"/invitations/{invitationId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
 
-            // Detach the existingInvitation entity to ensure a fresh query
-            dbContext.Entry(existingInvitation).State = EntityState.Detached;
-
-            // Reload the invitation from the database
-            var deletedInvitation = await dbContext.Invitations.FindAsync(existingInvitation.Id);
+            var verificationScope = factory.Services.CreateScope();
+            var dbContext = verificationScope.ServiceProvider.GetRequiredService<GirafDbContext>();
+            var deletedInvitation = await dbContext.Invitations.FindAsync(invitationId);
             Assert.Null(deletedInvitation);
         }
 
@@ -523,8 +586,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeleteInvitationById_ReturnsBadRequest_WhenInvitationIdDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicInvitationSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             var FakeInvitaionId = "fakeInvitation";
 

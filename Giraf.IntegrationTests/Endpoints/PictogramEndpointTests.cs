@@ -5,10 +5,8 @@ using Giraf.IntegrationTests.Utils;
 using Giraf.IntegrationTests.Utils.DbSeeders;
 using GirafAPI.Data;
 using GirafAPI.Entities.Pictograms.DTOs;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace Giraf.IntegrationTests.Endpoints
 {
@@ -21,18 +19,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreatePictogram_ReturnsOk_WhenPictogramIsValid()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await context.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                organizationId = organization.Id;
-            }
+            int organizationId = seeder.Organizations[0].Id;
 
             // Prepare multipart form data
             var formData = new MultipartFormDataContent();
@@ -68,8 +63,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreatePictogram_ReturnsBadRequest_WhenImageIsMissing()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             // Prepare multipart form data without image
             var formData = new MultipartFormDataContent();
@@ -87,8 +87,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreatePictogram_ReturnsBadRequest_WhenOrganizationIdIsMissing()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             // Prepare multipart form data without organizationId
             var formData = new MultipartFormDataContent();
@@ -112,18 +117,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task CreatePictogram_ReturnsBadRequest_WhenPictogramNameIsMissing()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await context.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                organizationId = organization.Id;
-            }
+            int organizationId = seeder.Organizations[0].Id;
 
             // Prepare multipart form data without pictogramName
             var formData = new MultipartFormDataContent();
@@ -151,18 +153,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramById_ReturnsPictogram_WhenPictogramExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int pictogramId;
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var pictogram = await context.Pictograms.FirstOrDefaultAsync();
-                Assert.NotNull(pictogram);
-                pictogramId = pictogram.Id;
-            }
+            int pictogramId = seeder.Pictograms[0].Id;
 
             // Act
             var response = await client.GetAsync($"/pictograms/{pictogramId}");
@@ -178,8 +177,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramById_ReturnsNotFound_WhenPictogramDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             int nonExistentPictogramId = 9999;
 
             // Act
@@ -197,16 +202,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramsByOrganizationId_ReturnsPictograms_WhenPictogramsExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
-            using var scope = factory.Services.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var organization = await context.Organizations.FirstOrDefaultAsync();
-            Assert.NotNull(organization);
-            organizationId = organization.Id;
+            int organizationId = seeder.Organizations[0].Id;
 
             var currentPage = 1;
             var pageSize = 10;
@@ -225,28 +229,21 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetPictogramsByOrganizationId_ReturnsEmptyList_WhenNoPictogramsExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await context.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                organizationId = organization.Id;
-            }
-
-            // Set up the test claims
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "test-user-id"),
-                new Claim("OrgMember", organizationId.ToString())
-            };
+            int organizationId = seeder.Organizations[0].Id;
+            
+            var currentPage = 1;
+            var pageSize = 10;
 
             // Act
-            var response = await client.GetAsync($"/pictograms/organization/{organizationId}");
+            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}&currentPage={currentPage}&pageSize={pageSize}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -263,18 +260,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeletePictogram_ReturnsOk_WhenPictogramExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicPictogramSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new BaseCaseDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int pictogramId;
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var context = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var pictogram = await context.Pictograms.FirstOrDefaultAsync();
-                Assert.NotNull(pictogram);
-                pictogramId = pictogram.Id;
-            }
+            int pictogramId = seeder.Pictograms[0].Id;
 
             // Act
             var response = await client.DeleteAsync($"/pictograms/{pictogramId}");
@@ -295,8 +289,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task DeletePictogram_ReturnsNotFound_WhenPictogramDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
             int nonExistentPictogramId = 9999;
 

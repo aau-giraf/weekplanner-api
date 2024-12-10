@@ -1,6 +1,9 @@
+using System.Text;
 using Giraf.IntegrationTests.Utils.DbSeeders;
+using GirafAPI.Authorization;
 using GirafAPI.Data;
 using GirafAPI.Configuration;
+using GirafAPI.Entities.Users;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
@@ -8,18 +11,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Giraf.IntegrationTests.Utils;
 
 // This factory creates a Giraf web API configured for testing.
 internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly Func<IServiceProvider, DbSeeder> _seederFactory;
-
-    public GirafWebApplicationFactory(Func<IServiceProvider, DbSeeder> seederFactory)
-    {
-        _seederFactory = seederFactory;
-    }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -38,38 +39,27 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
             });
 
             // Configure JwtSettings for testing
-            services.Configure<JwtSettings>( options =>
+            services.Configure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.Issuer = "TestIssuer";
-                options.Audience = "TestAudience";
-                options.SecretKey = "ThisIsASecretKeyForTestingPurposes!";
+                options.TokenValidationParameters.ValidIssuer = "TestIssuer";
+                options.TokenValidationParameters.ValidAudience = "TestAudience";
+                options.TokenValidationParameters.IssuerSigningKey =
+                    new SymmetricSecurityKey(Encoding.UTF8.GetBytes("ThisIsASecretKeyForTestingPurposes!"));
             });
 
-            // Add the test authentication scheme
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = TestAuthHandler.TestAuthenticationScheme;
-                options.DefaultChallengeScheme = TestAuthHandler.TestAuthenticationScheme;
-            })
-            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(TestAuthHandler.TestAuthenticationScheme, options => { });
-
             // Add authorization policies
+            services.AddScoped<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OrgOwnerAuthorizationHandler>();
+            
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("OrganizationMember", policy =>
-                {
-                    policy.RequireClaim("OrgMember");
-                });
-
+                    policy.Requirements.Add(new OrgMemberRequirement()));
                 options.AddPolicy("OrganizationAdmin", policy =>
-                {
-                    policy.RequireClaim("OrgAdmin");
-                });
-                
+                    policy.Requirements.Add(new OrgAdminRequirement()));
                 options.AddPolicy("OrganizationOwner", policy =>
-                {
-                    policy.RequireClaim("OrgOwner");
-                });
+                    policy.Requirements.Add(new OrgOwnerRequirement()));
             });
 
             // Build the service provider and create a scope
@@ -82,10 +72,13 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
 
             // Use migrations to apply schema, especially for identity tables
             dbContext.Database.Migrate();
-
-            // Seed the database with scenario-specific data
-            var seeder = _seederFactory(scope.ServiceProvider);
-            seeder.SeedData(dbContext);
         });
+    }
+
+    public void SeedDb(IServiceScope scope, DbSeeder seeder)
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>();
+        seeder.SeedData(dbContext, userManager);
     }
 }

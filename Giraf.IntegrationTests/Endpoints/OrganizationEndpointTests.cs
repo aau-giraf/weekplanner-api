@@ -22,19 +22,25 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationsForUser_ReturnsListOfOrganizations()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new UserWithOrganizationsSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
+            seeder.SeedOrganization(
+                scope.ServiceProvider.GetRequiredService<GirafDbContext>(),
+                scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>(),
+                seeder.Users["owner"],
+                [seeder.Users["admin"]],
+                [seeder.Users["member"]]
+                );
             var client = factory.CreateClient();
 
-            // Retrieve the actual user ID from the seeded data
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var user = await dbContext.Users
-                .Include(u => u.Organizations)
-                .FirstOrDefaultAsync();
-            Assert.NotNull(user);
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+
+            var userId = seeder.Users["member"].Id;
 
             // Act
-            var response = await client.GetAsync($"/organizations/user/{user.Id}");
+            var response = await client.GetAsync($"/organizations/user/{userId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -48,8 +54,14 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationsForUser_ReturnsBadRequest_WhenUserDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+            
             var nonExistentUserId = "nonexistent_user_id";
 
             // Act
@@ -68,34 +80,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationById_ReturnsOrganization_WhenOrganizationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationWithUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
-            string userId;
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
-            // Retrieve the organization and user IDs after the database is seeded
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations
-                    .Include(o => o.Users)
-                    .FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-
-                organizationId = organization.Id;
-
-                var user = organization.Users.FirstOrDefault();
-                Assert.NotNull(user);
-
-                userId = user.Id;
-            }
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim("OrgMember", organizationId.ToString())
-            };
+            int organizationId = seeder.Organizations[0].Id;
 
             // Act
             var response = await client.GetAsync($"/organizations/{organizationId}");
@@ -112,18 +105,15 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task GetOrganizationById_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
+            
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var nonExistentOrganizationId = 1;
-            var testUserId = "test-user-id";
-
-            // Set up the test claims
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, testUserId),
-                new Claim("OrgMember", nonExistentOrganizationId.ToString())
-            };
 
             // Act
             var response = await client.GetAsync($"/organizations/{nonExistentOrganizationId}");
@@ -141,19 +131,13 @@ namespace Giraf.IntegrationTests.Endpoints
         public async Task PostOrganization_ReturnsCreated_WhenUserIsValid()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
-
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var user = await dbContext.Users.FirstOrDefaultAsync();
-            Assert.NotNull(user);
-
-            // Set up the test claims
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id)
-            };
+            
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var newOrgDto = new CreateOrganizationDTO { Name = "New Organization" };
 
@@ -167,52 +151,24 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal("New Organization", createdOrganization.Name);
         }
 
-        // 6. Test POST /organizations when user does not exist
-        [Fact]
-        public async Task PostOrganization_ReturnsBadRequest_WhenUserDoesNotExist()
-        {
-            // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
-            var client = factory.CreateClient();
-            var nonExistentUserId = "nonexistent_user_id";
-            var newOrgDto = new CreateOrganizationDTO { Name = "Another Organization" };
-
-            // Act
-            var response = await client.PostAsJsonAsync($"/organizations?id={nonExistentUserId}", newOrgDto);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-        }
-
         #endregion
 
         #region Change Organization Name Tests
 
-        // 7. Test PUT /organizations/{id}/change-name when the organization exists
+        // 6. Test PUT /organizations/{id}/change-name when the organization exists
         [Fact]
         public async Task ChangeOrganizationName_ReturnsOk_WhenOrganizationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
-            // Retrieve the organization ID after the database is seeded
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-
-                organizationId = organization.Id;
-            }
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgOwner", organizationId.ToString())
-            };
+            int organizationId = seeder.Organizations[0].Id;
 
             // Act
             var newName = "Updated Organization Name";
@@ -225,20 +181,20 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(newName, updatedOrganization.Name);
         }
 
-        // 8. Test PUT /organizations/{id}/change-name when organization does not exist
+        // 7. Test PUT /organizations/{id}/change-name when organization does not exist
         [Fact]
         public async Task ChangeOrganizationName_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
-            var nonExistentOrgId = 9999;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgOwner", nonExistentOrgId.ToString())
-            };
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
+            
+            int nonExistentOrgId = 999;
 
             // Act
             var newName = "Nonexistent Organization Name";
@@ -252,29 +208,20 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Delete Organization Tests
 
-        // 9. Test DELETE /organizations/{id} when the organization exists
+        // 8. Test DELETE /organizations/{id} when the organization exists
         [Fact]
         public async Task DeleteOrganization_ReturnsNoContent_WhenOrganizationExists()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-                organizationId = organization.Id;
-            }
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgOwner", organizationId.ToString())
-            };
+            int organizationId = seeder.Organizations[0].Id;
 
             // Act
             var response = await client.DeleteAsync($"/organizations/{organizationId}");
@@ -283,28 +230,28 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
             // Verify that the organization was deleted from the database
-            using (var scope = factory.Services.CreateScope())
+            using (var verificationScope = factory.Services.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
+                var dbContext = verificationScope.ServiceProvider.GetRequiredService<GirafDbContext>();
                 var deletedOrganization = await dbContext.Organizations.FindAsync(organizationId);
                 Assert.Null(deletedOrganization);
             }
         }
 
-        // 10. Test DELETE /organizations/{id} when the organization does not exist
+        // 9. Test DELETE /organizations/{id} when the organization does not exist
         [Fact]
         public async Task DeleteOrganization_ReturnsNotFound_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new EmptyDb());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
-            var nonExistentOrgId = 9999;
             
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgOwner", nonExistentOrgId.ToString())
-            };
+            client.AttachClaimsToken(scope, seeder.Users["owner"]);
+            
+            var nonExistentOrgId = 9999;
 
             // Act
             var response = await client.DeleteAsync($"/organizations/{nonExistentOrgId}");
@@ -317,40 +264,21 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Remove User from Organization Tests
 
-        // 11. Test PUT /organizations/{id}/remove-user/{userId} when the organization and user exist
+        // 10. Test PUT /organizations/{id}/remove-user/{userId} when the organization and user exist
         [Fact]
         public async Task RemoveUser_ReturnsOk_WhenOrganizationAndUserExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new OrganizationWithUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
-            string userId;
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
-            // Retrieve the organization and user IDs after the database is seeded
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations
-                    .Include(o => o.Users)
-                    .FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-
-                organizationId = organization.Id;
-
-                var user = organization.Users.FirstOrDefault();
-                Assert.NotNull(user);
-
-                userId = user.Id;
-            }
-
-            // Set the test claims for authentication
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim("OrgAdmin", organizationId.ToString())
-            };
+            int organizationId = seeder.Organizations[0].Id;
+            string userId = seeder.Users["member"].Id;
 
 
             // Act
@@ -363,31 +291,20 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.DoesNotContain(userId, updatedOrganization.Users.Select(u => u.Id));
         }
 
-        // 12 .Test PUT /organizations/{id}/remove-user/{userId} when the user does not exist
+        // 11 .Test PUT /organizations/{id}/remove-user/{userId} when the user does not exist
         [Fact]
         public async Task RemoveUser_ReturnsBadRequest_WhenUserDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(_ => new BasicOrganizationSeeder());
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new OnlyUsersAndOrgDb();
+            var scope = factory.Services.CreateScope();
+            factory.SeedDb(scope, seeder);
             var client = factory.CreateClient();
 
-            int organizationId;
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
-            // Retrieve the organization ID after the database is seeded
-            using (var scope = factory.Services.CreateScope())
-            {
-                var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-                var organization = await dbContext.Organizations.FirstOrDefaultAsync();
-                Assert.NotNull(organization);
-
-                organizationId = organization.Id;
-            }
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", organizationId.ToString())
-            };
+            int organizationId = seeder.Organizations[0].Id;
 
             // Act
             var nonExistentUserId = "nonexistent_user_id";
@@ -397,29 +314,21 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        // 13. Test PUT /organizations/{id}/remove-user/{userId} when the organization does not exist
+        // 12. Test PUT /organizations/{id}/remove-user/{userId} when the organization does not exist
         [Fact]
         public async Task RemoveUser_ReturnsBadRequest_WhenOrganizationDoesNotExist()
         {
             // Arrange
-            var factory = new GirafWebApplicationFactory(sp => new BasicUserSeeder(sp.GetRequiredService<UserManager<GirafUser>>()));
+            var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
-
-
-            // Retrieve the seeded user from the database
-            using var scope = factory.Services.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<GirafDbContext>();
-            var user = await dbContext.Users.FirstOrDefaultAsync();
-            Assert.NotNull(user);
+            
+            client.AttachClaimsToken(scope, seeder.Users["admin"]);
 
             var nonExistentOrgId = 9999; // Using an ID that doesn't exist in the database
-            var userId = user.Id;
-            
-            TestAuthHandler.TestClaims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, "testUserId"),
-                new Claim("OrgAdmin", nonExistentOrgId.ToString())
-            };
+            var userId = seeder.Users["member"].Id;
 
             // Act
             var response = await client.PutAsync($"/organizations/{nonExistentOrgId}/remove-user/{userId}", null);
