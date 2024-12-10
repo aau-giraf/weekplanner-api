@@ -1,37 +1,41 @@
 # weekplanner-api
- The backend API for the GIRAF weekplaner app
+This is the backend REST API for the weekplanner branch of the GIRAF project.
+The weekplanner API uses Microsoft's .NET 8 architecture with a modern MinimalAPI
+setup. It also includes a containerized PostgreSql database.
 
 ## Get Started
-1. Install Microsoft Entity Framework
+1. Download and install .NET 8 from:
+   
+   https://dotnet.microsoft.com/en-us/download/dotnet
+
+2. Install Microsoft Entity Framework:
     ```bash
     dotnet tool install --global dotnet-ef
     ```
-2. Run the API from the GirafAPI directory
+3. Download and install Docker Desktop from:
+   
+   https://www.docker.com/products/docker-desktop/
+
+4. Launch the API from the weekplanner-api directory:
     ```bash
-    dotnet run
+    docker compose up
     ```
+
+## Production Environment
+The production environment uses a different build process from 
+the development environment. To run the production environment, call:
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
 
 ## Update the Database
 If you make changes to entities or DTOs, make sure to update the database:
 
 1. Add a new migration
-   ```bash
-   dotnet ef migrations add {NewMigrationName} --output-dir Data\Migrations
+   ```
+   dotnet ef migrations add Your_Migration_Name_Here --output-dir Data\Migrations
    ```
 2. Update the database
    ```bash
    dotnet ef database update
    ```
-   
-## Running in a Container
-
-### Development Environment
-```
-docker compose up
-```
-(If you are running the api on Linux and it does not seem to be working, try changing the port in docker-compose.yml to 5171:8080 instead of 5171:5171)
-
-### Production Environment
-```
-docker compose -f docker-compose.prod.yml up --build
-```

@@ -6,10 +6,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace GirafAPI.Authorization;
 
-public class OrgOwnerRequirement : IAuthorizationRequirement
-{
-    
-}
+public class OrgOwnerRequirement : IAuthorizationRequirement;
 
 public class OrgOwnerAuthorizationHandler : AuthorizationHandler<OrgOwnerRequirement>
 {
