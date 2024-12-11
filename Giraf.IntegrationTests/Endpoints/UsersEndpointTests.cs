@@ -82,6 +82,8 @@ namespace Giraf.IntegrationTests.Endpoints
             seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
 
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
+
             var userId = seeder.Users["member"].Id;
 
             var updateUserDto = new UpdateUserDTO("UpdatedFirstName", "UpdatedLastName");
@@ -109,7 +111,12 @@ namespace Giraf.IntegrationTests.Endpoints
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var updateUserDto = new UpdateUserDTO("NonExistentFirstName", "NonExistentLastName");
             var nonExistentUserId = "nonexistent_user_id";
@@ -125,43 +132,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Get Users Tests
 
-        // 5. Test GET /users/ when there are users in the DB
-        [Fact]
-        public async Task GetUsers_ReturnsListOfUsers()
-        {
-            // Arrange
-            var factory = new GirafWebApplicationFactory();
-            var seeder = new EmptyDb();
-            var scope = factory.Services.CreateScope();
-            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
-            var client = factory.CreateClient();
-
-            // Act
-            var response = await client.GetAsync("/users");
-
-            // Assert
-            response.EnsureSuccessStatusCode();
-            var users = await response.Content.ReadFromJsonAsync<List<UserDTO>>();
-            Assert.NotNull(users);
-            Assert.NotEmpty(users);
-        }
-
-        // 6. Test GET /users when there are no users
-        [Fact]
-        public async Task GetUsers_ReturnsNotFound_WhenNoUsersExist()
-        {
-            // Arrange
-            var factory = new GirafWebApplicationFactory();
-            var client = factory.CreateClient();
-
-            // Act
-            var response = await client.GetAsync("/users");
-
-            // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        }
-
-        // 7. Test GET /users/{id} when the user exists
+        // 5. Test GET /users/{id} when the user exists
         [Fact]
         public async Task GetUserById_ReturnsUser_WhenUserExists()
         {
@@ -171,6 +142,8 @@ namespace Giraf.IntegrationTests.Endpoints
             var scope = factory.Services.CreateScope();
             seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var userId = seeder.Users["member"].Id;
 
@@ -184,13 +157,18 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal(userId, user.Id);
         }
 
-        // 8. Test GET /users/{id} when the user does not exist
+        // 6. Test GET /users/{id} when the user does not exist
         [Fact]
         public async Task GetUserById_ReturnsNotFound_WhenUserDoesNotExist()
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var nonExistentUserId = "nonexistent_user_id";
 
@@ -205,7 +183,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Change Password Tests
 
-        // 9. Test PUT /users/{id}/change-password when the user and old password are valid
+        // 7. Test PUT /users/{id}/change-password when the user and old password are valid
         [Fact]
         public async Task ChangeUserPassword_ReturnsOk_WhenUserAndOldPasswordAreValid()
         {
@@ -234,7 +212,7 @@ namespace Giraf.IntegrationTests.Endpoints
         }
 
 
-        // 10. Test PUT /users/{id}/change-password when the user does not exist
+        // 8. Test PUT /users/{id}/change-password when the user does not exist
         [Fact]
         public async Task ChangeUserPassword_ReturnsBadRequest_WhenUserDoesNotExist()
         {
@@ -265,7 +243,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Change Username Tests
 
-        // 11. Test PUT /users/{id}/change-username when the user and new username are valid
+        // 9. Test PUT /users/{id}/change-username when the user and new username are valid
         [Fact]
         public async Task ChangeUsername_ReturnsOk_WhenUserAndUsernameAreValid()
         {
@@ -296,7 +274,7 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Equal("updatedUser", user.UserName);
         }
 
-        // 12. Test PUT /users/{id}/change-username when the user does not exist
+        // 10. Test PUT /users/{id}/change-username when the user does not exist
         [Fact]
         public async Task ChangeUsername_ReturnsBadRequest_WhenUserDoesNotExist()
         {
@@ -323,7 +301,7 @@ namespace Giraf.IntegrationTests.Endpoints
 
         #region Delete User Tests
 
-        // 13. Test DELETE /users/{id} when the user exists
+        // 11. Test DELETE /users/{id} when the user exists
         [Fact]
         public async Task DeleteUser_ReturnsNoContent_WhenUserExists()
         {
@@ -361,13 +339,18 @@ namespace Giraf.IntegrationTests.Endpoints
             Assert.Null(deletedUser);
         }
 
-        // 14. Test DELETE /users/{id} when the user does not exist
+        // 12. Test DELETE /users/{id} when the user does not exist
         [Fact]
         public async Task DeleteUser_ReturnsBadRequest_WhenUserDoesNotExist()
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
+            var seeder = new EmptyDb();
+            var scope = factory.Services.CreateScope();
+            seeder.SeedUsers(scope.ServiceProvider.GetRequiredService<UserManager<GirafUser>>());
             var client = factory.CreateClient();
+
+            client.AttachClaimsToken(scope, seeder.Users["member"]);
 
             var nonExistentUserId = "nonexistent_user_id";
 

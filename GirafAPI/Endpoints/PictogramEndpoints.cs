@@ -1,4 +1,5 @@
 using GirafAPI.Data;
+using GirafAPI.Entities.Organizations;
 using GirafAPI.Entities.Pictograms;
 using GirafAPI.Entities.Pictograms.DTOs;
 using GirafAPI.Mapping;
@@ -16,16 +17,17 @@ public static class PictogramEndpoints
         // Can't use a DTO here since for the endpoint to work correctly with images, the image and the dto must both be multipart/form-data
         // but minimal apis can't map from multipart/form-data to a record DTO, only from application/json
         // therefore we use manual binding
-        group.MapPost("/", async ([FromForm] IFormFile image, [FromForm] int? organizationId, [FromForm] string pictogramName, GirafDbContext context) =>
+        group.MapPost("/{orgId}", async (int orgId, [FromForm] IFormFile image, [FromForm] string pictogramName, GirafDbContext context) =>
             {
                 if (image.Length == 0)
                 {
                     return Results.BadRequest("Image file is required");
                 }
-
-                if (organizationId is null)
+                
+                var org = await context.Organizations.FindAsync(orgId);
+                if (org is null)
                 {
-                    return Results.BadRequest("Organization id is required");
+                    return Results.NotFound("Organization not find.");
                 }
 
                 if (pictogramName.Length == 0)
@@ -33,10 +35,10 @@ public static class PictogramEndpoints
                     return Results.BadRequest("Pictogram name is required");
                 }
 
-                CreatePictogramDTO createPictogramDTO = new CreatePictogramDTO(organizationId.GetValueOrDefault(), pictogramName);
+                CreatePictogramDTO createPictogramDTO = new CreatePictogramDTO(orgId, pictogramName);
 
                 var fileExtension = Path.GetExtension(image.FileName);
-                var url = Path.Combine("images", "pictograms", organizationId.ToString(), $"{pictogramName}{fileExtension}");
+                var url = Path.Combine("images", "pictograms", orgId.ToString(), $"{pictogramName}{fileExtension}");
                 Pictogram pictogram = createPictogramDTO.ToEntity(url);
                 //Ensure the directory exists
                 var directoryPath = Path.GetDirectoryName(Path.Combine("wwwroot", url));
@@ -63,24 +65,32 @@ public static class PictogramEndpoints
             .WithName("CreatePictogram")
             .WithDescription("Creates a pictogram")
             .WithTags("Pictograms")
+            .RequireAuthorization("OrganizationMember")
             .Accepts<IFormFile>("multipart/form-data")
             .Accepts<CreatePictogramDTO>("multipart/form-data")
             .Produces(StatusCodes.Status200OK)
-            .Produces(StatusCodes.Status400BadRequest);
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound);
 
 
-        group.MapGet("/{pictogramId:int}", async (int pictogramId, GirafDbContext dbContext) =>
+        group.MapGet("/{orgId}/{pictogramId:int}", async (int orgId, int pictogramId, GirafDbContext dbContext) =>
             {
               try
               {
-                Pictogram? pictogram = await dbContext.Pictograms.FindAsync(pictogramId);
+                  var organization = dbContext.Organizations.Find(orgId);
+                  if (organization is null)
+                  {
+                      return Results.NotFound("Organization not found.");
+                  }
+                  
+                  Pictogram? pictogram = await dbContext.Pictograms.FindAsync(pictogramId);
+                  
+                  if (pictogram is null)
+                  {
+                      return Results.NotFound("Pictogram not found");
+                  }
 
-                if (pictogram is null)
-                {
-                    return Results.NotFound("Pictogram not found");
-                }
-
-                return Results.Ok(pictogram.ToDTO());
+                  return Results.Ok(pictogram.ToDTO());
               }
               catch (Exception)
               {
@@ -90,18 +100,19 @@ public static class PictogramEndpoints
             .WithName("GetPictogramById")
             .WithDescription("Gets a specific pictogram by Id.")
             .WithTags("Pictograms")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);
 
-        group.MapGet("/organizationId:int", async (int organizationId, int currentPage, int pageSize, GirafDbContext dbContext) =>
+        group.MapGet("/{orgId:int}", async (int orgId, int currentPage, int pageSize, GirafDbContext dbContext) =>
             {
               try
               {
                   var skip = (currentPage - 1) * pageSize;
 
                   var pictograms = await dbContext.Pictograms
-                      .Where(p => p.OrganizationId == organizationId || p.OrganizationId == null)
+                      .Where(p => p.OrganizationId == orgId || p.OrganizationId == null)
                       .Skip(skip)  
                       .Take(pageSize)  
                       .Select(p => p.ToDTO())
@@ -119,16 +130,23 @@ public static class PictogramEndpoints
             .WithName("GetPictogramsByOrgId")
             .WithDescription("Gets all the pictograms belonging to the specified organization.")
             .WithTags("Pictograms")
+            .RequireAuthorization("OrganizationMember")
             .Produces<List<PictogramDTO>>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status500InternalServerError);
 
 
-        group.MapDelete("/{pictogramId:int}", async (int pictogramId, GirafDbContext dbContext) =>
+        group.MapDelete("/{orgId}/{pictogramId:int}", async (int orgId, int pictogramId, GirafDbContext dbContext) =>
             {
               try
               {
-                Pictogram? pictogram = await dbContext.Pictograms.FindAsync(pictogramId);
+                  var org = dbContext.Organizations.Find(orgId);
+                  if (org is null)
+                  {
+                      return Results.NotFound("Organization not found.");
+                  }
+                  
+                  Pictogram? pictogram = await dbContext.Pictograms.FindAsync(pictogramId);
                 if (pictogram is not null)
                 {
                     if (File.Exists(Path.Combine("wwwroot", "images", pictogram.PictogramUrl)))
@@ -149,6 +167,7 @@ public static class PictogramEndpoints
             .WithName("DeletePictogram")
             .WithDescription("Deletes a pictogram by Id.")
             .WithTags("Pictograms")
+            .RequireAuthorization("OrganizationMember")
             .Produces(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status500InternalServerError);

@@ -76,6 +76,7 @@ namespace GirafAPI.Extensions
             services.AddScoped<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
             services.AddScoped<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
             services.AddScoped<IAuthorizationHandler, OrgOwnerAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OwnDataAuthorizationHandler>();
             
             services.AddAuthorization(options =>
             {
@@ -85,6 +86,8 @@ namespace GirafAPI.Extensions
                     policy.Requirements.Add(new OrgAdminRequirement()));
                 options.AddPolicy("OrganizationOwner", policy =>
                     policy.Requirements.Add(new OrgOwnerRequirement()));
+                options.AddPolicy("OwnData", policy => 
+                    policy.Requirements.Add(new OwnDataRequirement()));
             });
 
             return services;

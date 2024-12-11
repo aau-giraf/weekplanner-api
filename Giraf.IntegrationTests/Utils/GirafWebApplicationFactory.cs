@@ -51,6 +51,7 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
             services.AddScoped<IAuthorizationHandler, OrgMemberAuthorizationHandler>();
             services.AddScoped<IAuthorizationHandler, OrgAdminAuthorizationHandler>();
             services.AddScoped<IAuthorizationHandler, OrgOwnerAuthorizationHandler>();
+            services.AddScoped<IAuthorizationHandler, OwnDataAuthorizationHandler>();
             
             services.AddAuthorization(options =>
             {
@@ -60,6 +61,8 @@ internal class GirafWebApplicationFactory : WebApplicationFactory<Program>
                     policy.Requirements.Add(new OrgAdminRequirement()));
                 options.AddPolicy("OrganizationOwner", policy =>
                     policy.Requirements.Add(new OrgOwnerRequirement()));
+                options.AddPolicy("OwnData", policy => 
+                    policy.Requirements.Add(new OwnDataRequirement()));
             });
 
             // Build the service provider and create a scope
