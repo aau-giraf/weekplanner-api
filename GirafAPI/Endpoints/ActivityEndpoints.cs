@@ -319,6 +319,7 @@ public static class ActivityEndpoints
             .WithName("CopyActivityForCitizen")
             .WithDescription("Copies activities between days for a citizen")
             .WithTags("Activities")
+            .RequireAuthorization()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status200OK)
             .RequireAuthorization();
@@ -382,6 +383,7 @@ public static class ActivityEndpoints
             .WithName("CopyActivityForGrade")
             .WithDescription("Copies activities between days for a grade")
             .WithTags("Activities")
+            .RequireAuthorization()
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status200OK)
             .RequireAuthorization();
@@ -465,7 +467,13 @@ public static class ActivityEndpoints
                         statusCode: StatusCodes.Status500InternalServerError);
                 }
             })
-            .RequireAuthorization();
+            .WithName("CompleteActivity")
+            .WithDescription("Completes an existing activity using ID.")
+            .WithTags("Activities")
+            .RequireAuthorization()
+            .Produces(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status500InternalServerError);
 
 
         // DELETE activity
