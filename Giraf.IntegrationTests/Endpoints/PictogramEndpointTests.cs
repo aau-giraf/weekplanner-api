@@ -42,7 +42,7 @@ namespace Giraf.IntegrationTests.Endpoints
             formData.Add(new StringContent("TestPictogram"), "pictogramName");
 
             // Act
-            var response = await client.PostAsync("/pictograms/", formData);
+            var response = await client.PostAsync($"/pictograms/{organizationId}", formData);
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -75,16 +75,18 @@ namespace Giraf.IntegrationTests.Endpoints
             var formData = new MultipartFormDataContent();
             formData.Add(new StringContent("1"), "organizationId");
             formData.Add(new StringContent("TestPictogram"), "pictogramName");
+            
+            var organizatonId = seeder.Organizations[0].Id;
 
             // Act
-            var response = await client.PostAsync("/pictograms/", formData);
+            var response = await client.PostAsync($"/pictograms/{organizatonId}", formData);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
-        public async Task CreatePictogram_ReturnsBadRequest_WhenOrganizationIdIsMissing()
+        public async Task CreatePictogram_ReturnsNotFound_WhenOrganizationIdIsInvalid()
         {
             // Arrange
             var factory = new GirafWebApplicationFactory();
@@ -105,12 +107,14 @@ namespace Giraf.IntegrationTests.Endpoints
 
             // Add pictogramName
             formData.Add(new StringContent("TestPictogram"), "pictogramName");
+            
+            var organizatonId = 999;
 
             // Act
-            var response = await client.PostAsync("/pictograms/", formData);
+            var response = await client.PostAsync($"/pictograms/{organizatonId}", formData);
 
             // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]
@@ -139,7 +143,7 @@ namespace Giraf.IntegrationTests.Endpoints
             formData.Add(new StringContent(organizationId.ToString()), "organizationId");
 
             // Act
-            var response = await client.PostAsync("/pictograms/", formData);
+            var response = await client.PostAsync($"/pictograms/{organizationId}", formData);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -163,8 +167,10 @@ namespace Giraf.IntegrationTests.Endpoints
 
             int pictogramId = seeder.Pictograms[0].Id;
 
+            var organizationId = seeder.Organizations[0].Id;
+
             // Act
-            var response = await client.GetAsync($"/pictograms/{pictogramId}");
+            var response = await client.GetAsync($"/pictograms/{organizationId}/{pictogramId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -186,9 +192,11 @@ namespace Giraf.IntegrationTests.Endpoints
             client.AttachClaimsToken(scope, seeder.Users["member"]);
             
             int nonExistentPictogramId = 9999;
+            
+            var organizationId = seeder.Organizations[0].Id;
 
             // Act
-            var response = await client.GetAsync($"/pictograms/{nonExistentPictogramId}");
+            var response = await client.GetAsync($"/pictograms/{organizationId}/{nonExistentPictogramId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -216,7 +224,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var pageSize = 10;
 
             // Act
-            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}&currentPage={currentPage}&pageSize={pageSize}");
+            var response = await client.GetAsync($"/pictograms/{organizationId}?currentPage={currentPage}&pageSize={pageSize}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -243,7 +251,7 @@ namespace Giraf.IntegrationTests.Endpoints
             var pageSize = 10;
 
             // Act
-            var response = await client.GetAsync($"/pictograms/organizationId:int?organizationId={organizationId}&currentPage={currentPage}&pageSize={pageSize}");
+            var response = await client.GetAsync($"/pictograms/{organizationId}?currentPage={currentPage}&pageSize={pageSize}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -268,10 +276,11 @@ namespace Giraf.IntegrationTests.Endpoints
 
             client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
+            var organizationId = seeder.Organizations[0].Id;
             int pictogramId = seeder.Pictograms[0].Id;
 
             // Act
-            var response = await client.DeleteAsync($"/pictograms/{pictogramId}");
+            var response = await client.DeleteAsync($"/pictograms/{organizationId}/{pictogramId}");
 
             // Assert
             response.EnsureSuccessStatusCode();
@@ -297,10 +306,11 @@ namespace Giraf.IntegrationTests.Endpoints
 
             client.AttachClaimsToken(scope, seeder.Users["owner"]);
 
+            var organizationId = seeder.Organizations[0].Id;
             int nonExistentPictogramId = 9999;
 
             // Act
-            var response = await client.DeleteAsync($"/pictograms/{nonExistentPictogramId}");
+            var response = await client.DeleteAsync($"/pictograms/{organizationId}/{nonExistentPictogramId}");
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
